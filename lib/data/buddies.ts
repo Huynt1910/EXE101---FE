@@ -69,7 +69,7 @@ export const BUDDIES: Buddy[] = [
     styles: ["Foodie", "Cultural"],
     interests: ["Street Food", "Coffee", "Markets", "History", "Handicraft"],
     rating: 4.9,
-    image: "/linh.png",
+    image: "/Linh.png",
   },
   {
     id: "ha-long-guide-son",
@@ -83,7 +83,7 @@ export const BUDDIES: Buddy[] = [
     styles: ["Adventure", "Photography"],
     interests: ["Boat & Kayak", "Beaches", "History"],
     rating: 4.8,
-    image: "/son.png",
+    image: "/Son.png",
   },
   {
     id: "sapa-trek-giang",
