@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { BUDDIES as localBuddies } from "@/lib/data/buddies";
+import Image from "next/image";
 
 export default function ExplorePage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -110,12 +111,13 @@ export default function ExplorePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredBuddies.map((buddy) => (
                 <Link key={buddy.id} href={`/buddy/${buddy.id}`}>
-                  <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
-                    <div className="relative h-48 sm:h-56 lg:h-64 bg-muted overflow-hidden">
+                  <Card className="p-0 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col">
+                    {/* IMAGE WRAPPER không padding, không margin */}
+                    <div className="relative aspect-[4/3] bg-muted">
                       <img
                         src={buddy.image || "/placeholder.svg"}
                         alt={buddy.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform"
+                        className="absolute inset-0 w-full h-full object-cover object-[50%_30%] block"
                       />
                       <button className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white rounded-full p-1.5 sm:p-2 hover:bg-gray-100 transition-colors">
                         <Heart className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />

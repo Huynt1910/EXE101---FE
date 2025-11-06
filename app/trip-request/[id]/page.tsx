@@ -189,13 +189,14 @@ export default function TripRequestPage({
               {matchedBuddies.map((buddy) => (
                 <Card
                   key={buddy.id}
-                  className="overflow-hidden hover:shadow-lg transition-shadow"
+                  className="p-0 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col"
                 >
-                  <div className="relative h-64 bg-muted overflow-hidden">
+                  {/* IMAGE WRAPPER không padding, không margin */}
+                  <div className="relative aspect-[4/3] bg-muted">
                     <img
                       src={buddy.image || "/placeholder.svg"}
                       alt={buddy.name}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                      className="absolute inset-0 w-full h-full object-cover object-[50%_30%] block"
                     />
                     <button className="absolute top-3 right-3 bg-white rounded-full p-2 hover:bg-gray-100 transition-colors">
                       <Heart className="w-5 h-5 text-red-500" />
@@ -292,13 +293,25 @@ export default function TripRequestPage({
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <Link href={`/buddy/${buddy.id}`}>
-                        <Button className="w-full" size="lg">
+                    <div className="space-y-3">
+                      <Button
+                        asChild
+                        size="lg"
+                        className="w-full rounded-lg bg-teal-700 hover:bg-teal-800 text-white"
+                      >
+                        <Link href={`/buddy/${buddy.id}`}>
                           <MessageCircle className="w-4 h-4 mr-2" />
                           View Profile & Apply
-                        </Button>
-                      </Link>
+                        </Link>
+                      </Button>
+
+                      <Button
+                        asChild
+                        size="lg"
+                        className="w-full rounded-lg bg-teal-600 hover:bg-teal-700 text-white"
+                      >
+                        <Link href={`/buddy/${buddy.id}/apply`}>Apply Now</Link>
+                      </Button>
 
                       <div className="flex items-center gap-2 text-sm text-green-600">
                         <CheckCircle className="w-4 h-4" />
