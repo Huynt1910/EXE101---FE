@@ -3,26 +3,32 @@ import Section from "../layout/Section";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { BookText } from "lucide-react";
+import Image from "next/image";
 
 export default function Hero() {
   return (
-    <Section
-      className="relative bg-cover bg-center bg-no-repeat"
-      asMotion={true}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ amount: 0.4 }}
-      style={{ backgroundImage: "url(/halong-bay.jpg)" }}
-    >
+    <Section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+      {/* Background image */}
+      <Image
+        src="/hero.png" // ảnh gốc đủ lớn
+        alt="Vietnam travel collage"
+        fill
+        priority
+        className="object-cover"
+        sizes="100vw"
+      />
+
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" />
-      <div className="relative z-10 text-center space-y-6">
-        <h1 className="text-5xl sm:text-6xl font-bold text-white">
-          Explore Vietnam & Asia with a local
+
+      {/* Content */}
+      <div className="relative z-10 text-center space-y-6 px-4">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white">
+          Explore Ho Chi Minh City with a local
         </h1>
-        <p className="text-xl text-white/90">
+        <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-2xl mx-auto">
           Connect with authentic local experiences and meet genuine locals who
-          share their culture and stories
+          share their culture and stories.
         </p>
         <Link href="/design_trip">
           <Button

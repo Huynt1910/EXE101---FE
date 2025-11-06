@@ -2,8 +2,8 @@
 
 import { useTripWizard } from "../TripWizardProvider";
 import { CheckboxChip } from "@/components/ui/checkboxChip";
-import { TRAVEL_STYLES, INTERESTS } from "@/lib/data/tripQuiz";
-
+import { INTERESTS } from "@/lib/data/tripQuiz";
+import { ACTIVITIES } from "@/lib/data/activities";
 export function StepPreferences() {
   const { form } = useTripWizard();
   const { register, watch, setValue } = form;
@@ -44,7 +44,7 @@ export function StepPreferences() {
           Travel style (choose multiple)
         </div>
         <div className="flex flex-wrap gap-2">
-          {TRAVEL_STYLES.map((s) => (
+          {ACTIVITIES.map((s) => (
             <CheckboxChip
               key={s}
               label={s}

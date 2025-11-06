@@ -7,7 +7,6 @@ export function useStepFields(watch: UseFormWatch<FormState>) {
 
   const step1Fields = useMemo(() => {
     const {
-      destination,
       budget,
       tripType,
       startDate,
@@ -16,7 +15,7 @@ export function useStepFields(watch: UseFormWatch<FormState>) {
       endDateLong,
     } = watchedValues;
 
-    const hasBasicInfo = !!destination && !!budget && !!tripType;
+    const hasBasicInfo = !!budget && !!tripType;
     if (!hasBasicInfo) return false;
 
     if (tripType === "short") {
@@ -26,7 +25,6 @@ export function useStepFields(watch: UseFormWatch<FormState>) {
     }
     return false;
   }, [
-    watchedValues.destination,
     watchedValues.budget,
     watchedValues.tripType,
     watchedValues.startDate,

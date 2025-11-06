@@ -10,7 +10,7 @@ export default function HomePageContent() {
     <div className="bg-background">
       <Hero />
       <AboutUs />
-      <Activities />
+      {/* <Activities /> */}
       <Places />
       <Feedbacks />
     </div>

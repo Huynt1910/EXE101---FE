@@ -28,7 +28,6 @@ const TripWizardContext = createContext<TripWizardContextType | undefined>(
 );
 
 const initialFormValues: FormState = {
-  destination: "",
   budget: "MID",
   tripType: "short",
   startDate: "",

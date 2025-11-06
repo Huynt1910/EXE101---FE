@@ -4,7 +4,6 @@ export const BudgetEnum = z.enum(["LOW", "MID", "HIGH"]);
 export const TripTypeEnum = z.enum(["short", "long"]);
 
 export const baseStep1 = z.object({
-  destination: z.string().min(1, "Chọn điểm đến"),
   budget: BudgetEnum,
   tripType: TripTypeEnum,
 });

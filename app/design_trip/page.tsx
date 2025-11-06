@@ -26,7 +26,7 @@ function TripWizardContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero */}
-      <div className="bg-[url('/halong-bay.jpg')] bg-cover bg-center max-h-20">
+      <div className="bg-[url('/banner-homepage.png')] bg-cover bg-center max-h-20">
         <div className="bg-black/35">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16 text-white">
             <h1 className="text-3xl sm:text-5xl font-extrabold">
