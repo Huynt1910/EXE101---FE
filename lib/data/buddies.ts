@@ -83,7 +83,7 @@ export const BUDDIES: Buddy[] = [
     styles: ["Adventure", "Photography"],
     interests: ["Boat & Kayak", "Beaches", "History"],
     rating: 4.8,
-    image: "/Son.png",
+    image: "/son.png",
   },
   {
     id: "sapa-trek-giang",
