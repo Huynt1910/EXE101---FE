@@ -5,17 +5,17 @@ import Link from "next/link";
 
 const places = [
   {
-    title: "Ha Long Bay",
-    img: "/HaLong_Bay.jpg",
-    href: "/cruises/halong-bay",
-    desc: "Explore the breathtaking beauty of Halong Bay, Lan Ha Bay, and Bai Tu Long Bay with our selection of budget, mid-range, luxury, and boutique cruises. Whether you choose the charm of a traditional junk boat or the exclusivity of a private cruise, your journey will be tailored to your desires.",
+    title: "Landmark 81",
+    img: "places/landmark-81.png",
+    href: "/places/landmark-81",
+    desc: "Explore the breathtaking beauty of Landmark 81, the tallest building in Vietnam, with our selection of budget, mid-range, luxury, and boutique cruises. Whether you choose the charm of a traditional junk boat or the exclusivity of a private cruise, your journey will be tailored to your desires.",
     cta: "View Cruises",
   },
   {
-    title: "Hoi An",
-    img: "/Hoi_An.jpg",
-    href: "/cruises/hoi-an",
-    desc: "Explore the rich history and culture of Hoi An with our selection of tours and activities. From the ancient streets of the old town to the colorful markets and traditional handicrafts, you’ll experience the best of Hoi An’s culture and heritage.",
+    title: "Ben Thanh Market",
+    img: "places/ben-thanh.png",
+    href: "/places/ben-thanh",
+    desc: "Explore the rich history and culture of Ben Thanh Market with our selection of tours and activities. From the ancient streets of the old town to the colorful markets and traditional handicrafts, you’ll experience the best of Ben Thanh Market’s culture and heritage.",
     cta: "View Cruises",
   },
 ];
@@ -25,13 +25,14 @@ export default function Places() {
     <Section className="bg-white" containerClassName="space-y-10">
       <div className="text-center space-y-4">
         <h2 className="text-4xl sm:text-5xl font-bold tracking-tight">
-          Vietnam’s Most Beautiful Places
+          Ho Chi Minh city’s Most Beautiful Places
         </h2>
         <p className="text-lg text-muted-foreground">
-          With 7+ iconic destinations spanning North, Central, and South—Ha Long
-          Bay, Hoi An, Ninh Binh, Sapa, Hue, Hanoi, and Ho Chi Minh City—you’ll
-          experience limestone karsts, lantern-lit old towns, river caves,
-          terraced mountains, and imperial heritage in one seamless journey.
+          With 7+ iconic destinations spanning North, Central, and
+          South—Landmark 81, Ben Thanh Market, Ninh Binh, Sapa, Hue, Hanoi, and
+          Ho Chi Minh City—you’ll experience limestone karsts, lantern-lit old
+          towns, river caves, terraced mountains, and imperial heritage in one
+          seamless journey.
         </p>
       </div>
 
@@ -52,7 +53,7 @@ export default function Places() {
               <p className="text-muted-foreground leading-relaxed mb-6">
                 {item.desc}
               </p>
-              <Link href={item.href}>
+              <Link href={item.img}>
                 <button className="inline-flex items-center gap-2 rounded-xl bg-orange-500 text-white px-5 py-3 font-semibold shadow hover:bg-orange-600 transition-colors">
                   {item.cta}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
