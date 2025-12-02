@@ -75,7 +75,7 @@ export default function NavMenu() {
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Link href="/inbox">
+          <Link href="/conversations">
             <Button variant="outline" size="sm">
               Inbox
             </Button>
