@@ -86,7 +86,7 @@ export function TripWizardProvider({ children }: TripWizardProviderProps) {
     const formData = form.getValues();
     console.log("SUBMIT FORM:", formData);
     // TODO: Submit to API and redirect
-    window.location.href = "/trip-request/1";
+    window.location.href = "/my-trips/1";
   };
 
   const value: TripWizardContextType = {

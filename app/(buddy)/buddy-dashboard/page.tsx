@@ -410,7 +410,7 @@ export default function BuddyDashboardPage() {
                     {/* Actions */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
                       <Link
-                        href={`/trip-request/${request.id}/details`}
+                        href={`/my-trips/${request.id}/details`}
                         className="flex-1"
                       >
                         <Button

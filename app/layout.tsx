@@ -1,8 +1,8 @@
 import "./globals.css";
-import NavMenu from "@/components/share/navMenu";
-import Footer from "@/components/share/footer";
+import NavMenu from "@/components/common/navMenu";
+import Footer from "@/components/Footer";
 import { headers } from "next/headers";
-import ScrollToTop from "@/components/share/scroll-to-top";
+import ScrollToTop from "@/components/ScrollToTop";
 
 export default async function RootLayout({
   children,
