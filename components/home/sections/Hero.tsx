@@ -30,7 +30,7 @@ export default function Hero() {
           Connect with authentic local experiences and meet genuine locals who
           share their culture and stories.
         </p>
-        <Link href="/design_trip">
+        <Link href="/plan-trip">
           <Button
             size="lg"
             className="bg-orange-500 hover:bg-orange-600 text-white"
