@@ -47,7 +47,7 @@ export default function NavMenu() {
   }, []);
 
   return (
-    <nav className="w-full border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="w-full border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 overflow-x-clip">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         {/* Brand */}
         <Link href="/" className="font-bold text-primary text-3xl">
@@ -74,19 +74,23 @@ export default function NavMenu() {
         </div>
 
         {/* Desktop actions */}
-        <div className="hidden md:flex items-center gap-3">
-          <Link href="/inbox">
-            <Button variant="outline" size="sm">
-              Inbox
-            </Button>
+        <div className="hidden md:flex items-center gap-4">
+          {/* Login (text-only) */}
+          <Link
+            href="/login"
+            className="text-sm font-medium text-foreground hover:text-primary transition-colors"
+          >
+            Log in
           </Link>
-          <Link href="/buddy-dashboard">
-            <Button variant="outline" size="sm">
-              Find Trips
+
+          {/* Sign up (white bg, hover đổi màu) */}
+          <Link href="/signup">
+            <Button
+              size="sm"
+              className="bg-white text-primary hover:bg-primary hover:text-white transition-colors"
+            >
+              Sign up
             </Button>
-          </Link>
-          <Link href="/admin">
-            <Button size="sm">Dashboard</Button>
           </Link>
         </div>
 
@@ -107,28 +111,23 @@ export default function NavMenu() {
 
       {/* Mobile off-canvas menu */}
       {/* Overlay (click để đóng) */}
-      <div
-        className={`fixed inset-0 z-50 md:hidden transition-opacity ${
-          open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-        aria-hidden={!open}
-      >
-        {/* Dùng button ở lớp nền để nhận click, tránh race khi chuyển trạng thái */}
-        <button
-          type="button"
-          className="absolute inset-0 w-full h-full bg-black/40"
-          aria-label="Close menu overlay"
-          onClick={() => setOpen(false)}
-        />
-      </div>
+      {open && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 w-full h-full bg-black/40"
+            aria-label="Close menu overlay"
+            onClick={() => setOpen(false)}
+          />
+        </div>
+      )}
 
       {/* Panel (drawer) */}
       <aside
         id="mobile-menu"
-        className={`fixed inset-0 z-[60] md:hidden transition-transform duration-300 ease-out
-    ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-0 z-[60] md:hidden h-dvh w-[90vw] max-w-sm
+  transition-transform duration-300 ease-out
+  ${open ? "translate-x-0" : "translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation Menu"
@@ -136,7 +135,7 @@ export default function NavMenu() {
         onPointerDownCapture={(e) => e.stopPropagation()}
       >
         {/* Drawer content: trượt từ phải vào */}
-        <div className="ml-auto h-dvh w-[90vw] max-w-sm bg-background text-foreground border-l border-border shadow-xl flex flex-col overflow-y-auto">
+        <div className="h-dvh bg-background text-foreground border-l border-border shadow-xl flex flex-col overflow-y-auto">
           {/* Header */}
           <div className="px-4 py-4 flex items-center justify-between border-b border-border">
             <Link
@@ -193,20 +192,22 @@ export default function NavMenu() {
             <hr className="border-border" />
           </div>
 
-          {/* Actions */}
+          {/* Auth Actions */}
           <div className="p-4 flex flex-col gap-3">
-            <Link href="/inbox" onClick={() => setOpen(false)}>
-              <Button variant="outline" className="w-full">
-                Inbox
-              </Button>
+            {/* Login text-only */}
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="text-center text-sm font-medium text-foreground hover:text-primary transition-colors"
+            >
+              Log in
             </Link>
-            <Link href="/buddy-dashboard" onClick={() => setOpen(false)}>
-              <Button variant="outline" className="w-full">
-                Find Trips
+
+            {/* Sign up */}
+            <Link href="/signup" onClick={() => setOpen(false)}>
+              <Button className="w-full bg-white text-primary hover:bg-primary hover:text-white transition-colors">
+                Sign up
               </Button>
-            </Link>
-            <Link href="/admin" onClick={() => setOpen(false)}>
-              <Button className="w-full">Dashboard</Button>
             </Link>
           </div>
 
