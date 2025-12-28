@@ -1,17 +1,23 @@
 import "./globals.css";
 import NavMenu from "@/components/common/navMenu";
 import Footer from "@/components/Footer";
-import { headers } from "next/headers";
 import ScrollToTop from "@/components/ScrollToTop";
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
 export default async function RootLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal?: React.ReactNode;
 }) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "";
-  const isHomePage = pathname === "/";
+  // const headersList = await headers();
+  // const pathname = headersList.get("x-pathname") || "";
+  // const isHomePage = pathname === "/";
 
   return (
     <html lang="en">
@@ -21,7 +27,10 @@ export default async function RootLayout({
           <NavMenu />
         </header>
 
-        <main className="min-h-screen">{children}</main>
+        <main className="min-h-screen">
+          {children}
+          {modal}
+        </main>
 
         <footer>
           <Footer />
