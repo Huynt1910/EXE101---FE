@@ -4,40 +4,45 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Menu, X } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { buildAuthUrl } from "@/lib/auth/callback-url";
 
 export default function NavMenu() {
   const [open, setOpen] = useState(false);
   const closeBtnRef = useRef<HTMLButtonElement | null>(null);
 
-  // Khoá scroll nền khi mở menu mobile + focus vào Close + bù scrollbar
+  // ===== Callback URL (chuẩn App Router) =====
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentPath = searchParams.toString()
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
+
+  // ===== Lock scroll + focus management =====
   useEffect(() => {
     const body = document.body;
 
     if (open) {
-      // Tính bề rộng scrollbar hiện tại
       const scrollbarWidth =
         window.innerWidth - document.documentElement.clientWidth;
 
-      // Bù phần scrollbar để không bị "nhảy" layout
       body.style.paddingRight = `${scrollbarWidth}px`;
       body.style.overflow = "hidden";
 
-      // Đưa focus vào nút Close cho accessibility
       setTimeout(() => closeBtnRef.current?.focus(), 0);
     } else {
-      // Khôi phục
       body.style.overflow = "";
       body.style.paddingRight = "";
     }
 
-    // Cleanup khi unmount
     return () => {
       body.style.overflow = "";
       body.style.paddingRight = "";
     };
   }, [open]);
 
-  // Đóng bằng Esc
+  // ===== ESC close =====
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false);
@@ -75,16 +80,14 @@ export default function NavMenu() {
 
         {/* Desktop actions */}
         <div className="hidden md:flex items-center gap-4">
-          {/* Login (text-only) */}
           <Link
-            href="/login"
+            href={buildAuthUrl("/login", currentPath)}
             className="text-sm font-medium text-foreground hover:text-primary transition-colors"
           >
             Log in
           </Link>
 
-          {/* Sign up (white bg, hover đổi màu) */}
-          <Link href="/signup">
+          <Link href={buildAuthUrl("/signup", currentPath)}>
             <Button
               size="sm"
               className="bg-white text-primary hover:bg-primary hover:text-white transition-colors"
@@ -109,8 +112,7 @@ export default function NavMenu() {
         </div>
       </div>
 
-      {/* Mobile off-canvas menu */}
-      {/* Overlay (click để đóng) */}
+      {/* Mobile overlay */}
       {open && (
         <div className="fixed inset-0 z-50 md:hidden">
           <button
@@ -122,19 +124,18 @@ export default function NavMenu() {
         </div>
       )}
 
-      {/* Panel (drawer) */}
+      {/* Mobile drawer */}
       <aside
         id="mobile-menu"
         className={`fixed right-0 top-0 z-[60] md:hidden h-dvh w-[90vw] max-w-sm
-  transition-transform duration-300 ease-out
-  ${open ? "translate-x-0" : "translate-x-full"}`}
+        transition-transform duration-300 ease-out
+        ${open ? "translate-x-0" : "translate-x-full"}`}
         role="dialog"
         aria-modal="true"
         aria-label="Navigation Menu"
         onClick={(e) => e.stopPropagation()}
         onPointerDownCapture={(e) => e.stopPropagation()}
       >
-        {/* Drawer content: trượt từ phải vào */}
         <div className="h-dvh bg-background text-foreground border-l border-border shadow-xl flex flex-col overflow-y-auto">
           {/* Header */}
           <div className="px-4 py-4 flex items-center justify-between border-b border-border">
@@ -156,7 +157,7 @@ export default function NavMenu() {
             </Button>
           </div>
 
-          {/* Nav Links */}
+          {/* Links */}
           <div className="p-4 space-y-1">
             <Link
               href="/explore"
@@ -192,19 +193,20 @@ export default function NavMenu() {
             <hr className="border-border" />
           </div>
 
-          {/* Auth Actions */}
+          {/* Auth actions (Mobile) */}
           <div className="p-4 flex flex-col gap-3">
-            {/* Login text-only */}
             <Link
-              href="/login"
+              href={buildAuthUrl("/login", currentPath)}
               onClick={() => setOpen(false)}
               className="text-center text-sm font-medium text-foreground hover:text-primary transition-colors"
             >
               Log in
             </Link>
 
-            {/* Sign up */}
-            <Link href="/signup" onClick={() => setOpen(false)}>
+            <Link
+              href={buildAuthUrl("/signup", currentPath)}
+              onClick={() => setOpen(false)}
+            >
               <Button className="w-full bg-white text-primary hover:bg-primary hover:text-white transition-colors">
                 Sign up
               </Button>

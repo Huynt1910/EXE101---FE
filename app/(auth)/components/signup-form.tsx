@@ -1,13 +1,14 @@
 "use client";
 
-import Image from "next/image";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-import { useMemo, useState } from "react";
 import { FaApple, FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
+import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/auth/callback-url";
 
 export interface SignUpFormProps {
   onSubmit?: (payload: {
@@ -19,22 +20,17 @@ export interface SignUpFormProps {
 
   onLogIn?: () => void;
 
-  showLogo?: boolean;
   centered?: boolean;
-
-  callbackUrl?: string; // default "/"
+  callbackUrl?: string;
   mode?: "page" | "modal";
-  onClose?: () => void;
 }
 
 export default function SignUpForm({
   onSubmit,
   onLogIn,
-  showLogo = true,
   centered = false,
   callbackUrl = "/",
   mode = "page",
-  onClose,
 }: SignUpFormProps) {
   const router = useRouter();
 
@@ -45,48 +41,39 @@ export default function SignUpForm({
   const [showPassword, setShowPassword] = useState(false);
 
   const isPage = mode === "page";
+  const containerAlign = isPage ? "text-left" : centered ? "text-center" : "text-left";
 
-  const containerAlign = useMemo(() => {
-    if (isPage) return "text-left";
-    return centered ? "text-center" : "text-left";
-  }, [centered, isPage]);
+  const safeCallbackUrl = normalizeCallbackUrl(callbackUrl, "/");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     onSubmit?.({ email, firstName, lastName, password });
+  };
 
-    if (mode === "modal") {
-      onClose?.();
-      setTimeout(() => router.push(callbackUrl), 0);
-      return;
-    }
-
-    router.push(callbackUrl);
+  const handleLogin = () => {
+    if (onLogIn) return onLogIn();
+    router.push(buildAuthUrl("/login", safeCallbackUrl));
   };
 
   return (
     <div className={`w-full ${containerAlign}`}>
-      {showLogo && (
-        <div className="mb-6 sm:mb-8">
-          <Image
-            src="/logo.png"
-            alt="Bonddy logo"
-            width={150}
-            height={40}
-            priority
-            className="h-auto w-auto"
-          />
-        </div>
-      )}
-
-      {/* Heading chỉ ở page (modal đã có header riêng) */}
       {isPage && (
-        <div className="mb-5 sm:mb-7">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl leading-tight font-extrabold text-primary">
+        <div className="mb-10 sm:mb-8 text-center md:text-left">
+          <Link href="/" aria-label="Go to homepage">
+            <Image
+              src="/logo.png"
+              alt="Bonddy"
+              width={120}
+              height={28}
+              priority
+              className="cursor-pointer mx-auto md:mx-0"
+            />
+          </Link>
+
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-primary">
             Create an account
           </h1>
-          <p className="mt-2 text-sm sm:text-2xl text-muted-foreground">
+          <p className="text-sm sm:text-lg text-muted-foreground">
             Sign up to get started
           </p>
         </div>
@@ -131,7 +118,7 @@ export default function SignUpForm({
           </button>
         </div>
 
-        <div className="my-4 flex items-center gap-3">
+        <div className="my-4 sm:my-4 flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
           <span className="text-md text-muted-foreground">or</span>
           <div className="h-px flex-1 bg-border" />
@@ -150,7 +137,8 @@ export default function SignUpForm({
           onChange={(e) => setEmail(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg outline-none
+            px-4 text-lg sm:text-lg
+            outline-none
             focus:ring-2 focus:ring-primary/30
           "
           required
@@ -163,7 +151,8 @@ export default function SignUpForm({
           onChange={(e) => setFirstName(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg outline-none
+            px-4 text-lg sm:text-lg
+            outline-none
             focus:ring-2 focus:ring-primary/30
           "
           required
@@ -176,7 +165,8 @@ export default function SignUpForm({
           onChange={(e) => setLastName(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg outline-none
+            px-4 text-lg sm:text-lg
+            outline-none
             focus:ring-2 focus:ring-primary/30
           "
           required
@@ -190,7 +180,8 @@ export default function SignUpForm({
             onChange={(e) => setPassword(e.target.value)}
             className="
               w-full h-12 rounded-lg border bg-white
-              px-4 pr-12 text-lg outline-none
+              px-4 pr-12 text-lg sm:text-lg
+              outline-none
               focus:ring-2 focus:ring-primary/30
             "
             required
@@ -211,28 +202,19 @@ export default function SignUpForm({
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
+          <span className="block whitespace-nowrap">When using Bonddy you accept our</span>
           <span className="block whitespace-nowrap">
-            When using Withlocals you accept our
-          </span>
-
-          <span className="block whitespace-nowrap">
-            <a
-              href="/terms"
-              className="text-primary font-semibold hover:underline underline-offset-0"
-            >
+            <Link href="/terms" className="text-primary font-semibold hover:underline">
               Terms &amp; Conditions
-            </a>{" "}
+            </Link>{" "}
             and{" "}
-            <a
-              href="/privacy"
-              className="text-primary font-semibold hover:underline underline-offset-0"
-            >
+            <Link href="/privacy" className="text-primary font-semibold hover:underline">
               Privacy Policy
-            </a>
+            </Link>
           </span>
         </p>
 
-        <button type="submit" className="btn-primary w-full h-12 text-md">
+        <button type="submit" className="btn-primary w-full h-12 sm:h-12 text-md">
           Sign up
         </button>
       </form>
@@ -241,7 +223,7 @@ export default function SignUpForm({
         Already have an account?{" "}
         <button
           type="button"
-          onClick={onLogIn}
+          onClick={handleLogin}
           className="text-primary font-semibold hover:underline"
         >
           Log in

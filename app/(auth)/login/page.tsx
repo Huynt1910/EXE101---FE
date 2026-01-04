@@ -1,29 +1,38 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
 import { toast } from "@/components/hooks/use-toast";
+import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/auth/callback-url";
 
 export default function LoginPage() {
   const router = useRouter();
   const sp = useSearchParams();
-  const callbackUrl = sp.get("callbackUrl") || "/";
+
+  const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
 
   const handleSubmit = (email: string, password: string) => {
-    toast({
-      title: "Logging in...",
-      description: `Signing in with ${email}`,
-    });
+    // demo UI: sau này thay bằng gọi API
+    toast({ title: "Logging in...", description: `Signing in with ${email}` });
 
+    // login xong quay lại đúng trang user muốn tới
     router.replace(callbackUrl);
+  };
+
+  const handleSignUp = () => {
+    router.push(buildAuthUrl("/signup", callbackUrl));
+  };
+
+  const handleForgotPassword = () => {
+    router.push(buildAuthUrl("/forgot-password", callbackUrl));
   };
 
   return (
     <LoginForm
-      onSubmit={handleSubmit}
-      callbackUrl={callbackUrl}
       mode="page"
-      showLogo={false} 
+      onSubmit={handleSubmit}
+      onSignUp={handleSignUp}
+      onForgotPassword={handleForgotPassword}
     />
   );
 }
