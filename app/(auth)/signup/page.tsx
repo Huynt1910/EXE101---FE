@@ -3,11 +3,13 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "@/components/hooks/use-toast";
 import SignUpForm from "../components/signup-form";
+import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/auth/callback-url";
 
 export default function SignUpPage() {
   const router = useRouter();
   const sp = useSearchParams();
-  const callbackUrl = sp.get("callbackUrl") || "/";
+
+  const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
 
   const handleSubmit = (payload: {
     email: string;
@@ -23,15 +25,16 @@ export default function SignUpPage() {
     router.replace(callbackUrl);
   };
 
+  const handleLogin = () => {
+    router.push(buildAuthUrl("/login", callbackUrl));
+  };
+
   return (
     <SignUpForm
       mode="page"
-      showLogo={false}
       callbackUrl={callbackUrl}
       onSubmit={handleSubmit}
-      onLogIn={() =>
-        router.replace(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`)
-      }
+      onLogIn={handleLogin}
     />
   );
 }
