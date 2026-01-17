@@ -30,13 +30,13 @@ export default function CTALeadFormSection() {
   const { language } = useLanguage();
   const content = {
     vi: {
-      sectionTitle: "Đăng ký nhận thông báo",
+      sectionTitle: "Hãy để chuyến đi của bạn bắt đầu đúng cách",
       sectionDesc:
-        "Để lại thông tin, chúng tôi sẽ thông báo khi website chính thức ra mắt.",
-      button: "Nhận thông báo",
-      dialogTitle: "Đăng ký ngay",
+        "Để lại thông tin, chúng tôi sẽ liên hệ tư vấn lộ trình phù hợp trong vòng 24 giờ.",
+      button: "Đăng ký ngay",
+      dialogTitle: "Tư vấn ngay",
       dialogDesc:
-        "Vui lòng để lại thông tin liên hệ, Bonddy sẽ thông báo về website sớm nhất cho bạn.",
+        "Vui lòng để lại thông tin liên hệ, Bonddy sẽ hỗ trợ bạn sớm nhất.",
       nameLabel: "Họ và tên",
       namePlaceholder: "Ví dụ: Nguyễn Văn A",
       emailLabel: "Gmail",
@@ -127,133 +127,124 @@ export default function CTALeadFormSection() {
   }
 
   return (
-    <section id="lead-form" className="bg-primary py-16 sm:py-20">
+    <section id="lead-form" className="bg-background py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
-        <div className="pointer-events-none absolute -left-16 top-8 h-36 w-36 rounded-full border-2 border-primary/20 opacity-40" />
-        <div className="pointer-events-none absolute -right-10 bottom-6 h-24 w-24 rounded-full border-2 border-accent/30 opacity-40" />
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
+        <div className="relative overflow-hidden rounded-3xl border bg-card px-6 py-14 text-center text-foreground shadow-xl sm:px-12">
+          <div className="pointer-events-none absolute -left-16 top-8 h-36 w-36 rounded-full border-2 border-primary/20 opacity-40" />
+          <div className="pointer-events-none absolute -right-10 bottom-6 h-24 w-24 rounded-full border-2 border-accent/30 opacity-40" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-transparent via-accent/70 to-transparent" />
 
-        <h2 className="text-4xl text-center text-balance text-accent-foreground font-bold sm:text-4xl">
-          {t.sectionTitle}
-        </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-white text-center text-sm text-muted-foreground sm:text-base">
-          {t.sectionDesc}
-        </p>
+          <h2 className="text-3xl font-bold sm:text-4xl">{t.sectionTitle}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground sm:text-base">
+            {t.sectionDesc}
+          </p>
 
-        <div className="mt-8 flex justify-center">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                className="
-    rounded-full
-    bg-primary text-accent-foreground
-    border border-accent-foreground
-    transition-colors duration-200
-    hover:bg-accent-foreground hover:text-primary
-    hover:border-primary
-  "
-              >
-                {t.button}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent className="border border-border bg-background p-0 sm:max-w-[560px]">
-              <div className="rounded-2xl p-6 sm:p-8">
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-center text-2xl font-bold text-foreground">
-                    {t.dialogTitle}
-                  </AlertDialogTitle>
-                  <p className="mt-2 text-center text-sm text-muted-foreground">
-                    {t.dialogDesc}
-                  </p>
-                </AlertDialogHeader>
+          <div className="mt-8 flex justify-center">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground hover:opacity-90">
+                  {t.button}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="border border-border bg-card p-0 sm:max-w-[560px]">
+                <div className="rounded-2xl p-6 sm:p-8">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-center text-2xl font-bold text-foreground">
+                      {t.dialogTitle}
+                    </AlertDialogTitle>
+                    <p className="mt-2 text-center text-sm text-muted-foreground">
+                      {t.dialogDesc}
+                    </p>
+                  </AlertDialogHeader>
 
-                {status !== "success" ? (
-                  <form onSubmit={onSubmit} className="mt-6 space-y-4">
-                    <div>
-                      <label className="mb-1 block text-sm font-medium">
-                        {t.nameLabel}
-                      </label>
-                      <input
-                        name="name"
-                        value={form.name}
-                        onChange={onChange}
-                        required
-                        placeholder={t.namePlaceholder}
-                        autoComplete="name"
-                        className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-                        disabled={status === "loading"}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-sm font-medium">
-                        {t.emailLabel}
-                      </label>
-                      <input
-                        type="email"
-                        name="gmail"
-                        value={form.gmail}
-                        onChange={onChange}
-                        required
-                        placeholder={t.emailPlaceholder}
-                        autoComplete="email"
-                        className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-                        disabled={status === "loading"}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="mb-1 block text-sm font-medium">
-                        {t.phoneLabel}
-                      </label>
-                      <input
-                        type="tel"
-                        name="phoneNumber"
-                        value={form.phoneNumber}
-                        onChange={onChange}
-                        required
-                        placeholder={t.phonePlaceholder}
-                        autoComplete="tel"
-                        className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-                        disabled={status === "loading"}
-                      />
-                    </div>
-
-                    {status === "error" && (
-                      <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                        {errorMsg}
+                  {status !== "success" ? (
+                    <form onSubmit={onSubmit} className="mt-6 space-y-4">
+                      <div>
+                        <label className="mb-1 block text-sm font-medium">
+                          {t.nameLabel}
+                        </label>
+                        <input
+                          name="name"
+                          value={form.name}
+                          onChange={onChange}
+                          required
+                          placeholder={t.namePlaceholder}
+                          autoComplete="name"
+                          className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          disabled={status === "loading"}
+                        />
                       </div>
-                    )}
 
-                    <div className="flex justify-center">
+                      <div>
+                        <label className="mb-1 block text-sm font-medium">
+                          {t.emailLabel}
+                        </label>
+                        <input
+                          type="email"
+                          name="gmail"
+                          value={form.gmail}
+                          onChange={onChange}
+                          required
+                          placeholder={t.emailPlaceholder}
+                          autoComplete="email"
+                          className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          disabled={status === "loading"}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-sm font-medium">
+                          {t.phoneLabel}
+                        </label>
+                        <input
+                          type="tel"
+                          name="phoneNumber"
+                          value={form.phoneNumber}
+                          onChange={onChange}
+                          required
+                          placeholder={t.phonePlaceholder}
+                          autoComplete="tel"
+                          className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          disabled={status === "loading"}
+                        />
+                      </div>
+
+                      {status === "error" && (
+                        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                          {errorMsg}
+                        </div>
+                      )}
+
                       <Button
                         type="submit"
-                        className="w-1/2 rounded-full bg-accent p-3 text-sm font-semibold text-accent-foreground hover:opacity-90"
+                        className="w-full rounded-full bg-accent py-3 text-sm font-semibold text-accent-foreground hover:opacity-90"
                         disabled={status === "loading"}
                       >
-                        {status === "loading" ? t.submitLoading : t.submitIdle}
+                        {status === "loading"
+                          ? t.submitLoading
+                          : t.submitIdle}
                       </Button>
+                    </form>
+                  ) : (
+                    <div className="mt-6 rounded-xl border bg-card p-5 text-center">
+                      <h3 className="text-base font-semibold text-foreground">
+                        {t.successTitle}
+                      </h3>
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        {t.successDesc}
+                      </p>
                     </div>
-                  </form>
-                ) : (
-                  <div className="mt-6 rounded-xl border bg-card p-5 text-center">
-                    <h3 className="text-base font-semibold text-foreground">
-                      {t.successTitle}
-                    </h3>
-                    <p className="mt-2 text-sm text-muted-foreground">
-                      {t.successDesc}
-                    </p>
-                  </div>
-                )}
+                  )}
 
-                <div className="mt-6 flex justify-center">
-                  <AlertDialogCancel className="rounded-full border border-border bg-background px-6 py-2 text-sm text-foreground hover:bg-secondary">
-                    {t.close}
-                  </AlertDialogCancel>
+                  <div className="mt-6 flex justify-center">
+                    <AlertDialogCancel className="rounded-full border border-border bg-background px-6 py-2 text-sm text-foreground hover:bg-secondary">
+                      {t.close}
+                    </AlertDialogCancel>
+                  </div>
                 </div>
-              </div>
-            </AlertDialogContent>
-          </AlertDialog>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
     </section>

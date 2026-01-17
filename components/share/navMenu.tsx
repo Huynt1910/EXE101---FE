@@ -109,7 +109,7 @@ export default function NavMenu() {
       {/* 
       <aside
         id="mobile-menu"
-        className={`fixed inset-0 z-[60] transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed inset-y-0 right-0 z-[60] w-[90vw] max-w-sm transition-transform duration-300 ease-out md:hidden ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
         role="dialog"
@@ -118,7 +118,7 @@ export default function NavMenu() {
         onClick={(e) => e.stopPropagation()}
         onPointerDownCapture={(e) => e.stopPropagation()}
       >
-        <div className="ml-auto flex h-dvh w-[90vw] max-w-sm flex-col overflow-y-auto border-l border-border bg-background text-foreground shadow-xl">
+        <div className="flex h-dvh w-full flex-col overflow-y-auto border-l border-border bg-background text-foreground shadow-xl">
           <div className="flex items-center justify-between border-b border-border px-4 py-4">
             <Link
               href="/"

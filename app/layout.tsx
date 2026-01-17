@@ -26,7 +26,6 @@ export default async function RootLayout({
     <html className={`${beVietnam.variable} [--font-heading:var(--font-body)]`}>
       <body className="bg-background text-foreground">
         <AppProviders>
-          <ScrollToTop />
           <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
             <NavMenu />
           </header>
