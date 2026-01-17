@@ -30,13 +30,13 @@ export default function CTALeadFormSection() {
   const { language } = useLanguage();
   const content = {
     vi: {
-      sectionTitle: "Hãy để chuyến đi của bạn bắt đầu đúng cách",
+      sectionTitle: "Đăng ký nhận thông báo",
       sectionDesc:
-        "Để lại thông tin, chúng tôi sẽ liên hệ tư vấn lộ trình phù hợp trong vòng 24 giờ.",
-      button: "Đăng ký ngay",
-      dialogTitle: "Tư vấn ngay",
+        "Để lại thông tin, chúng tôi sẽ thông báo khi website chính thức ra mắt.",
+      button: "Nhận thông báo",
+      dialogTitle: "Đăng ký ngay",
       dialogDesc:
-        "Vui lòng để lại thông tin liên hệ, Bonddy sẽ hỗ trợ bạn sớm nhất.",
+        "Vui lòng để lại thông tin liên hệ, Bonddy sẽ thông báo về website sớm nhất cho bạn.",
       nameLabel: "Họ và tên",
       namePlaceholder: "Ví dụ: Nguyễn Văn A",
       emailLabel: "Gmail",
@@ -127,7 +127,7 @@ export default function CTALeadFormSection() {
   }
 
   return (
-    <section id="lead-form" className="bg-background py-16 sm:py-20">
+    <section id="lead-form" className="bg-primary py-16 sm:py-20">
       <div className="mx-auto max-w-6xl px-4">
         <div className="relative overflow-hidden rounded-3xl border bg-card px-6 py-14 text-center text-foreground shadow-xl sm:px-12">
           <div className="pointer-events-none absolute -left-16 top-8 h-36 w-36 rounded-full border-2 border-primary/20 opacity-40" />
@@ -146,7 +146,7 @@ export default function CTALeadFormSection() {
                   {t.button}
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="border border-border bg-card p-0 sm:max-w-[560px]">
+              <AlertDialogContent className="w-[calc(100%-2rem)] border border-border bg-card p-0 sm:max-w-[560px]">
                 <div className="rounded-2xl p-6 sm:p-8">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="text-center text-2xl font-bold text-foreground">
@@ -170,7 +170,7 @@ export default function CTALeadFormSection() {
                           required
                           placeholder={t.namePlaceholder}
                           autoComplete="name"
-                          className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          className="w-full rounded-lg border bg-input px-4 py-3 text-base text-foreground outline-none focus:ring-2 focus:ring-ring sm:text-sm"
                           disabled={status === "loading"}
                         />
                       </div>
@@ -187,7 +187,7 @@ export default function CTALeadFormSection() {
                           required
                           placeholder={t.emailPlaceholder}
                           autoComplete="email"
-                          className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          className="w-full rounded-lg border bg-input px-4 py-3 text-base text-foreground outline-none focus:ring-2 focus:ring-ring sm:text-sm"
                           disabled={status === "loading"}
                         />
                       </div>
@@ -204,7 +204,7 @@ export default function CTALeadFormSection() {
                           required
                           placeholder={t.phonePlaceholder}
                           autoComplete="tel"
-                          className="w-full rounded-lg border bg-input px-4 py-3 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                          className="w-full rounded-lg border bg-input px-4 py-3 text-base text-foreground outline-none focus:ring-2 focus:ring-ring sm:text-sm"
                           disabled={status === "loading"}
                         />
                       </div>
@@ -215,15 +215,26 @@ export default function CTALeadFormSection() {
                         </div>
                       )}
 
-                      <Button
+                      <button
                         type="submit"
-                        className="w-full rounded-full bg-accent py-3 text-sm font-semibold text-accent-foreground hover:opacity-90"
+                        className="
+    mx-auto
+    block
+    min-w-[180px]
+    rounded-full
+    bg-accent
+    px-8
+    py-3
+    text-base
+    font-semibold
+    text-accent-foreground
+    hover:opacity-90
+    sm:text-sm
+  "
                         disabled={status === "loading"}
                       >
-                        {status === "loading"
-                          ? t.submitLoading
-                          : t.submitIdle}
-                      </Button>
+                        {status === "loading" ? t.submitLoading : t.submitIdle}
+                      </button>
                     </form>
                   ) : (
                     <div className="mt-6 rounded-xl border bg-card p-5 text-center">
