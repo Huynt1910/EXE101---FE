@@ -91,7 +91,7 @@ export default function NavMenu() {
         </div> */}
       </div>
 
-      <div
+      {/* <div
         className={`fixed inset-0 z-50 transition-opacity md:hidden ${
           open
             ? "pointer-events-auto opacity-100"
@@ -105,8 +105,8 @@ export default function NavMenu() {
           aria-label={t.closeOverlay}
           onClick={() => setOpen(false)}
         />
-      </div>
-
+      </div> */}
+      {/* 
       <aside
         id="mobile-menu"
         className={`fixed inset-0 z-[60] transition-transform duration-300 ease-out md:hidden ${
@@ -222,7 +222,7 @@ export default function NavMenu() {
             © {new Date().getFullYear()} Bonddy. All rights reserved.
           </div>
         </div>
-      </aside>
+      </aside> */}
     </nav>
   );
 }
