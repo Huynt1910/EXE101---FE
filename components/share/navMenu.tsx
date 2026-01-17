@@ -48,7 +48,7 @@ export default function NavMenu() {
           {t.brand}
         </Link>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="flex items-center gap-3">
           <div className="flex items-center gap-2 rounded-full border border-border bg-background/70 p-1">
             <button
               type="button"
@@ -77,7 +77,7 @@ export default function NavMenu() {
           </div>
         </div>
 
-        <div className="md:hidden">
+        {/* <div className="md:hidden">
           <Button
             variant="outline"
             size="icon"
@@ -88,7 +88,7 @@ export default function NavMenu() {
           >
             <Menu className="h-5 w-5" />
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <div
