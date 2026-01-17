@@ -6,16 +6,15 @@ import Feedbacks from "./sections/Feedbacks";
 import CTASection from "../share/CTASection";
 import FAQ from "./sections/FAQ";
 
-export default function HomePageContent() {
+export default function TVCHomepageContent() {
   return (
     <div className="bg-background">
       <Hero />
-      <AboutUs />
-      {/* <Activities /> */}
-      <Places />
-      <Feedbacks />
-      <FAQ />
       <CTASection />
+      <AboutUs />
+      <Places />
+      <FAQ />
+      <Feedbacks />
     </div>
   );
 }

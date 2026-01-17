@@ -2,41 +2,62 @@
 import Section from "../layout/Section";
 import { motion } from "framer-motion";
 import Link from "next/link";
-
-const places = [
-  {
-    title: "Landmark 81",
-    img: "places/landmark-81.png",
-    href: "/places/landmark-81",
-    desc: "Explore the breathtaking beauty of Landmark 81, the tallest building in Vietnam, with our selection of budget, mid-range, luxury, and boutique cruises. Whether you choose the charm of a traditional junk boat or the exclusivity of a private cruise, your journey will be tailored to your desires.",
-    cta: "View Cruises",
-  },
-  {
-    title: "Ben Thanh Market",
-    img: "places/ben-thanh.png",
-    href: "/places/ben-thanh",
-    desc: "Explore the rich history and culture of Ben Thanh Market with our selection of tours and activities. From the ancient streets of the old town to the colorful markets and traditional handicrafts, you’ll experience the best of Ben Thanh Market’s culture and heritage.",
-    cta: "View Cruises",
-  },
-];
+import { useLanguage } from "@/components/share/AppProviders";
 
 export default function Places() {
+  const { language } = useLanguage();
+  const content = {
+    vi: {
+      title: "Những điểm đến đẹp nhất TP.HCM",
+      desc: "Landmark 81 và Chợ Bến Thành là hai biểu tượng không thể bỏ lỡ - nơi kết hợp giữa nhịp sống hiện đại và hơi thở văn hóa Sài Gòn.",
+      cta: "Xem chi tiết",
+      places: [
+        {
+          title: "Landmark 81",
+          img: "places/landmark-81.png",
+          href: "/places/landmark-81",
+          desc: "Chiêm ngưỡng tòa nhà cao nhất Việt Nam với không gian ngắm cảnh, ẩm thực và trải nghiệm hiện đại ngay giữa lòng thành phố.",
+        },
+        {
+          title: "Chợ Bến Thành",
+          img: "places/ben-thanh.png",
+          href: "/places/ben-thanh",
+          desc: "Khám phá nhịp sống Sài Gòn với thiên đường ẩm thực đường phố, sản vật địa phương và nét văn hóa lâu đời.",
+        },
+      ],
+    },
+    en: {
+      title: "HCMC's most iconic spots",
+      desc: "Landmark 81 and Ben Thanh Market are must-see highlights, blending modern energy with Saigon’s cultural rhythm.",
+      cta: "View details",
+      places: [
+        {
+          title: "Landmark 81",
+          img: "places/landmark-81.png",
+          href: "/places/landmark-81",
+          desc: "Vietnam’s tallest tower with skyline views, contemporary dining, and vibrant city energy.",
+        },
+        {
+          title: "Ben Thanh Market",
+          img: "places/ben-thanh.png",
+          href: "/places/ben-thanh",
+          desc: "A lively market of street food, local crafts, and Saigon’s signature bustle.",
+        },
+      ],
+    },
+  } as const;
+  const t = content[language];
+
   return (
-    <Section className="bg-white" containerClassName="space-y-10">
-      <div className="text-center space-y-4">
-        <h2 className="text-4xl sm:text-5xl font-bold tracking-tight">
-          Ho Chi Minh city’s Most Beautiful Places
+    <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div className="space-y-4 text-center">
+        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+          {t.title}
         </h2>
-        <p className="text-lg text-muted-foreground">
-          With 7+ iconic destinations spanning North, Central, and
-          South—Landmark 81, Ben Thanh Market, Ninh Binh, Sapa, Hue, Hanoi, and
-          Ho Chi Minh City—you’ll experience limestone karsts, lantern-lit old
-          towns, river caves, terraced mountains, and imperial heritage in one
-          seamless journey.
-        </p>
+        <p className="text-lg text-muted-foreground py-4">{t.desc}</p>
       </div>
 
-      {places.map((item, i) => (
+      {t.places.map((item, i) => (
         <motion.div
           key={item.title}
           initial={{ opacity: 0, y: 24 }}
@@ -45,17 +66,17 @@ export default function Places() {
           viewport={{ amount: 0.3 }}
           className="mb-6"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          <div className="grid grid-cols-1 items-center gap-10 md:grid-cols-2 py-2">
             <div className={i % 2 === 0 ? "" : "md:order-2"}>
-              <h3 className="text-3xl md:text-4xl font-bold mb-4">
+              <h3 className="mb-4 text-3xl font-bold md:text-4xl">
                 {item.title}
               </h3>
-              <p className="text-muted-foreground leading-relaxed mb-6">
+              <p className="mb-6 leading-relaxed text-muted-foreground">
                 {item.desc}
               </p>
-              <Link href={item.img}>
-                <button className="inline-flex items-center gap-2 rounded-xl bg-orange-500 text-white px-5 py-3 font-semibold shadow hover:bg-orange-600 transition-colors">
-                  {item.cta}
+              {/* <Link >
+                <button className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white shadow transition-colors hover:bg-orange-600">
+                  {t.cta}
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M9 18l6-6-6-6"
@@ -66,20 +87,20 @@ export default function Places() {
                     />
                   </svg>
                 </button>
-              </Link>
+              </Link> */}
             </div>
             <div className={i % 2 === 0 ? "" : "md:order-1"}>
               <div className="relative overflow-hidden rounded-3xl shadow-xl">
                 <img
                   src={item.img}
                   alt={item.title}
-                  className="w-full h-[260px] sm:h-[320px] md:h-[360px] object-cover"
+                  className="h-[260px] w-full object-cover sm:h-[320px] md:h-[360px]"
                 />
               </div>
             </div>
           </div>
         </motion.div>
       ))}
-    </Section>
+    </section>
   );
 }

@@ -1,3 +1,5 @@
+import type { Language } from "@/lib/i18n";
+
 export interface Destination {
   id: number;
   name: string;
@@ -53,26 +55,41 @@ export const topDestinations: Destination[] = [
   },
 ];
 
-export const feedbacksData: Testimonial[] = [
-  {
-    name: "Martina Di-marco",
-    date: "Sep 22, 2025",
-    rating: 5,
-    text: "Trip to Vietnam organized with LocalHost: everything was perfect! Tailor-made itinerary, knowledgeable guides, punctual transfers, and well-chosen hotels. A reliable agency, always available. Highly recommended!",
-    image: "/vietnamese-woman.jpg",
-  },
-  {
-    name: "Tara Bergin",
-    date: "Oct 9, 2025",
-    rating: 5,
-    text: "From the moment my husband and I contacted IZI tours we were paired with a kind, helpful agent. Lien was our dedicated agent who went above and beyond in organising...",
-    image: "/vietnamese-woman.jpg",
-  },
-  {
-    name: "Blanche Decroix",
-    date: "Oct 9, 2025",
-    rating: 5,
-    text: "We highly recommend the izitour agency, and particularly Emily who not only helped us prepare for this trip but also adapted our stay based on our health condition and the...",
-    image: "/vietnamese-woman.jpg",
-  },
-];
+const feedbacksByLang: Record<Language, Testimonial[]> = {
+  vi: [
+    {
+      name: "Martina Di-marco",
+      date: "22/09/2025",
+      rating: 5,
+      text: "Chuyến đi Việt Nam được tổ chức rất chu đáo. Lịch trình cá nhân hóa, hướng dẫn viên nhiệt tình, di chuyển đúng giờ và khách sạn lựa chọn kỹ.",
+      image: "/vietnamese-woman.jpg",
+    },
+    {
+      name: "Tara Bergin",
+      date: "09/10/2025",
+      rating: 5,
+      text: "Ngay từ lúc liên hệ, chúng tôi đã được tư vấn rất tận tình. Mọi yêu cầu đều được xử lý nhanh và rõ ràng.",
+      image: "/vietnamese-woman.jpg",
+    },
+  ],
+  en: [
+    {
+      name: "Martina Di-marco",
+      date: "Sep 22, 2025",
+      rating: 5,
+      text: "A beautifully organized Vietnam trip. Personalized itinerary, warm guides, on-time transfers, and carefully selected hotels.",
+      image: "/vietnamese-woman.jpg",
+    },
+    {
+      name: "Tara Bergin",
+      date: "Oct 9, 2025",
+      rating: 5,
+      text: "From first contact, the team was attentive and quick to handle every request. Clear, friendly, and reliable.",
+      image: "/vietnamese-woman.jpg",
+    },
+  ],
+};
+
+export function getFeedbacks(language: Language) {
+  return feedbacksByLang[language];
+}
