@@ -54,10 +54,10 @@ export default function SignUpModal({
           </button>
 
           <div className="flex justify-center">
-            <Image src="/logo.png" alt="Bonddy logo" width={60} height={28} priority />
+            <Image src="/logo_bonddy.png" alt="Bonddy logo" width={68} height={68} priority />
           </div>
 
-          <h2 className="text-xl sm:text-2xl font-extrabold text-primary">
+          <h2 className="text-lg sm:text-xl font-extrabold text-primary">
             Create an account
           </h2>
           <p className="mt-1 text-xs sm:text-sm lg:text-md text-muted-foreground">

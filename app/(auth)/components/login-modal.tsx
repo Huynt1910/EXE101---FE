@@ -47,13 +47,13 @@ export default function LoginModal({
           </button>
 
           <div className="flex justify-center">
-            <Image src="/logo.png" alt="Bonddy logo" width={48} height={48} priority />
+            <Image src="/logo_bonddy.png" alt="Bonddy logo" width={68} height={68} priority />
           </div>
 
-          <h2 className="mt-2 text-xl sm:text-2xl font-extrabold text-primary">
+          <h2 className="mt-2 text-lg sm:text-xl font-extrabold text-primary">
             Welcome back
           </h2>
-          <p className="text-xs sm:text-sm lg:text-lg text-muted-foreground">
+          <p className="text-xs sm:text-sm lg:text-md text-muted-foreground">
             Log in to your account
           </p>
         </div>

@@ -3,8 +3,7 @@ import { motion, MotionProps } from "framer-motion";
 import React from "react";
 import clsx from "clsx";
 
-export const sectionBase =
-  "min-h-[100svh] snap-start flex flex-col justify-center py-16 md:py-20";
+export const sectionBase = "py-16 md:py-24";
 export const containerBase =
   "w-full mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 xl:max-w-7xl 2xl:max-w-[1280px]";
 

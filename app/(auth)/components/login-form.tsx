@@ -42,7 +42,7 @@ export default function LoginForm({
         <div className="mb-10 sm:mb-8 text-center md:text-left">
           <Link href="/" aria-label="Go to homepage">
             <Image
-              src="/logo.png"
+              src="/logo_bonddy.png"
               alt="Bonddy"
               width={120}
               height={28}
@@ -105,7 +105,7 @@ export default function LoginForm({
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <p className="text-center text-primary font-semibold text-md mb-2">
+        <p className="text-center text-primary font-semibold text-sm sm:text-sm mb-2">
           Log in with your email address
         </p>
       </div>
@@ -118,7 +118,7 @@ export default function LoginForm({
           onChange={(e) => setEmail(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg sm:text-lg
+            px-4 text-md sm:text-md
             outline-none
             focus:ring-2 focus:ring-primary/30
           "
@@ -133,7 +133,7 @@ export default function LoginForm({
             onChange={(e) => setPassword(e.target.value)}
             className="
               w-full h-12 rounded-lg border bg-white
-              px-4 pr-12 text-lg sm:text-lg
+              px-4 pr-12 text-md sm:text-md
               outline-none
               focus:ring-2 focus:ring-primary/30
             "
@@ -157,18 +157,18 @@ export default function LoginForm({
           <button
             type="button"
             onClick={() => onForgotPassword?.()}
-            className="text-primary text-md font-medium hover:underline"
+            className="text-primary text-sm sm:text-sm font-medium hover:underline"
           >
             Forgot your password?
           </button>
         </div>
 
-        <button type="submit" className="btn-primary w-full h-12 sm:h-12 text-md">
+        <button type="submit" className="btn-primary w-full h-12 sm:h-14 text-md">
           Log in
         </button>
       </form>
 
-      <p className="mt-5 text-center text-muted-foreground text-md">
+      <p className="mt-5 text-center text-muted-foreground text-sm sm:text-sm">
         No account?{" "}
         <button
           type="button"

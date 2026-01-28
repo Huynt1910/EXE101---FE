@@ -1,4 +1,4 @@
-import NavMenu from "@/components/common/navMenu";
+import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
 
@@ -8,18 +8,11 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <div className="flex-1">{children}</div>
+      <Footer />
       <ScrollToTop />
-
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b border-border">
-        <NavMenu />
-      </header>
-
-      <main className="min-h-screen">{children}</main>
-
-      <footer>
-        <Footer />
-      </footer>
-    </>
+    </div>
   );
 }

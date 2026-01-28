@@ -61,7 +61,7 @@ export default function SignUpForm({
         <div className="mb-10 sm:mb-8 text-center md:text-left">
           <Link href="/" aria-label="Go to homepage">
             <Image
-              src="/logo.png"
+              src="/logo_bonddy.png"
               alt="Bonddy"
               width={120}
               height={28}
@@ -124,7 +124,7 @@ export default function SignUpForm({
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <p className="text-center text-primary font-semibold text-md mb-2">
+        <p className="text-center text-primary font-semibold text-sm sm:text-sm mb-3">
           Sign up with your email address
         </p>
       </div>
@@ -137,7 +137,7 @@ export default function SignUpForm({
           onChange={(e) => setEmail(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg sm:text-lg
+            px-4 text-md sm:text-md
             outline-none
             focus:ring-2 focus:ring-primary/30
           "
@@ -151,7 +151,7 @@ export default function SignUpForm({
           onChange={(e) => setFirstName(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg sm:text-lg
+            px-4 text-md sm:text-md
             outline-none
             focus:ring-2 focus:ring-primary/30
           "
@@ -165,7 +165,7 @@ export default function SignUpForm({
           onChange={(e) => setLastName(e.target.value)}
           className="
             w-full h-12 rounded-lg border bg-white
-            px-4 text-lg sm:text-lg
+            px-4 text-md sm:text-md
             outline-none
             focus:ring-2 focus:ring-primary/30
           "
@@ -180,7 +180,7 @@ export default function SignUpForm({
             onChange={(e) => setPassword(e.target.value)}
             className="
               w-full h-12 rounded-lg border bg-white
-              px-4 pr-12 text-lg sm:text-lg
+              px-4 pr-12 text-md sm:text-md
               outline-none
               focus:ring-2 focus:ring-primary/30
             "
@@ -201,7 +201,7 @@ export default function SignUpForm({
           </button>
         </div>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <p className="mt-6 text-center text-sm sm:text-xs text-muted-foreground">
           <span className="block whitespace-nowrap">When using Bonddy you accept our</span>
           <span className="block whitespace-nowrap">
             <Link href="/terms" className="text-primary font-semibold hover:underline">
@@ -214,12 +214,12 @@ export default function SignUpForm({
           </span>
         </p>
 
-        <button type="submit" className="btn-primary w-full h-12 sm:h-12 text-md">
+        <button type="submit" className="btn-primary w-full h-12 sm:h-13 text-md">
           Sign up
         </button>
       </form>
 
-      <p className="mt-5 text-center text-muted-foreground text-md">
+      <p className="mt-5 text-center text-muted-foreground text-sm sm:text-sm">
         Already have an account?{" "}
         <button
           type="button"
