@@ -1,7 +1,5 @@
 "use client";
-import Section from "../layout/Section";
 import { motion } from "framer-motion";
-import Link from "next/link";
 import { useLanguage } from "@/components/share/AppProviders";
 
 export default function Places() {

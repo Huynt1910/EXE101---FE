@@ -1,228 +1,186 @@
 "use client";
 
-import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
-import { Button } from "../ui/button";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { useLanguage } from "@/components/share/AppProviders";
-import { useMessages } from "@/lib/i18n/useMessages";
 
-export default function NavMenu() {
-  const [open, setOpen] = useState(false);
-  const closeBtnRef = useRef<HTMLButtonElement | null>(null);
-  const { language, setLanguage } = useLanguage();
-  const t = useMessages().nav;
+type NavigationLink = {
+  name: string;
+  href: string;
+};
 
+const navigationLinks: NavigationLink[] = [
+  {
+    name: "Features",
+    href: "#features",
+  },
+  {
+    name: "Pricing",
+    href: "#pricing",
+  },
+  {
+    name: "Solutions",
+    href: "#solutions",
+  },
+  {
+    name: "Resources",
+    href: "#resources",
+  },
+];
+
+// @component: PortfolioNavbar
+export const PortfolioNavbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   useEffect(() => {
-    const body = document.body;
-
-    if (open) {
-      const scrollbarWidth =
-        window.innerWidth - document.documentElement.clientWidth;
-      body.style.paddingRight = `${scrollbarWidth}px`;
-      body.style.overflow = "hidden";
-      setTimeout(() => closeBtnRef.current?.focus(), 0);
-    } else {
-      body.style.overflow = "";
-      body.style.paddingRight = "";
-    }
-
-    return () => {
-      body.style.overflow = "";
-      body.style.paddingRight = "";
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
     };
-  }, [open]);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+  const handleLinkClick = (href: string) => {
+    closeMobileMenu();
+    const element = document.querySelector(href);
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+      });
+    }
+  };
 
+  // @return
   return (
-    <nav className="w-full border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-        <Link href="/" className="text-3xl font-bold text-primary">
-          {t.brand}
-        </Link>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 rounded-full border border-border bg-background/70 p-1">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-background/95 backdrop-blur-md shadow-sm" : "bg-transparent"}`}
+    >
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20">
+          <div className="flex-shrink-0">
             <button
-              type="button"
-              onClick={() => setLanguage("vi")}
-              className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition ${
-                language === "vi"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              onClick={() => handleLinkClick("#home")}
+              className="text-2xl font-bold text-foreground hover:text-primary transition-colors duration-200"
+              style={{
+                fontFamily: "Plus Jakarta Sans, sans-serif",
+              }}
             >
-              <span>🇻🇳</span>
-              VI
+              <span
+                style={{
+                  fontFamily: "Figtree",
+                  fontWeight: "800",
+                }}
+              >
+                Auralink
+              </span>
             </button>
+          </div>
+
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-8">
+              {navigationLinks.map((link) => (
+                <button
+                  key={link.name}
+                  onClick={() => handleLinkClick(link.href)}
+                  className="text-foreground hover:text-primary px-3 py-2 text-base font-medium transition-colors duration-200 relative group"
+                  style={{
+                    fontFamily: "Figtree, sans-serif",
+                    fontWeight: "400",
+                  }}
+                >
+                  <span>{link.name}</span>
+                  <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-300 group-hover:w-full"></div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hidden md:block">
             <button
-              type="button"
-              onClick={() => setLanguage("en")}
-              className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold transition ${
-                language === "en"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              onClick={() => handleLinkClick("#contact")}
+              className="bg-[#156d95] text-white px-[18px] rounded-full text-base font-semibold hover:bg-[#156d95]/90 transition-all duration-200 hover:rounded-2xl shadow-sm hover:shadow-md whitespace-nowrap leading-4 py-[15px]"
+              style={{
+                fontFamily: "Plus Jakarta Sans, sans-serif",
+              }}
             >
-              <span>🇺🇸</span>
-              EN
+              <span
+                style={{
+                  fontFamily: "Figtree",
+                  fontWeight: "500",
+                }}
+              >
+                Start Free Trial
+              </span>
+            </button>
+          </div>
+
+          <div className="md:hidden">
+            <button
+              onClick={toggleMobileMenu}
+              className="text-foreground hover:text-primary p-2 rounded-md transition-colors duration-200"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
         </div>
-
-        {/* <div className="md:hidden">
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label={open ? t.closeMenu : t.openMenu}
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen(true)}
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </div> */}
       </div>
 
-      {/* <div
-        className={`fixed inset-0 z-50 transition-opacity md:hidden ${
-          open
-            ? "pointer-events-auto opacity-100"
-            : "pointer-events-none opacity-0"
-        }`}
-        aria-hidden={!open}
-      >
-        <button
-          type="button"
-          className="absolute inset-0 h-full w-full bg-black/40"
-          aria-label={t.closeOverlay}
-          onClick={() => setOpen(false)}
-        />
-      </div> */}
-      {/* 
-      <aside
-        id="mobile-menu"
-        className={`fixed inset-y-0 right-0 z-[60] w-[90vw] max-w-sm transition-transform duration-300 ease-out md:hidden ${
-          open ? "translate-x-0" : "translate-x-full"
-        }`}
-        role="dialog"
-        aria-modal="true"
-        aria-label="Navigation Menu"
-        onClick={(e) => e.stopPropagation()}
-        onPointerDownCapture={(e) => e.stopPropagation()}
-      >
-        <div className="flex h-dvh w-full flex-col overflow-y-auto border-l border-border bg-background text-foreground shadow-xl">
-          <div className="flex items-center justify-between border-b border-border px-4 py-4">
-            <Link
-              href="/"
-              className="text-2xl font-bold text-primary"
-              onClick={() => setOpen(false)}
-            >
-              {t.brand}
-            </Link>
-            <Button
-              ref={closeBtnRef}
-              variant="ghost"
-              size="icon"
-              aria-label={t.closeMenu}
-              onClick={() => setOpen(false)}
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
-
-          <div className="space-y-1 p-4">
-            <Link
-              href="/explore"
-              className="block rounded-lg px-3 py-3 hover:bg-muted"
-              onClick={() => setOpen(false)}
-            >
-              {t.explore}
-            </Link>
-            <Link
-              href="/host-dashboard"
-              className="block rounded-lg px-3 py-3 hover:bg-muted"
-              onClick={() => setOpen(false)}
-            >
-              {t.host}
-            </Link>
-            <Link
-              href="/about"
-              className="block rounded-lg px-3 py-3 hover:bg-muted"
-              onClick={() => setOpen(false)}
-            >
-              {t.about}
-            </Link>
-            <Link
-              href="/contact"
-              className="block rounded-lg px-3 py-3 hover:bg-muted"
-              onClick={() => setOpen(false)}
-            >
-              {t.contact}
-            </Link>
-          </div>
-
-          <div className="px-4">
-            <hr className="border-border" />
-          </div>
-
-          <div className="space-y-3 p-4">
-            <div className="flex items-center justify-between rounded-xl border border-border bg-background/70 px-3 py-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
-                {t.languageLabel}
-              </span>
-              <div className="flex gap-2">
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div
+            initial={{
+              opacity: 0,
+              height: 0,
+            }}
+            animate={{
+              opacity: 1,
+              height: "auto",
+            }}
+            exit={{
+              opacity: 0,
+              height: 0,
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+            }}
+            className="md:hidden bg-background/95 backdrop-blur-md border-t border-border"
+          >
+            <div className="px-6 py-6 space-y-4">
+              {navigationLinks.map((link) => (
                 <button
-                  type="button"
-                  onClick={() => setLanguage("vi")}
-                  className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                    language === "vi"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground"
-                  }`}
+                  key={link.name}
+                  onClick={() => handleLinkClick(link.href)}
+                  className="block w-full text-left text-foreground hover:text-primary py-3 text-lg font-medium transition-colors duration-200"
+                  style={{
+                    fontFamily: "Figtree, sans-serif",
+                    fontWeight: "400",
+                  }}
                 >
-                  🇻🇳 VI
+                  <span>{link.name}</span>
                 </button>
+              ))}
+              <div className="pt-4 border-t border-border">
                 <button
-                  type="button"
-                  onClick={() => setLanguage("en")}
-                  className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                    language === "en"
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground"
-                  }`}
+                  onClick={() => handleLinkClick("#contact")}
+                  className="w-full bg-[#156d95] text-white px-[18px] py-[15px] rounded-full text-base font-semibold hover:bg-[#156d95]/90 transition-all duration-200"
+                  style={{
+                    fontFamily: "Plus Jakarta Sans, sans-serif",
+                  }}
                 >
-                  🇺🇸 EN
+                  <span>Start Free Trial</span>
                 </button>
               </div>
             </div>
-            <Link href="/inbox" onClick={() => setOpen(false)}>
-              <Button variant="outline" className="w-full">
-                {t.inbox}
-              </Button>
-            </Link>
-            <Link href="/buddy-dashboard" onClick={() => setOpen(false)}>
-              <Button variant="outline" className="w-full">
-                {t.findTrips}
-              </Button>
-            </Link>
-            <Link href="/admin" onClick={() => setOpen(false)}>
-              <Button className="w-full">{t.dashboard}</Button>
-            </Link>
-          </div>
-
-          <div className="mt-auto p-4 text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Bonddy. All rights reserved.
-          </div>
-        </div>
-      </aside> */}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
-}
+};

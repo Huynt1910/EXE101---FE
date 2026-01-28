@@ -1,8 +1,6 @@
 "use client";
-import Section from "../layout/Section";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { BookText } from "lucide-react";
 import Image from "next/image";
 import { useLanguage } from "@/components/share/AppProviders";
 

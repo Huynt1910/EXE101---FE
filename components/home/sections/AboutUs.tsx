@@ -2,7 +2,6 @@
 
 import { Card } from "@/components/ui/card";
 import { getWhyChooseUs } from "@/lib/data/whyChooseUs";
-import Section from "../layout/Section";
 import { useLanguage } from "@/components/share/AppProviders";
 
 export default function AboutUs() {
