@@ -47,16 +47,14 @@ export function Header() {
             </Link>
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden md:block pointer-events-auto">
-            <Button asChild className="...">
+          {/* CTA Buttons */}
+          <div className="hidden md:flex items-center gap-3 pointer-events-auto">
+            <Button asChild>
               <Link href="/login">Log in</Link>
             </Button>
-          </div>
 
-          <div className="hidden md:block pointer-events-auto">
-            <Button asChild className="...">
-              <Link href="/login">Sign up</Link>
+            <Button asChild variant="secondary">
+              <Link href="/signup">Sign up</Link>
             </Button>
           </div>
 
