@@ -1,4 +1,4 @@
-import type { Language } from "@/lib/i18n";
+import type { Language } from "@/i18n/config";
 
 export interface Destination {
   id: number;
@@ -93,3 +93,4 @@ const feedbacksByLang: Record<Language, Testimonial[]> = {
 export function getFeedbacks(language: Language) {
   return feedbacksByLang[language];
 }
+

@@ -4,19 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { AnimatedText } from "@/components/animations/animated-text";
-// import Link from "next/link"; // nếu muốn link thật
+import { useLanguage } from "@/components/common/AppProviders";
+import { getHomepageContent } from "@/i18n";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const { language } = useLanguage();
+  const t = getHomepageContent(language).hero;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting)
+          if (entry.isIntersecting) {
             entry.target.classList.add("animate-fade-up");
+          }
         });
       },
       { threshold: 0.1 },
@@ -48,7 +52,7 @@ export function Hero() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-screen flex items-center overflow-hidden pt-20"
+      className="relative h-screen flex items-center overflow-hidden pt-20"
     >
       <div
         ref={imageContainerRef}
@@ -60,65 +64,47 @@ export function Hero() {
       >
         <img
           src="/hero.png"
-          alt="Travel in Vietnam with a local buddy"
+          alt={t.imageAlt}
           className="w-full h-full object-cover animate-zoom-in"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-foreground/60 via-foreground/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-foreground/90 via-foreground/70 to-transparent" />
       </div>
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 py-20 lg:py-32 w-full">
         <div className="max-w-2xl">
-          <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-background font-medium mb-6">
-            Travel with a local in Vietnam
+          <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-primary-foreground font-medium mb-6">
+            {t.eyebrow}
           </p>
 
-          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium leading-[1.1] text-background text-balance mb-8">
-            <AnimatedText text="Meet your" delay={0.2} />
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium leading-[1.1] text-primary-foreground text-balance mb-8">
+            <AnimatedText text={t.titleLine1} delay={0.2} />
             <br />
             <span className="text-accent">
-              <AnimatedText text="local buddy." delay={0.6} />
+              <AnimatedText text={t.titleLine2} delay={0.6} />
             </span>
             <br />
           </h1>
 
-          <p className="reveal opacity-0 animation-delay-400 text-lg text-background/90 leading-relaxed mb-10 md:text-base">
-            Tell us your interests and schedule. A verified local buddy crafts a
-            personalized itinerary, recommends real experiences, and supports
-            you in real time—right in chat.
+          <p className="reveal opacity-0 animation-delay-400 text-lg text-primary-foreground/90 leading-relaxed mb-10 md:text-base">
+            {t.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               size="lg"
-              className="bg-primary text-primary-foreground cursor-pointer hover:bg-primary/90 rounded-full px-8 py-6 text-base group"
-              // asChild
+              className="bg-accent text-primary-foreground cursor-pointer hover:bg-accent/90 rounded-full px-8 py-6 text-base group"
             >
-              {/* <Link href="/trip-request"> */}
-              Start your journey
+              {t.primaryCta}
               <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              {/* </Link> */}
             </Button>
 
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full cursor-pointer px-8 py-6 text-base border-background/30 hover:bg-background/10 text-background bg-transparent backdrop-blur-sm"
-              // asChild
+              className="rounded-full cursor-pointer px-8 py-6 text-primary-foreground border-background/30 hover:bg-background/10 bg-transparent backdrop-blur-sm"
             >
-              {/* <Link href="/#how-it-works"> */}
-              How it works
-              {/* </Link> */}
+              {t.secondaryCta}
             </Button>
-
-            {/* Optional: CTA cho Buddy (nếu landing chung) */}
-            {/* <Button
-              size="lg"
-              variant="ghost"
-              className="rounded-full px-6 py-6 text-base text-background hover:bg-background/10"
-              asChild
-            >
-              <Link href="/buddy/apply">Become a buddy</Link>
-            </Button> */}
           </div>
         </div>
       </div>

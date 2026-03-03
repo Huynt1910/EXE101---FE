@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { isLanguage, type Language } from "@/lib/i18n";
+import { isLanguage, type Language } from "@/i18n/config";
 
 type LanguageContextValue = {
   language: Language;
@@ -50,3 +50,4 @@ export default function AppProviders({
 }) {
   return <LanguageProvider>{children}</LanguageProvider>;
 }
+

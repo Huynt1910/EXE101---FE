@@ -5,39 +5,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
 import Link from "next/link";
-
-const highlights = [
-  {
-    name: "Personalized itinerary",
-    description:
-      "Share your dates, interests, and pace. A local buddy designs a trip plan that matches your style—no generic tours.",
-    image: "/images/highlight-itinerary.png", // có thể thay sau
-    tag: "Personalized",
-    href: "/trip-request",
-    cta: "Create trip request",
-  },
-  {
-    name: "Verified local buddies",
-    description:
-      "Choose buddies by city and language. Profiles are reviewed to keep the community safe and high-quality.",
-    image: "/images/highlight-verified.png",
-    tag: "Verified",
-    href: "/buddies",
-    cta: "Browse buddies",
-  },
-  {
-    name: "Chat & real-time support",
-    description:
-      "Refine your plan in chat, ask local questions, and get practical tips before and during the trip.",
-    image: "/images/highlight-chat.png",
-    tag: "In chat",
-    href: "/how-it-works",
-    cta: "How it works",
-  },
-];
+import { useLanguage } from "@/components/common/AppProviders";
+import { getHomepageContent } from "@/i18n";
 
 export function SolutionSection() {
   const sectionRef = useRef<HTMLElement>(null);
+  const { language } = useLanguage();
+  const t = getHomepageContent(language).solution;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -61,25 +35,24 @@ export function SolutionSection() {
     <section
       ref={sectionRef}
       id="why-bonddy"
-      className="py-24 lg:py-32 bg-muted/30"
+      className="py-24 lg:py-32 bg-background"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-16 lg:mb-20">
           <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-accent font-medium mb-4">
-            Why Bonddy
+            {t.eyebrow}
           </p>
           <ScrollBlurText
-            text="Travel the local way"
+            text={t.title}
             className="font-serif text-3xl text-foreground text-balance mb-6 md:text-7xl font-light"
           />
           <p className="reveal opacity-0 animation-delay-400 text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Personalized planning, verified buddies, and real-time support—so
-            you can explore with confidence.
+            {t.description}
           </p>
         </div>
 
         <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide lg:grid lg:grid-cols-3 lg:gap-8 lg:overflow-visible -mx-6 px-6 lg:mx-0">
-          {highlights.map((item, index) => (
+          {t.highlights.map((item, index) => (
             <div
               key={item.name}
               className={`reveal opacity-0 ${
@@ -129,3 +102,4 @@ export function SolutionSection() {
     </section>
   );
 }
+

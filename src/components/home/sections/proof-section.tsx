@@ -3,34 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import { FlaskConical, Leaf, Shield, Users } from "lucide-react";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
+import { useLanguage } from "@/components/common/AppProviders";
+import { getHomepageContent } from "@/i18n";
 
-const stats = [
-  { icon: Users, value: "50+", label: "Verified buddies" },
-  { icon: Shield, value: "100%", label: "Buddy screening" },
-  { icon: FlaskConical, value: "2h", label: "Avg response time" },
-  { icon: Leaf, value: "6+", label: "Cities covered" },
-];
-
-const principles = [
-  {
-    number: "01",
-    title: "Personalized itinerary",
-    description:
-      "Tell us your city, dates, budget, and interests. Your buddy crafts a plan that matches your pace — food, hidden gems, and must-sees.",
-  },
-  {
-    number: "02",
-    title: "Chat before you decide",
-    description:
-      "Message your buddy to ask questions, adjust the plan, and align expectations — so you feel confident before confirming anything.",
-  },
-  {
-    number: "03",
-    title: "Verified buddies, safer trips",
-    description:
-      "We screen buddies and collect reviews after completed trips. If anything goes wrong, Bonddy support is here to help.",
-  },
-];
+const statIcons = {
+  users: Users,
+  shield: Shield,
+  flask: FlaskConical,
+  leaf: Leaf,
+} as const;
 
 export function ProofSection() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -38,6 +19,8 @@ export function ProofSection() {
     [key: string]: number;
   }>({});
   const [hasAnimated, setHasAnimated] = useState(false);
+  const { language } = useLanguage();
+  const t = getHomepageContent(language).proof;
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -47,7 +30,7 @@ export function ProofSection() {
             entry.target.classList.add("animate-fade-up");
             if (!hasAnimated) {
               setHasAnimated(true);
-              stats.forEach((stat) => {
+              t.stats.forEach((stat) => {
                 animateCounter(stat.value, stat.label);
               });
             }
@@ -61,7 +44,7 @@ export function ProofSection() {
     elements?.forEach((el) => observer.observe(el));
 
     return () => observer.disconnect();
-  }, [hasAnimated]);
+  }, [hasAnimated, t.stats]);
 
   const animateCounter = (value: string, label: string) => {
     const numericValue = Number.parseInt(value.replace(/[^0-9]/g, ""));
@@ -93,6 +76,7 @@ export function ProofSection() {
     if (originalValue.includes("%")) return `${animatedValue}%`;
     if (originalValue.includes("K+")) return `${animatedValue}K+`;
     if (originalValue.includes("+")) return `${animatedValue}+`;
+    if (originalValue.toLowerCase().includes("h")) return `${animatedValue}h`;
     return `${animatedValue}`;
   };
 
@@ -103,41 +87,42 @@ export function ProofSection() {
       className="py-24 lg:py-32 bg-primary text-primary-foreground"
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Section Header */}
         <div className="text-center mb-16 lg:mb-20">
           <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-primary-foreground/70 font-medium mb-4">
-            Our Approach
+            {t.eyebrow}
           </p>
           <ScrollBlurText
-            text="Science in service of life"
+            text={t.title}
             className="font-serif text-3xl md:text-4xl text-primary-foreground text-balance mb-6 lg:text-7xl font-light"
           />
           <p className="reveal opacity-0 animation-delay-400 text-lg text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed">
-            We believe in caring science that respects natural balances while
-            providing concrete and effective solutions.
+            {t.description}
           </p>
         </div>
 
-        {/* Stats Grid */}
         <div className="reveal opacity-0 animation-delay-400 grid grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="w-14 h-14 rounded-2xl bg-primary-foreground/10 flex items-center justify-center mx-auto mb-4">
-                <stat.icon className="w-6 h-6 text-primary-foreground" />
+          {t.stats.map((stat) => {
+            const Icon = statIcons[stat.icon as keyof typeof statIcons];
+            return (
+              <div key={stat.label} className="text-center">
+                <div className="w-14 h-14 rounded-2xl bg-primary-foreground/10 flex items-center justify-center mx-auto mb-4">
+                  {Icon ? (
+                    <Icon className="w-6 h-6 text-primary-foreground" />
+                  ) : null}
+                </div>
+                <div className="font-serif text-4xl md:text-5xl font-medium text-primary-foreground mb-2">
+                  {formatValue(stat.value, animatedValues[stat.label])}
+                </div>
+                <div className="text-sm text-primary-foreground/70">
+                  {stat.label}
+                </div>
               </div>
-              <div className="font-serif text-4xl md:text-5xl font-medium text-primary-foreground mb-2">
-                {formatValue(stat.value, animatedValues[stat.label])}
-              </div>
-              <div className="text-sm text-primary-foreground/70">
-                {stat.label}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Principles */}
         <div className="grid lg:grid-cols-3 gap-8 lg:gap-12">
-          {principles.map((principle, index) => (
+          {t.principles.map((principle, index) => (
             <div
               key={principle.number}
               className={`reveal opacity-0 ${index === 1 ? "animation-delay-200" : index === 2 ? "animation-delay-400" : ""}`}
@@ -160,3 +145,4 @@ export function ProofSection() {
     </section>
   );
 }
+

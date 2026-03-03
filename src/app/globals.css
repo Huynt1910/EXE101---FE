@@ -5,25 +5,27 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated primary color to teal for travel marketplace aesthetic */
-  --primary: oklch(0.5 0.15 200);
+  /* Primary color */
+  --primary: #0d3b66;
   --primary-foreground: oklch(1 0 0);
 
-  /* Neutrals */
-  --background: oklch(0.98 0.01 45);
-  --foreground: oklch(0.15 0.02 45);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 45);
+  /* Secondary color */
+  --secondary: oklch(1 0 0);
+  --secondary-foreground: #0d3b66;
 
-  /* Updated accent to orange for CTAs */
-  --accent: oklch(0.65 0.2 35);
-  --accent-foreground: oklch(1 0 0);
-  --secondary: oklch(0.92 0.02 45);
-  --secondary-foreground: oklch(0.15 0.02 45);
-
-  /* Muted */
+  /* Muted color*/
   --muted: oklch(0.92 0.01 45);
   --muted-foreground: oklch(0.5 0.02 45);
+
+  /* Accent color */
+  --accent: oklch(0.65 0.2 35);
+  --accent-foreground: #faf0ca;
+
+  /* Neutrals */
+  --background: #faf0ca;
+  --foreground: #0d3b66;
+  --card: #fff9e6;
+  --card-foreground: #e85e77;
 
   /* UI Elements */
   --popover: oklch(1 0 0);
@@ -52,6 +54,22 @@
   --sidebar-ring: oklch(0.5 0.15 200);
 
   --radius: 0.625rem;
+
+  /* Typography scale */
+  --text-display: clamp(2rem, 1.6rem + 1.4vw, 3rem);
+  --text-h1: clamp(1.75rem, 1.5rem + 0.9vw, 2.375rem);
+  --text-h2: clamp(1.5rem, 1.35rem + 0.6vw, 2rem);
+  --text-h3: clamp(1.25rem, 1.15rem + 0.4vw, 1.5rem);
+  --text-title: 1.125rem;
+  --text-body-lg: 1.0625rem;
+  --text-body: 1rem;
+  --text-body-sm: 0.9375rem;
+  --text-caption: 0.8125rem;
+
+  --leading-tight: 1.2;
+  --leading-title: 1.35;
+  --leading-body: 1.7;
+  --leading-relaxed: 1.8;
 }
 
 .dark {
@@ -151,8 +169,8 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    font-size: 16px;
-    line-height: 1.7;
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
     letter-spacing: 0.01em;
   }
   h1,
@@ -161,11 +179,27 @@
     font-family: var(--font-heading);
     letter-spacing: 0.01em;
   }
+  h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-tight);
+  }
+  h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-title);
+  }
+  h3 {
+    font-size: var(--text-h3);
+    line-height: var(--leading-title);
+  }
+  p,
+  li {
+    line-height: var(--leading-body);
+  }
 }
 
 @media (min-width: 1024px) {
   body {
-    font-size: 17px;
+    font-size: var(--text-body-lg);
   }
 
   img,
@@ -178,6 +212,56 @@
 }
 
 @layer components {
+  .type-display {
+    font-size: var(--text-display);
+    line-height: var(--leading-tight);
+    font-family: var(--font-heading);
+    letter-spacing: 0.01em;
+  }
+
+  .type-h1 {
+    font-size: var(--text-h1);
+    line-height: var(--leading-tight);
+    font-family: var(--font-heading);
+  }
+
+  .type-h2 {
+    font-size: var(--text-h2);
+    line-height: var(--leading-title);
+    font-family: var(--font-heading);
+  }
+
+  .type-h3 {
+    font-size: var(--text-h3);
+    line-height: var(--leading-title);
+    font-family: var(--font-heading);
+  }
+
+  .type-title {
+    font-size: var(--text-title);
+    line-height: var(--leading-title);
+  }
+
+  .type-body-lg {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+  }
+
+  .type-body {
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+
+  .type-body-sm {
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+  }
+
+  .type-caption {
+    font-size: var(--text-caption);
+    line-height: var(--leading-relaxed);
+  }
+
   .social-btn {
     @apply flex items-center justify-center gap-2 px-8 py-3 rounded-lg font-medium
       transition-all duration-200 hover:opacity-90 hover:scale-[1.02];

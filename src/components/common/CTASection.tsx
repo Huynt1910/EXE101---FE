@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useLanguage } from "@/components/AppProviders";
+import { useLanguage } from "@/components/common/AppProviders";
 
 import {
   AlertDialog,
@@ -262,3 +262,4 @@ export default function CTALeadFormSection() {
     </section>
   );
 }
+

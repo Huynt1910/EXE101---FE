@@ -1,5 +1,5 @@
 import { BookOpen, Award, Clock } from "lucide-react";
-import type { Language } from "@/lib/i18n";
+import type { Language } from "@/i18n/config";
 
 export interface WhyChooseUs {
   icon: any;
@@ -49,3 +49,4 @@ const whyChooseUsByLang: Record<Language, WhyChooseUs[]> = {
 export function getWhyChooseUs(language: Language) {
   return whyChooseUsByLang[language];
 }
+

@@ -1,0 +1,159 @@
+{
+  "hero": {
+    "imageAlt": "Du lich Viet Nam cung ban dong hanh dia phuong",
+    "eyebrow": "Du lich cung nguoi ban dia phuong tai Viet Nam",
+    "titleLine1": "Gap",
+    "titleLine2": "ban dong hanh dia phuong.",
+    "description": "Chia se so thich va lich trinh cua ban. Ban dong hanh da xac minh se len ke hoach ca nhan hoa, goi y trai nghiem thuc te va ho tro ban theo thoi gian thuc ngay trong khung chat.",
+    "primaryCta": "Bat dau hanh trinh",
+    "secondaryCta": "Cach hoat dong"
+  },
+  "vietnamHighlights": {
+    "buttonText": "Kham pha",
+    "buttonHref": "/places",
+    "eyebrow": "Diem nhan Viet Nam",
+    "title": "Kham pha nhung diem noi bat cua Viet Nam.",
+    "subtitle": "Tu am thuc duong pho den nghi duong tren nui, trai nghiem van hoa, thien nhien va nhip song ban dia.",
+    "topRowHighlights": [
+      { "name": "Ben Thanh", "image": "/places/ben-thanh.png" },
+      { "name": "Landmark 81", "image": "/places/landmark-81.png" },
+      { "name": "Da Nang", "image": "/places/da-nang.png" },
+      { "name": "Vinh Ha Long", "image": "/places/vinh-ha-long.png" },
+      { "name": "Da Lat", "image": "/places/da-lat.png" },
+      { "name": "Sa Pa", "image": "/places/sapa.png" },
+      { "name": "Ha Noi", "image": "/places/ha-noi.png" },
+      { "name": "Nha Trang", "image": "/places/nha-trang.png" },
+      { "name": "Hoi An", "image": "/places/hoi-an.png" }
+    ],
+    "bottomRowHighlights": [
+      { "name": "Pho", "image": "/foods/pho.png" },
+      { "name": "Banh mi", "image": "/foods/banh-mi.png" },
+      { "name": "Nem nuong", "image": "/foods/nem-nuong.png" },
+      { "name": "Banh xeo", "image": "/foods/banh-xeo.png" },
+      { "name": "Com tam", "image": "/foods/com-tam.png" },
+      { "name": "Bun dau", "image": "/foods/bun-dau.png" },
+      { "name": "Banh cuon", "image": "/foods/banh-cuon.png" },
+      { "name": "Sup cua", "image": "/foods/sup-cua.png" },
+      { "name": "Bun thit nuong", "image": "/foods/bun-thit-nuong.png" }
+    ]
+  },
+  "proof": {
+    "eyebrow": "Cach tiep can",
+    "title": "Nen tang dang tin cay cho chuyen di cua ban",
+    "description": "Bonddy ket hop lap ke hoach ca nhan hoa, ket noi nhanh va quy trinh xac minh de ban yen tam kham pha.",
+    "stats": [
+      { "icon": "users", "value": "50+", "label": "Buddy da xac minh" },
+      { "icon": "shield", "value": "100%", "label": "Ty le sang loc profile" },
+      { "icon": "flask", "value": "2h", "label": "Thoi gian phan hoi trung binh" },
+      { "icon": "leaf", "value": "6+", "label": "Thanh pho ho tro" }
+    ],
+    "principles": [
+      {
+        "number": "01",
+        "title": "Lich trinh ca nhan hoa",
+        "description": "Cho chung toi biet diem den, ngay di, ngan sach va so thich. Buddy se tao ke hoach phu hop voi toc do va phong cach cua ban."
+      },
+      {
+        "number": "02",
+        "title": "Trao doi truoc khi dat",
+        "description": "Nhan tin voi buddy de hoi chi tiet, dieu chinh lich trinh va thong nhat ky vong truoc khi xac nhan."
+      },
+      {
+        "number": "03",
+        "title": "Buddy da xac minh, di an toan hon",
+        "description": "Chung toi sang loc buddy va thu thap danh gia sau moi chuyen di. Neu co van de, doi ngu Bonddy luon san sang ho tro."
+      }
+    ]
+  },
+  "about": {
+    "eyebrow": "VE BONDDY",
+    "eyebrowHint": "Gap doi ngu va su menh cua chung toi",
+    "headline": "Du lich nhu nguoi ban dia, cung buddy hieu thanh pho.",
+    "subheadline": "Bonddy ket noi ban voi nguoi ban dia da xac minh de len lich trinh ca nhan hoa, chia se diem hay va dong hanh truoc, trong chuyen di.",
+    "description": "Thay vi tour dai tra, ban co trai nghiem that, mon ngon that va goi y that, dua tren nhip do va so thich rieng.",
+    "primaryButtonText": "Doc cau chuyen cua chung toi",
+    "primaryButtonHref": "/about-us",
+    "secondaryButtonText": "Xem danh sach buddy",
+    "secondaryButtonHref": "/buddies",
+    "videoSrc": "/videos/tvc.mp4"
+  },
+  "testimonials": {
+    "eyebrow": "Cam nhan",
+    "title": "Du khach noi gi ve Bonddy",
+    "items": [
+      {
+        "quote": "Toi da co chuyen di rat de chiu vi lich trinh duoc ca nhan hoa dung nhu mong muon.",
+        "author": "Minh A.",
+        "role": "Da su dung 8 thang",
+        "avatar": "/placeholder.svg?height=80&width=80"
+      },
+      {
+        "quote": "Ban buddy phan hoi nhanh, goi y rat thuc te va de ap dung ngay tai diem den.",
+        "author": "Linh T.",
+        "role": "Da su dung 1 nam",
+        "avatar": "/placeholder.svg?height=80&width=80"
+      },
+      {
+        "quote": "Toi danh gia cao quy trinh xac minh va cach ho tro trong suot chuyen di.",
+        "author": "Dr. Hoa M.",
+        "role": "Bac si",
+        "avatar": "/placeholder.svg?height=80&width=80"
+      },
+      {
+        "quote": "Chi can nhan tin la co nguoi huong dan ngay, tiet kiem rat nhieu thoi gian tu tim hieu.",
+        "author": "Quang P.",
+        "role": "Da su dung 6 thang",
+        "avatar": "/placeholder.svg?height=80&width=80"
+      },
+      {
+        "quote": "Chuyen di lan dau den Viet Nam cua toi tro nen de dang va tu tin hon rat nhieu.",
+        "author": "An B.",
+        "role": "Da su dung 10 thang",
+        "avatar": "/placeholder.svg?height=80&width=80"
+      }
+    ]
+  },
+  "solution": {
+    "eyebrow": "Vi sao Bonddy",
+    "title": "Du lich theo cach ban dia",
+    "description": "Len ke hoach ca nhan hoa, buddy da xac minh, va ho tro thoi gian thuc de ban kham pha tu tin hon.",
+    "highlights": [
+      {
+        "name": "Lich trinh ca nhan hoa",
+        "description": "Chia se ngay di, so thich va nhip do cua ban. Buddy se thiet ke ke hoach phu hop, khong dai tra.",
+        "image": "/images/highlight-itinerary.png",
+        "tag": "Ca nhan hoa",
+        "href": "/trip-request",
+        "cta": "Tao yeu cau chuyen di"
+      },
+      {
+        "name": "Buddy dia phuong da xac minh",
+        "description": "Chon buddy theo thanh pho va ngon ngu. Moi profile deu duoc kiem duyet de dam bao chat luong.",
+        "image": "/images/highlight-verified.png",
+        "tag": "Da xac minh",
+        "href": "/buddies",
+        "cta": "Xem buddy"
+      },
+      {
+        "name": "Chat va ho tro thoi gian thuc",
+        "description": "Dieu chinh lich trinh qua chat, hoi dap nhanh va nhan meo thuc te truoc va trong chuyen di.",
+        "image": "/images/highlight-chat.png",
+        "tag": "Trong chat",
+        "href": "/how-it-works",
+        "cta": "Cach hoat dong"
+      }
+    ]
+  },
+  "buddiesForm": {
+    "imageAlt": "Du lich Viet Nam cung buddy dia phuong",
+    "eyebrow": "Tro thanh Local Buddy",
+    "title": "Bien kien thuc ban dia thanh nhung chuyen di dang nho",
+    "paragraph1": "Tao lich trinh ca nhan hoa, goi y trai nghiem thuc te va ho tro du khach theo thoi gian thuc trong khung chat.",
+    "paragraph2": "Chung toi kiem duyet moi ho so de dam bao cong dong an toan va chat luong. Tu chon lich ranh, khu vuc va ngon ngu de nhan yeu cau phu hop.",
+    "meta": "Lich linh hoat - Thu nhap theo booking - Ket noi du khach quoc te",
+    "primaryCta": "Dang ky tro thanh Buddy",
+    "primaryHref": "/buddy/apply",
+    "secondaryCta": "Cach hoat dong",
+    "secondaryHref": "/how-it-works"
+  }
+}

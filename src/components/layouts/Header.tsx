@@ -14,7 +14,7 @@ export function Header() {
         <div className="flex items-center justify-between h-20 px-6 lg:px-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-serif text-foreground text-2xl font-normal">
+            <span className="font-serif text-accent text-2xl font-normal">
               Bonddy
             </span>
           </Link>
@@ -55,6 +55,10 @@ export function Header() {
 
             <Button asChild variant="secondary">
               <Link href="/signup">Sign up</Link>
+            </Button>
+
+            <Button asChild variant="secondary">
+              <Link href="/profile">Profile</Link>
             </Button>
           </div>
 

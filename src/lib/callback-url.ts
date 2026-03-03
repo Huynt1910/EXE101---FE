@@ -18,7 +18,7 @@ export function normalizeCallbackUrl(input?: string | null, fallback = "/") {
 
 export function buildAuthUrl(
   path: "/login" | "/signup" | "/forgot-password",
-  callbackUrl: string
+  callbackUrl: string,
 ) {
   return `${path}?callbackUrl=${encodeURIComponent(callbackUrl)}`;
 }

@@ -1,0 +1,35 @@
+{
+  "hero": {
+    "title1": "Frequently Asked Questions",
+    "title2": "when using",
+    "brand": "Bonddy"
+  },
+  "search": {
+    "placeholder": "Search questions..."
+  },
+  "empty": {
+    "title": "No matching questions"
+  },
+  "items": [
+    {
+      "q": "What is Bonddy and how does it work?",
+      "a": "Bonddy connects you with local buddies to design a personalized itinerary, quick advice, and support during your trip."
+    },
+    {
+      "q": "Can I request a trip based on my interests?",
+      "a": "Yes. Share your interests, timing, and budget and we will suggest a tailored plan."
+    },
+    {
+      "q": "Is the service suitable for families or couples?",
+      "a": "Absolutely. We optimize itineraries for different group sizes and needs."
+    },
+    {
+      "q": "Is my personal data safe?",
+      "a": "Yes. We only use your details for consultation and never share them with third parties."
+    },
+    {
+      "q": "How do I get started?",
+      "a": "Leave your info in the consultation form and we will contact you within 24 hours."
+    }
+  ]
+}
