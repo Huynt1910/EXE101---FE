@@ -13,6 +13,9 @@ export interface LoginFormProps {
   onForgotPassword?: () => void;
   onSignUp?: () => void;
 
+  isLoading?: boolean;
+  error?: string | null;
+
   centered?: boolean;
   mode?: "page" | "modal";
 }
@@ -21,15 +24,21 @@ export default function LoginForm({
   onSubmit,
   onForgotPassword,
   onSignUp,
+  isLoading = false,
+  error = null,
   centered = false,
   mode = "page",
-}: LoginFormProps) {
+}: Readonly<LoginFormProps>) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const isPage = mode === "page";
-  const containerAlign = isPage ? "text-left" : centered ? "text-center" : "text-left";
+  let containerAlign = "text-left";
+
+  if (!isPage && centered) {
+    containerAlign = "text-center";
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +120,12 @@ export default function LoginForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {error && (
+          <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-3">
+            <p className="text-sm text-destructive">{error}</p>
+          </div>
+        )}
+
         <input
           type="email"
           placeholder="Email"
@@ -163,8 +178,8 @@ export default function LoginForm({
           </button>
         </div>
 
-        <button type="submit" className="btn-primary w-full h-12 sm:h-14 text-md">
-          Log in
+        <button type="submit" className="btn-primary w-full h-12 sm:h-14 text-md" disabled={isLoading}>
+          {isLoading ? "Logging in..." : "Log in"}
         </button>
       </form>
 

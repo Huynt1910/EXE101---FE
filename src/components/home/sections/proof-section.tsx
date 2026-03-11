@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FlaskConical, Leaf, Shield, Users } from "lucide-react";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 import { getHomepageContent } from "@/i18n";
 
 const statIcons = {
