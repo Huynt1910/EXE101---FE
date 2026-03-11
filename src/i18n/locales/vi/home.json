@@ -121,7 +121,7 @@
       {
         "name": "Lich trinh ca nhan hoa",
         "description": "Chia se ngay di, so thich va nhip do cua ban. Buddy se thiet ke ke hoach phu hop, khong dai tra.",
-        "image": "/images/highlight-itinerary.png",
+        "image": "/placeholder.svg",
         "tag": "Ca nhan hoa",
         "href": "/trip-request",
         "cta": "Tao yeu cau chuyen di"
@@ -129,7 +129,7 @@
       {
         "name": "Buddy dia phuong da xac minh",
         "description": "Chon buddy theo thanh pho va ngon ngu. Moi profile deu duoc kiem duyet de dam bao chat luong.",
-        "image": "/images/highlight-verified.png",
+        "image": "/placeholder.svg",
         "tag": "Da xac minh",
         "href": "/buddies",
         "cta": "Xem buddy"
@@ -137,7 +137,7 @@
       {
         "name": "Chat va ho tro thoi gian thuc",
         "description": "Dieu chinh lich trinh qua chat, hoi dap nhanh va nhan meo thuc te truoc va trong chuyen di.",
-        "image": "/images/highlight-chat.png",
+        "image": "/placeholder.svg",
         "tag": "Trong chat",
         "href": "/how-it-works",
         "cta": "Cach hoat dong"

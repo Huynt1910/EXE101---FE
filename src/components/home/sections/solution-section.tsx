@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
 import Link from "next/link";
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 import { getHomepageContent } from "@/i18n";
 
 export function SolutionSection() {

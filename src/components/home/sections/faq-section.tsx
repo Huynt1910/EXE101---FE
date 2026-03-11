@@ -1,6 +1,6 @@
 "use client";
 
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 import {
   Accordion,
   AccordionContent,
