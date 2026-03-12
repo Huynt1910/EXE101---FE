@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { AnimatedText } from "@/components/animations/animated-text";
@@ -91,11 +92,14 @@ export function Hero() {
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
+              asChild
               size="lg"
               className="bg-accent text-primary-foreground cursor-pointer hover:bg-accent/90 rounded-full px-8 py-6 text-base group"
             >
-              {t.primaryCta}
-              <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <Link href="/trip-request">
+                {t.primaryCta}
+                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
 
             <Button

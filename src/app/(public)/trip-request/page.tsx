@@ -1,6 +1,7 @@
-﻿"use client";
+"use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CalendarDays,
   MapPin,
@@ -12,6 +13,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  clearTripRequestDraft,
+  createStoredTripRequest,
+  defaultTripRequestFormData,
+  getTripRequestDraft,
+  saveLatestTripRequest,
+  saveTripRequestDraft,
+  type TripRequestFormData,
+} from "@/lib/trip-request";
 
 const TRIP_STYLES = [
   "Food",
@@ -30,19 +40,54 @@ const TOP_DESTINATIONS = [
 ];
 
 export default function TripRequestPage() {
-  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  const router = useRouter();
+  const [formData, setFormData] = useState<TripRequestFormData>(
+    defaultTripRequestFormData,
+  );
 
   const selectedLabel = useMemo(() => {
-    if (selectedStyles.length === 0) return "No style selected";
-    return selectedStyles.join(", ");
-  }, [selectedStyles]);
+    if (formData.travelStyles.length === 0) return "No style selected";
+    return formData.travelStyles.join(", ");
+  }, [formData.travelStyles]);
+
+  useEffect(() => {
+    const draft = getTripRequestDraft();
+    if (!draft) return;
+
+    setFormData({
+      ...defaultTripRequestFormData,
+      ...draft,
+    });
+  }, []);
+
+  const updateField = <K extends keyof TripRequestFormData>(
+    key: K,
+    value: TripRequestFormData[K],
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   const toggleStyle = (style: string) => {
-    setSelectedStyles((prev) =>
-      prev.includes(style)
-        ? prev.filter((item) => item !== style)
-        : [...prev, style],
-    );
+    setFormData((prev) => ({
+      ...prev,
+      travelStyles: prev.travelStyles.includes(style)
+        ? prev.travelStyles.filter((item) => item !== style)
+        : [...prev.travelStyles, style],
+    }));
+  };
+
+  const handleSubmit = () => {
+    const request = createStoredTripRequest(formData);
+    saveLatestTripRequest(request);
+    clearTripRequestDraft();
+    router.push("/trip-request/success");
+  };
+
+  const handleSaveDraft = () => {
+    saveTripRequestDraft(formData);
   };
 
   return (
@@ -86,6 +131,10 @@ export default function TripRequestPage() {
               <Input
                 placeholder="Example: Da Nang, Hoi An"
                 className="border-0 px-0 shadow-none"
+                value={formData.destination}
+                onChange={(event) =>
+                  updateField("destination", event.target.value)
+                }
               />
             </label>
 
@@ -94,7 +143,12 @@ export default function TripRequestPage() {
                 <CalendarDays className="h-3.5 w-3.5" />
                 Start date
               </span>
-              <Input type="date" className="border-0 px-0 shadow-none" />
+              <Input
+                type="date"
+                className="border-0 px-0 shadow-none"
+                value={formData.startDate}
+                onChange={(event) => updateField("startDate", event.target.value)}
+              />
             </label>
 
             <label className="rounded-xl border border-border p-3">
@@ -102,7 +156,12 @@ export default function TripRequestPage() {
                 <CalendarDays className="h-3.5 w-3.5" />
                 End date
               </span>
-              <Input type="date" className="border-0 px-0 shadow-none" />
+              <Input
+                type="date"
+                className="border-0 px-0 shadow-none"
+                value={formData.endDate}
+                onChange={(event) => updateField("endDate", event.target.value)}
+              />
             </label>
 
             <label className="rounded-xl border border-border p-3">
@@ -113,14 +172,19 @@ export default function TripRequestPage() {
               <Input
                 type="number"
                 min={1}
-                defaultValue={2}
+                value={formData.travelers}
                 className="border-0 px-0 shadow-none"
+                onChange={(event) =>
+                  updateField("travelers", Number(event.target.value) || 1)
+                }
               />
             </label>
           </div>
 
           <div className="mt-4 flex justify-end">
-            <Button className="rounded-full px-8">Create request</Button>
+            <Button className="rounded-full px-8" onClick={handleSubmit}>
+              Create request
+            </Button>
           </div>
         </Card>
       </section>
@@ -140,13 +204,25 @@ export default function TripRequestPage() {
                 <span className="text-sm text-muted-foreground">
                   Departure city
                 </span>
-                <Input placeholder="Ho Chi Minh City" />
+                <Input
+                  placeholder="Ho Chi Minh City"
+                  value={formData.departureCity}
+                  onChange={(event) =>
+                    updateField("departureCity", event.target.value)
+                  }
+                />
               </label>
               <label className="space-y-2">
                 <span className="text-sm text-muted-foreground">
                   Budget range (USD)
                 </span>
-                <Input placeholder="500 - 1200" />
+                <Input
+                  placeholder="500 - 1200"
+                  value={formData.budgetRange}
+                  onChange={(event) =>
+                    updateField("budgetRange", event.target.value)
+                  }
+                />
               </label>
               <label className="space-y-2 md:col-span-2">
                 <span className="text-sm text-muted-foreground">
@@ -154,7 +230,7 @@ export default function TripRequestPage() {
                 </span>
                 <div className="flex flex-wrap gap-2">
                   {TRIP_STYLES.map((style) => {
-                    const active = selectedStyles.includes(style);
+                    const active = formData.travelStyles.includes(style);
                     return (
                       <button
                         key={style}
@@ -184,13 +260,21 @@ export default function TripRequestPage() {
                 <Textarea
                   rows={5}
                   placeholder="Tell us your must-visit places, preferred activities, pace, and any special requests..."
+                  value={formData.notes}
+                  onChange={(event) => updateField("notes", event.target.value)}
                 />
               </label>
             </div>
 
             <div className="mt-5 flex flex-wrap gap-3">
-              <Button className="rounded-full px-7">Submit request</Button>
-              <Button variant="outline" className="rounded-full px-7">
+              <Button className="rounded-full px-7" onClick={handleSubmit}>
+                Submit request
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-full px-7"
+                onClick={handleSaveDraft}
+              >
                 Save draft
               </Button>
             </div>
@@ -208,6 +292,7 @@ export default function TripRequestPage() {
                   <button
                     key={item.name}
                     type="button"
+                    onClick={() => updateField("destination", item.name)}
                     className="overflow-hidden rounded-xl border border-border text-left transition hover:shadow-sm"
                   >
                     <img
