@@ -15,26 +15,39 @@ export interface LoginModalProps {
 export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   const router = useRouter();
   const sp = useSearchParams();
-const { sessionQuery, loginMutation } = useAuth();
+  const { sessionQuery, loginMutation } = useAuth();
   const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
 
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
+
   const handleSubmit = (email: string, password: string) => {
-      loginMutation.mutate({ email, password });
+    loginMutation.mutate({ email, password });
   };
 
   const handleSignUp = () => {
-    router.push(buildAuthUrl("/signup", callbackUrl));
+    router.push(buildAuthUrl("/signup", callbackUrl), { scroll: false });
   };
 
   const handleForgotPassword = () => {
-    router.push(buildAuthUrl("/forgot-password", callbackUrl));
+    router.push(buildAuthUrl("/forgot-password", callbackUrl), { scroll: false });
   };
 
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {
-      router.replace(callbackUrl);
+      onClose();
     }
-  }, [sessionQuery.data?.accessToken, callbackUrl, router]);
+  }, [sessionQuery.data?.accessToken, onClose]);
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center p-0 sm:p-6">
       <button
@@ -68,7 +81,7 @@ const { sessionQuery, loginMutation } = useAuth();
             <Image src="/logo_bonddy.png" alt="Bonddy logo" width={68} height={68} priority />
           </div>
 
-          <h2 className="mt-2 text-lg sm:text-xl font-extrabold text-primary">
+          <h2 className="mt-2 text-lg sm:text-2xl font-extrabold text-primary">
             Welcome back
           </h2>
           <p className="text-xs sm:text-sm lg:text-md text-muted-foreground">
