@@ -1,22 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
-import { toast } from "@/components/ui/use-toast";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
 
 export default function LoginPage() {
   const router = useRouter();
   const sp = useSearchParams();
+  const { sessionQuery, loginMutation } = useAuth();
 
   const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
 
   const handleSubmit = (email: string, password: string) => {
-    // demo UI: sau này thay bằng gọi API
-    toast({ title: "Logging in...", description: `Signing in with ${email}` });
-
-    // login xong quay lại đúng trang user muốn tới
-    router.replace(callbackUrl);
+    loginMutation.mutate({ email, password });
   };
 
   const handleSignUp = () => {
@@ -27,12 +25,20 @@ export default function LoginPage() {
     router.push(buildAuthUrl("/forgot-password", callbackUrl));
   };
 
+  useEffect(() => {
+    if (sessionQuery.data?.accessToken) {
+      router.replace(callbackUrl);
+    }
+  }, [sessionQuery.data?.accessToken, callbackUrl, router]);
+
   return (
     <LoginForm
       mode="page"
       onSubmit={handleSubmit}
       onSignUp={handleSignUp}
       onForgotPassword={handleForgotPassword}
+      isLoading={loginMutation.isPending}
+      error={loginMutation.error?.message || null}
     />
   );
 }

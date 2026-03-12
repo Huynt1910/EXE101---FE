@@ -121,7 +121,7 @@
       {
         "name": "Personalized itinerary",
         "description": "Share your dates, interests, and pace. A local buddy designs a trip plan that matches your style without generic tours.",
-        "image": "/images/highlight-itinerary.png",
+        "image": "/placeholder.svg",
         "tag": "Personalized",
         "href": "/trip-request",
         "cta": "Create trip request"
@@ -129,7 +129,7 @@
       {
         "name": "Verified local buddies",
         "description": "Choose buddies by city and language. Profiles are reviewed to keep the community safe and high-quality.",
-        "image": "/images/highlight-verified.png",
+        "image": "/placeholder.svg",
         "tag": "Verified",
         "href": "/buddies",
         "cta": "Browse buddies"
@@ -137,7 +137,7 @@
       {
         "name": "Chat and real-time support",
         "description": "Refine your plan in chat, ask local questions, and get practical tips before and during the trip.",
-        "image": "/images/highlight-chat.png",
+        "image": "/placeholder.svg",
         "tag": "In chat",
         "href": "/how-it-works",
         "cta": "How it works"

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { AnimatedText } from "@/components/animations/animated-text";
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 import { getHomepageContent } from "@/i18n";
 
 export function Hero() {

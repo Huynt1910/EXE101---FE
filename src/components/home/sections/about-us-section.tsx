@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 import { getHomepageContent } from "@/i18n";
 
 export function AboutUsSection() {

@@ -2,21 +2,39 @@
 
 import Image from "next/image";
 import { X } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
+import { useAuth } from "@/features/auth/hooks/useAuth";
+import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
 
 export interface LoginModalProps {
   onClose: () => void;
-  onSubmit?: (email: string, password: string) => void;
-  onForgotPassword?: () => void;
-  onSignUp?: () => void;
 }
 
-export default function LoginModal({
-  onClose,
-  onSubmit,
-  onForgotPassword,
-  onSignUp,
-}: LoginModalProps) {
+export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
+  const router = useRouter();
+  const sp = useSearchParams();
+const { sessionQuery, loginMutation } = useAuth();
+  const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
+
+  const handleSubmit = (email: string, password: string) => {
+      loginMutation.mutate({ email, password });
+  };
+
+  const handleSignUp = () => {
+    router.push(buildAuthUrl("/signup", callbackUrl));
+  };
+
+  const handleForgotPassword = () => {
+    router.push(buildAuthUrl("/forgot-password", callbackUrl));
+  };
+
+  useEffect(() => {
+    if (sessionQuery.data?.accessToken) {
+      router.replace(callbackUrl);
+    }
+  }, [sessionQuery.data?.accessToken, callbackUrl, router]);
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center p-0 sm:p-6">
       <button
@@ -63,9 +81,11 @@ export default function LoginModal({
             <LoginForm
               mode="modal"
               centered={false}
-              onSubmit={onSubmit}
-              onForgotPassword={onForgotPassword}
-              onSignUp={onSignUp}
+              onSubmit={handleSubmit}
+              onForgotPassword={handleForgotPassword}
+              onSignUp={handleSignUp}
+              isLoading={loginMutation.isPending}
+              error={loginMutation.error?.message || null}
             />
           </div>
         </div>

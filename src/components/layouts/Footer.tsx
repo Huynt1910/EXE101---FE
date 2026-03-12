@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Github, Twitter, Linkedin, Mail } from "lucide-react";
 import { motion } from "framer-motion";
 import { getCommonMessages, type Language } from "@/i18n";
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 
 type FooterLink = {
   label: string;

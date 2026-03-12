@@ -2,7 +2,7 @@
 
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
 import { useEffect, useRef } from "react";
-import { useLanguage } from "@/components/common/AppProviders";
+import { useLanguage } from "@/lib/provider/appProviders";
 import { getHomepageContent } from "@/i18n";
 
 export function TestimonialsSection() {
