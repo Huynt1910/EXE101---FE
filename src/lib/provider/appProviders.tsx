@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { Toaster } from "sonner";
 import { QueryProvider } from "./queryProvider";
 import { isLanguage, type Language } from "@/i18n";
 import { authStore } from "@/lib/store/authStore";
@@ -56,7 +57,14 @@ export default function AppProviders({
 
   return (
     <QueryProvider>
-      <LanguageProvider>{children}</LanguageProvider>
+      <LanguageProvider>
+        {children}
+        <Toaster
+          position="top-right"
+          richColors
+          toastOptions={{ className: "font-sans" }}
+        />
+      </LanguageProvider>
     </QueryProvider>
   );
 }

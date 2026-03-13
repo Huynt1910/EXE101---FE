@@ -115,7 +115,7 @@ export const Footer = ({
     copyrightText || `© ${currentYear} ${companyName}. All rights reserved.`;
 
   return (
-    <footer className="w-full bg-background border-t border-secondary-foreground">
+    <footer id="contact" className="w-full bg-background border-t border-secondary-foreground">
       <div className="max-w-[1200px] mx-auto px-8 py-16">
         <div className="grid grid-cols-2 md:grid-cols-6 gap-8 mb-12">
           <motion.div

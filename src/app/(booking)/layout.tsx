@@ -9,7 +9,7 @@ export default function PublicLayout({
   return (
     <>
       <Header />
-      <main className="min-h-screen">{children}</main>
+      <div className="booking-layout pt-16 md:pt-20">{children}</div>
       <Footer />
     </>
   );

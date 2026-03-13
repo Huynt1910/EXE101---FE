@@ -9,7 +9,7 @@ export default function PublicLayout({
     <>
       <main className="min-h-screen bg-background">
         <ProfileSidebar mobile />
-        <div className="grid gap-4 xl:grid-cols-[auto_minmax(0,1fr)]">
+        <div className="grid gap-2 xl:grid-cols-[auto_minmax(0,1fr)]">
           <div className="hidden xl:block xl:sticky xl:top-0 xl:h-screen">
             <ProfileSidebar />
           </div>

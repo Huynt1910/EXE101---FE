@@ -297,6 +297,56 @@
   .peach-gradient {
     @apply bg-gradient-to-b from-secondary to-card;
   }
+
+  .booking-layout {
+    background:
+      radial-gradient(circle at top left, rgb(255 255 255 / 0.35), transparent 30%),
+      linear-gradient(180deg, var(--background) 0%, color-mix(in srgb, var(--background) 72%, white) 48%, var(--card) 100%);
+  }
+
+  .booking-page {
+    @apply min-h-screen text-foreground;
+  }
+
+  .booking-section {
+    @apply mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-10;
+  }
+
+  .booking-card {
+    @apply rounded-[28px] border border-border bg-card shadow-sm;
+  }
+
+  .booking-card-padded {
+    @apply rounded-[28px] border border-border bg-card p-5 shadow-sm md:p-6;
+  }
+
+  .booking-card-large {
+    @apply rounded-[28px] border border-border bg-card p-6 shadow-sm md:p-8;
+  }
+
+  .booking-card-empty {
+    @apply mx-auto max-w-3xl rounded-[28px] border border-border bg-card p-8 text-center shadow-xl;
+  }
+
+  .booking-banner {
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary) 10%, var(--card)) 0%,
+      color-mix(in srgb, var(--card) 92%, white) 100%
+    );
+    @apply rounded-[28px] border border-border shadow-sm;
+  }
+
+  .booking-muted-panel {
+    background: color-mix(in srgb, var(--secondary) 40%, white);
+    @apply rounded-[28px] border border-border shadow-sm;
+  }
+
+  .booking-dark-panel {
+    background: var(--primary);
+    color: var(--primary-foreground);
+    @apply rounded-[28px] shadow-sm;
+  }
 }
 
 @layer base {

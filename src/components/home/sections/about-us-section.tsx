@@ -10,7 +10,7 @@ export function AboutUsSection() {
   const t = getHomepageContent(language).about;
 
   return (
-    <section className="w-full px-8 pt-24 pb-16">
+    <section id="about" className="w-full px-8 pt-24 pb-16">
       <div className="max-w-7xl mx-auto">
         <div className="rounded-[40px] bg-card p-6 md:p-10">
           <div className="grid grid-cols-12 gap-6 items-center">
