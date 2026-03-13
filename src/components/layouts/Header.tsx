@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ChevronRight, Menu, MessageCircle, PlusCircle, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/callback-url";
@@ -95,22 +95,28 @@ export function Header() {
           <div className="hidden md:flex items-center gap-3 pointer-events-auto">
             {isAuthenticated ? (
               <>
-                <Button asChild variant="secondary" className="rounded-full">
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="rounded-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
+                >
                   <Link
                     href="/inbox"
                     className="inline-flex items-center gap-2"
                   >
-                    <MessageCircle className="h-4 w-4" />
                     Chat
                   </Link>
                 </Button>
 
-                <Button asChild className="rounded-full">
+                <Button
+                  asChild
+                  variant="ghost"
+                  className="rounded-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
+                >
                   <Link
                     href="/trip-request"
                     className="inline-flex items-center gap-2"
                   >
-                    <PlusCircle className="h-4 w-4" />
                     Create a trip
                   </Link>
                 </Button>
@@ -118,88 +124,75 @@ export function Header() {
                 <DropdownMenu.Root>
                   <DropdownMenu.Trigger asChild>
                     <button
-                      className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-2 py-1.5 transition-colors hover:bg-muted"
+                      className="inline-flex items-center gap-2 rounded-full  px-2 py-1.5 transition-colors hover:bg-transparent"
                       aria-label="Open account menu"
                     >
-                      <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-accent/20 text-xs font-semibold text-accent">
+                      <span className="inline-flex h-8 w-8 items-center justify-center bg-foreground text-xs font-semibold text-white rounded-sm">
                         {initials}
                       </span>
-                      <span className="max-w-28 truncate text-sm font-medium">
+                      <span className="max-w-28 truncate text-sm font-medium text-muted-foreground hover:text-foreground">
                         {fullName}
                       </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
                   </DropdownMenu.Trigger>
 
                   <DropdownMenu.Portal>
                     <DropdownMenu.Content
                       align="end"
-                      sideOffset={10}
-                      className="z-50 w-67.5 rounded-3xl border border-border/60 bg-[#ececec] p-3 text-[#5f5f5f] shadow-2xl"
+                      sideOffset={24}
+                      className="z-50 w-[200px] rounded-2xl border text-md border-black/5 bg-[#efefef] p-3 text-[#5f5f5f] shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
                     >
                       <DropdownMenu.Item asChild>
                         <Link
-                          href="/"
-                          className="rounded-xl bg-[#d4d4d7] px-4 py-3 text-[34px] outline-none"
+                          href="/profile"
+                          className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
-                          Home
+                          View profile
                         </Link>
                       </DropdownMenu.Item>
 
                       <DropdownMenu.Item asChild>
                         <Link
                           href="/inbox"
-                          className="mt-1 block rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5"
+                          className="mt-1 block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
-                          Messages
+                          Chat
                         </Link>
                       </DropdownMenu.Item>
+
                       <DropdownMenu.Item asChild>
                         <Link
                           href="/booking"
-                          className="block rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5"
+                          className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
-                          Tours
-                        </Link>
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item asChild>
-                        <Link
-                          href="/profile"
-                          className="block rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5"
-                        >
-                          Account
-                        </Link>
-                      </DropdownMenu.Item>
-                      <DropdownMenu.Item asChild>
-                        <Link
-                          href="#"
-                          className="block rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5"
-                        >
-                          Wishlist
+                          My trips
                         </Link>
                       </DropdownMenu.Item>
 
-                      <DropdownMenu.Separator className="my-2 h-px bg-black/15" />
+                      <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
 
                       <DropdownMenu.Item asChild>
                         <Link
                           href="#"
-                          className="block rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5"
+                          className="block rounded-xl px-4 py-3 text-[18  px] leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
                           Help
                         </Link>
                       </DropdownMenu.Item>
-                      <DropdownMenu.Item className="group rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5">
+
+                      <DropdownMenu.Item className="rounded-xl px-4 py-3 leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground">
                         <span className="inline-flex items-center gap-1">
                           Currency: USD
                           <ChevronRight className="h-4 w-4" />
                         </span>
                       </DropdownMenu.Item>
 
-                      <DropdownMenu.Separator className="my-2 h-px bg-black/15" />
+                      <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
 
                       <DropdownMenu.Item
                         onSelect={handleLogout}
-                        className="rounded-xl px-4 py-3 text-[34px] outline-none hover:bg-black/5"
+                        className="rounded-xl px-4 py-3 leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                       >
                         Log out
                       </DropdownMenu.Item>
@@ -210,11 +203,15 @@ export function Header() {
             ) : (
               <>
                 <Button asChild>
-                  <Link href={loginHref}>Log in</Link>
+                  <Link href={loginHref} scroll={false}>
+                    Log in
+                  </Link>
                 </Button>
 
                 <Button asChild variant="secondary">
-                  <Link href={signupHref}>Sign up</Link>
+                  <Link href={signupHref} scroll={false}>
+                    Sign up
+                  </Link>
                 </Button>
               </>
             )}
@@ -264,15 +261,19 @@ export function Header() {
               </Link>
               {isAuthenticated ? (
                 <>
-                  <Button asChild className="rounded-full w-full mt-4">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    className="rounded-full w-full mt-4 bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-accent"
+                  >
                     <Link href="/inbox" onClick={() => setIsOpen(false)}>
                       Chat
                     </Link>
                   </Button>
                   <Button
                     asChild
-                    variant="secondary"
-                    className="rounded-full w-full"
+                    variant="ghost"
+                    className="rounded-full w-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-accent"
                   >
                     <Link href="/trip-request" onClick={() => setIsOpen(false)}>
                       Create a trip
@@ -298,7 +299,11 @@ export function Header() {
               ) : (
                 <>
                   <Button asChild className="rounded-full w-full mt-4">
-                    <Link href={loginHref} onClick={() => setIsOpen(false)}>
+                    <Link
+                      href={loginHref}
+                      scroll={false}
+                      onClick={() => setIsOpen(false)}
+                    >
                       Log in
                     </Link>
                   </Button>
@@ -307,7 +312,11 @@ export function Header() {
                     variant="secondary"
                     className="rounded-full w-full"
                   >
-                    <Link href={signupHref} onClick={() => setIsOpen(false)}>
+                    <Link
+                      href={signupHref}
+                      scroll={false}
+                      onClick={() => setIsOpen(false)}
+                    >
                       Sign up
                     </Link>
                   </Button>
