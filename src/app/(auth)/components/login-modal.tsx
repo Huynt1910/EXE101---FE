@@ -98,7 +98,6 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
               onForgotPassword={handleForgotPassword}
               onSignUp={handleSignUp}
               isLoading={loginMutation.isPending}
-              error={loginMutation.error?.message || null}
             />
           </div>
         </div>

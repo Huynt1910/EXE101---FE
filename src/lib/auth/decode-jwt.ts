@@ -3,6 +3,7 @@ export interface JwtPayload {
   email?: string;
   fullName?: string;
   name?: string;
+  unique_name?: string;
   role?: string | number;
   exp?: number;
   iat?: number;
@@ -66,6 +67,8 @@ export function mapJwtPayloadToUser(payload: JwtPayload | null): AuthUser | null
   let fullName = email.split("@")[0];
   if (typeof payload.fullName === "string" && payload.fullName.trim() !== "") {
     fullName = payload.fullName;
+  } else if (typeof payload.unique_name === "string" && payload.unique_name.trim() !== "") {
+    fullName = payload.unique_name;
   } else if (typeof payload.name === "string" && payload.name.trim() !== "") {
     fullName = payload.name;
   }

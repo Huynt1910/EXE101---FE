@@ -14,7 +14,6 @@ export interface LoginFormProps {
   onSignUp?: () => void;
 
   isLoading?: boolean;
-  error?: string | null;
 
   centered?: boolean;
   mode?: "page" | "modal";
@@ -25,7 +24,6 @@ export default function LoginForm({
   onForgotPassword,
   onSignUp,
   isLoading = false,
-  error = null,
   centered = false,
   mode = "page",
 }: Readonly<LoginFormProps>) {
@@ -120,12 +118,6 @@ export default function LoginForm({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-3">
-            <p className="text-sm text-destructive">{error}</p>
-          </div>
-        )}
-
         <input
           type="email"
           placeholder="Email"

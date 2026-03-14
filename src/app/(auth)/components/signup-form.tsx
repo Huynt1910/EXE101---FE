@@ -12,18 +12,18 @@ import { FaApple, FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 export interface SignUpFormProps {
-  onSubmit?: (payload: {
+  readonly onSubmit?: (payload: {
     email: string;
-    firstName: string;
-    lastName: string;
+    fullName: string;
     password: string;
   }) => void;
 
-  onLogIn?: () => void;
+  readonly onLogIn?: () => void;
 
-  centered?: boolean;
-  callbackUrl?: string;
-  mode?: "page" | "modal";
+  readonly centered?: boolean;
+  readonly callbackUrl?: string;
+  readonly mode?: "page" | "modal";
+  readonly isLoading?: boolean;
 }
 
 export default function SignUpForm({
@@ -32,27 +32,27 @@ export default function SignUpForm({
   centered = false,
   callbackUrl = "/",
   mode = "page",
+  isLoading = false,
 }: SignUpFormProps) {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const isPage = mode === "page";
-  const containerAlign = isPage
-    ? "text-left"
-    : centered
-      ? "text-center"
-      : "text-left";
+  
+  let containerAlign = "text-left";
+  if (!isPage && centered) {
+    containerAlign = "text-center";
+  }
 
   const safeCallbackUrl = normalizeCallbackUrl(callbackUrl, "/");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit?.({ email, firstName, lastName, password });
+    onSubmit?.({ email, fullName, password });
   };
 
   const handleLogin = () => {
@@ -88,10 +88,12 @@ export default function SignUpForm({
         <div className="flex gap-3 sm:gap-4">
           <button
             type="button"
+            disabled={isLoading}
             className={cn(
               "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
               "bg-black text-white hover:opacity-90",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
             aria-label="Continue with Apple"
           >
@@ -100,10 +102,12 @@ export default function SignUpForm({
 
           <button
             type="button"
+            disabled={isLoading}
             className={cn(
               "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
               "bg-[#1877F2] text-white hover:brightness-110",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
             aria-label="Continue with Facebook"
           >
@@ -112,10 +116,12 @@ export default function SignUpForm({
 
           <button
             type="button"
+            disabled={isLoading}
             className={cn(
               "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
               "bg-white border border-border hover:bg-neutral-100",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+              isLoading && "opacity-50 cursor-not-allowed"
             )}
             aria-label="Continue with Google"
           >
@@ -140,39 +146,29 @@ export default function SignUpForm({
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          disabled={isLoading}
           className="
             w-full h-12 rounded-lg border bg-white
             px-4 text-md sm:text-md
             outline-none
             focus:ring-2 focus:ring-primary/30
+            disabled:opacity-50 disabled:cursor-not-allowed
           "
           required
         />
 
         <input
           type="text"
-          placeholder="First Name"
-          value={firstName}
-          onChange={(e) => setFirstName(e.target.value)}
+          placeholder="Full Name"
+          value={fullName}
+          onChange={(e) => setFullName(e.target.value)}
+          disabled={isLoading}
           className="
             w-full h-12 rounded-lg border bg-white
             px-4 text-md sm:text-md
             outline-none
             focus:ring-2 focus:ring-primary/30
-          "
-          required
-        />
-
-        <input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          onChange={(e) => setLastName(e.target.value)}
-          className="
-            w-full h-12 rounded-lg border bg-white
-            px-4 text-md sm:text-md
-            outline-none
-            focus:ring-2 focus:ring-primary/30
+            disabled:opacity-50 disabled:cursor-not-allowed
           "
           required
         />
@@ -183,11 +179,13 @@ export default function SignUpForm({
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
             className="
               w-full h-12 rounded-lg border bg-white
               px-4 pr-12 text-md sm:text-md
               outline-none
               focus:ring-2 focus:ring-primary/30
+              disabled:opacity-50 disabled:cursor-not-allowed
             "
             required
             minLength={6}
@@ -229,9 +227,13 @@ export default function SignUpForm({
 
         <button
           type="submit"
-          className="btn-primary w-full h-12 sm:h-13 text-md"
+          disabled={isLoading}
+          className={cn(
+            "btn-primary w-full h-12 sm:h-13 text-md transition-all",
+            isLoading ? "opacity-50 cursor-not-allowed" : "hover:opacity-90 active:scale-95"
+          )}
         >
-          Sign up
+          {isLoading ? "Creating account..." : "Sign up"}
         </button>
       </form>
 
