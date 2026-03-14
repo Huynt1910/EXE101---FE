@@ -60,7 +60,7 @@ export default function AppProviders({
       <LanguageProvider>
         {children}
         <Toaster
-          position="top-right"
+          position="bottom-center"
           richColors
           toastOptions={{ className: "font-sans" }}
         />

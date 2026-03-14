@@ -113,6 +113,14 @@ function restoreAuth() {
 	}
 }
 
+function setAuthToken(token: string) {
+	const isValid = setAuthFromToken(token, true);
+	if (!isValid) {
+		throw new Error("Invalid access token payload");
+	}
+	return isValid;
+}
+
 export function useAuthStore() {
 	return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
@@ -122,4 +130,5 @@ export const authStore = {
 	login,
 	logout,
 	restoreAuth,
+	setAuthToken,
 };
