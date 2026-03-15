@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
+import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
+import { handleApiError } from "@/lib/error-handler";
 
 export interface LoginModalProps {
   onClose: () => void;
@@ -15,7 +17,7 @@ export interface LoginModalProps {
 export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   const router = useRouter();
   const sp = useSearchParams();
-  const { sessionQuery, loginMutation } = useAuth();
+  const { sessionQuery, loginMutation, googleLoginMutation } = useAuth();
   const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
 
   useEffect(() => {
@@ -43,11 +45,33 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
     router.push(buildAuthUrl("/forgot-password", callbackUrl), { scroll: false });
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const idToken = await signInWithGoogleAndGetIdToken();
+      googleLoginMutation.mutate({ idToken });
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {
       onClose();
     }
   }, [sessionQuery.data?.accessToken, onClose]);
+
+  useEffect(() => {
+    if (loginMutation.isError) {
+      handleApiError(loginMutation.error);
+    }
+  }, [loginMutation.isError, loginMutation.error]);
+
+  useEffect(() => {
+    if (googleLoginMutation.isError) {
+      handleApiError(googleLoginMutation.error);
+    }
+  }, [googleLoginMutation.isError, googleLoginMutation.error]);
+
   return (
     <div className="fixed inset-0 z-[100] grid place-items-center p-0 sm:p-6">
       <button
@@ -95,9 +119,11 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
               mode="modal"
               centered={false}
               onSubmit={handleSubmit}
+              onGoogleSignIn={handleGoogleSignIn}
               onForgotPassword={handleForgotPassword}
               onSignUp={handleSignUp}
               isLoading={loginMutation.isPending}
+              isGoogleLoading={googleLoginMutation.isPending}
             />
           </div>
         </div>

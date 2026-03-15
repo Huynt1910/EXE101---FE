@@ -10,10 +10,12 @@ import Link from "next/link";
 
 export interface LoginFormProps {
   onSubmit?: (email: string, password: string) => void;
+  onGoogleSignIn?: () => void;
   onForgotPassword?: () => void;
   onSignUp?: () => void;
 
   isLoading?: boolean;
+  isGoogleLoading?: boolean;
 
   centered?: boolean;
   mode?: "page" | "modal";
@@ -21,9 +23,11 @@ export interface LoginFormProps {
 
 export default function LoginForm({
   onSubmit,
+  onGoogleSignIn,
   onForgotPassword,
   onSignUp,
   isLoading = false,
+  isGoogleLoading = false,
   centered = false,
   mode = "page",
 }: Readonly<LoginFormProps>) {
@@ -95,9 +99,12 @@ export default function LoginForm({
 
           <button
             type="button"
+            onClick={onGoogleSignIn}
+            disabled={isGoogleLoading}
             className={cn(
               "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
               "bg-white border border-border hover:bg-neutral-100",
+              "disabled:opacity-60 disabled:cursor-not-allowed",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             )}
             aria-label="Continue with Google"

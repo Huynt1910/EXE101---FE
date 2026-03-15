@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useMutation } from "@tanstack/react-query";
-import type { LoginRequest } from "../type";
+import type { LoginGoogleRequest, LoginRequest } from "../type";
 import { httpClient } from "@/lib/http/client";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 
@@ -18,6 +18,10 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: (payload: LoginRequest) => authStore.login(payload),
+  });
+
+  const googleLoginMutation = useMutation({
+    mutationFn: (payload: LoginGoogleRequest) => authStore.loginGoogle(payload),
   });
 
   const sessionQuery = useMemo(
@@ -41,6 +45,7 @@ export function useAuth() {
   return {
     sessionQuery,
     loginMutation,
+    googleLoginMutation,
     logout,
     isAuthenticated: authState.isAuthenticated,
     user,

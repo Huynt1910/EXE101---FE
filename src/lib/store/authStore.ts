@@ -2,7 +2,7 @@
 
 import { useSyncExternalStore } from "react";
 import { authApi } from "@/features/auth/api/services/auth.services";
-import type { LoginRequest } from "@/features/auth/type";
+import type { LoginGoogleRequest, LoginRequest } from "@/features/auth/type";
 import { decodeJwtPayload, mapJwtPayloadToUser, type AuthUser } from "@/lib/auth/decode-jwt";
 import { cookieConfig, getCookie, removeCookie, setCookie } from "@/lib/config/cookie";
 import { httpClient } from "@/lib/http/client";
@@ -96,6 +96,21 @@ async function login(payload: LoginRequest) {
 	return response;
 }
 
+async function loginGoogle(payload: LoginGoogleRequest) {
+	const response = await authApi.loginGoogle(payload);
+
+	if (!response.success || !response.data?.accessToken) {
+		throw new Error(response.message ?? "Google login failed");
+	}
+
+	const isValid = setAuthFromToken(response.data.accessToken);
+	if (!isValid) {
+		throw new Error("Invalid access token payload");
+	}
+
+	return response;
+}
+
 function logout() {
 	clearAuthState();
 }
@@ -128,6 +143,7 @@ export function useAuthStore() {
 export const authStore = {
 	getState: getSnapshot,
 	login,
+	loginGoogle,
 	logout,
 	restoreAuth,
 	setAuthToken,

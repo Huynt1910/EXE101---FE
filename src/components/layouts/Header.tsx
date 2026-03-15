@@ -236,7 +236,7 @@ export function Header() {
                 className="text-lg text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Products
+                Find buddies
               </Link>
               <Link
                 href="#science"
@@ -257,7 +257,7 @@ export function Header() {
                 className="text-lg text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Our Mission
+                Blog
               </Link>
               {isAuthenticated ? (
                 <>
