@@ -3,6 +3,10 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface LoginGoogleRequest {
+  idToken: string;
+}
+
 export interface LoginResponse {
   email: string;
   fullName: string;
