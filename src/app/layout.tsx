@@ -1,5 +1,6 @@
 // src/app/layout.tsx
 import AppProviders from "@/lib/provider/appProviders";
+import { NavigationProgressProvider } from "@/lib/provider/navigationProgressProvider";
 import "./globals.css";
 
 export default function RootLayout({
@@ -13,8 +14,10 @@ export default function RootLayout({
     <html lang="vi">
       <body>
         <AppProviders>
-          {children}
-          {modal}
+          <NavigationProgressProvider>
+            {children}
+            {modal}
+          </NavigationProgressProvider>
         </AppProviders>
       </body>
     </html>
