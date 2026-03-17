@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { User } from "lucide-react";
 
 export default function AuthImage() {
   return (
@@ -34,9 +33,9 @@ export default function AuthImage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <div className="size-8 xl:size-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+            <div className="size-8 xl:size-10 flex items-center justify-center flex-shrink-0">
               <Image
-                src="/logo.png"
+                src="/avt_buddy.jpg"
                 alt="Bonddy icon"
                 width={24}
                 height={24}
@@ -66,8 +65,15 @@ export default function AuthImage() {
               </p>
             </div>
 
-            <div className="size-8 xl:size-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <User className="size-3 xl:size-4 text-white" />
+            <div className="size-8 xl:size-10 flex items-center justify-center flex-shrink-0">
+              <Image
+                src="/avt_travler.JPG"
+                alt="Traveler icon"
+                width={24}
+                height={24}
+                className="rounded-md xl:w-7 xl:h-7"
+                priority
+              />
             </div>
           </motion.div>
 
@@ -78,9 +84,9 @@ export default function AuthImage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 1.6 }}
           >
-            <div className="size-8 xl:size-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+            <div className="size-8 xl:size-10 flex items-center justify-center flex-shrink-0">
               <Image
-                src="/logo.png"
+                src="/avt_buddy.jpg"
                 alt="Bonddy icon"
                 width={24}
                 height={24}
@@ -110,8 +116,15 @@ export default function AuthImage() {
               </p>
             </div>
 
-            <div className="size-8 xl:size-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <User className="size-3 xl:size-4 text-white" />
+             <div className="size-8 xl:size-10 flex items-center justify-center flex-shrink-0">
+              <Image
+                src="/avt_travler.JPG"
+                alt="Traveler icon"
+                width={24}
+                height={24}
+                className="rounded-md xl:w-7 xl:h-7"
+                priority
+              />
             </div>
           </motion.div>
 
@@ -122,9 +135,9 @@ export default function AuthImage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 2.8 }}
           >
-            <div className="size-8 xl:size-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
+            <div className="size-8 xl:size-10 flex items-center justify-center flex-shrink-0">
               <Image
-                src="/logo.png"
+                src="/avt_buddy.jpg"
                 alt="Bonddy icon"
                 width={24}
                 height={24}

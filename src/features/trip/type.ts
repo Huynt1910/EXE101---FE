@@ -28,6 +28,23 @@ export interface TripDto {
   updatedAt: string | null;
 }
 
+export interface TripListData {
+  items: TripDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export interface GetOpenTripsQuery {
+  page: number;
+  pageSize: number;
+}
+
 export type TripResponse = TripDto;
 
 export type CreateTripResponse = ApiResponse<TripDto>;
+export type GetOpenTripsResponse = ApiResponse<TripListData>;
+export type GetTripByIdResponse = ApiResponse<TripDto>;
