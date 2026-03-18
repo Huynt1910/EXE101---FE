@@ -7,7 +7,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import SignUpForm from "@/app/(auth)/components/signup-form";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSignup } from "@/features/auth/hooks/useSignup";
+import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface SignUpModalProps {
@@ -27,6 +29,7 @@ export default function SignUpModal({
 }: Readonly<SignUpModalProps>) {
   const router = useRouter();
   const { signupMutation } = useSignup();
+  const { sessionQuery, googleLoginMutation } = useAuth();
   const [submittedEmail, setSubmittedEmail] = useState("");
 
   // ============================================================================
@@ -40,6 +43,15 @@ export default function SignUpModal({
   }) => {
     setSubmittedEmail(payload.email);
     signupMutation.mutate(payload);
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const idToken = await signInWithGoogleAndGetIdToken();
+      googleLoginMutation.mutate({ idToken });
+    } catch (error) {
+      handleApiError(error);
+    }
   };
 
   // ============================================================================
@@ -89,6 +101,18 @@ export default function SignUpModal({
       handleApiError(signupMutation.error);
     }
   }, [signupMutation.isError, signupMutation.error]);
+
+  useEffect(() => {
+    if (googleLoginMutation.isError) {
+      handleApiError(googleLoginMutation.error);
+    }
+  }, [googleLoginMutation.isError, googleLoginMutation.error]);
+
+  useEffect(() => {
+    if (sessionQuery.data?.accessToken) {
+      onClose();
+    }
+  }, [sessionQuery.data?.accessToken, onClose]);
 
   // ============================================================================
   // Render
@@ -162,8 +186,10 @@ export default function SignUpModal({
               mode="modal"
               callbackUrl={callbackUrl}
               onSubmit={handleSubmit}
+              onGoogleSignIn={handleGoogleSignIn}
               onLogIn={onLogIn}
               isLoading={signupMutation.isPending}
+              isGoogleLoading={googleLoginMutation.isPending}
             />
           </div>
         </div>

@@ -19,20 +19,24 @@ export interface SignUpFormProps {
   }) => void;
 
   readonly onLogIn?: () => void;
+  readonly onGoogleSignIn?: () => void;
 
   readonly centered?: boolean;
   readonly callbackUrl?: string;
   readonly mode?: "page" | "modal";
   readonly isLoading?: boolean;
+  readonly isGoogleLoading?: boolean;
 }
 
 export default function SignUpForm({
   onSubmit,
   onLogIn,
+  onGoogleSignIn,
   centered = false,
   callbackUrl = "/",
   mode = "page",
   isLoading = false,
+  isGoogleLoading = false,
 }: SignUpFormProps) {
   const router = useRouter();
 
@@ -116,12 +120,13 @@ export default function SignUpForm({
 
           <button
             type="button"
-            disabled={isLoading}
+            onClick={onGoogleSignIn}
+            disabled={isGoogleLoading}
             className={cn(
               "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
               "bg-white border border-border hover:bg-neutral-100",
               "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-              isLoading && "opacity-50 cursor-not-allowed"
+              isGoogleLoading && "opacity-50 cursor-not-allowed"
             )}
             aria-label="Continue with Google"
           >
@@ -227,10 +232,12 @@ export default function SignUpForm({
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || isGoogleLoading}
           className={cn(
             "btn-primary w-full h-12 sm:h-13 text-md transition-all",
-            isLoading ? "opacity-50 cursor-not-allowed" : "hover:opacity-90 active:scale-95"
+            isLoading || isGoogleLoading
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:opacity-90 active:scale-95"
           )}
         >
           {isLoading ? "Creating account..." : "Sign up"}

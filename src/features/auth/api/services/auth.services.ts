@@ -1,5 +1,6 @@
 import { httpClient } from "@/lib/http/client";
 import {
+  LoginGoogleRequest,
   LoginRequest,
   LoginResponse,
   RequestOtpRequest,
@@ -16,6 +17,14 @@ export const authApi = {
   async login(payload: LoginRequest) {
     const res = await httpClient.post<ApiResponse<LoginResponse>, LoginRequest>(
       `${AUTH_BASE_PATH}/login`,
+      payload,
+    );
+    return res.data;
+  },
+
+  async loginGoogle(payload: LoginGoogleRequest) {
+    const res = await httpClient.post<ApiResponse<LoginResponse>, LoginGoogleRequest>(
+      `${AUTH_BASE_PATH}/login-google`,
       payload,
     );
     return res.data;

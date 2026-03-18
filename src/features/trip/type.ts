@@ -1,3 +1,4 @@
+import { ApiResponse } from "@/features/api-type";
 import { RequestParams } from "@/lib/http/client";
 
 export interface TripRequest {
@@ -11,7 +12,7 @@ export interface TripRequest {
   notes: string;
 }
 
-export interface TripResponse {
+export interface TripDto {
   id: string;
   city: string;
   startDate: string;
@@ -28,17 +29,23 @@ export interface TripResponse {
   updatedAt: string | null;
 }
 
-export type CreateTripRequest = TripRequest;
-export type TripDto = TripResponse;
-
-export interface GetTripsQuery extends RequestParams {
-  city?: string;
-  status?: string;
-  startFrom?: string;
-  startTo?: string;
-  search?: string;
-  page?: number;
-  pageSize?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
+export interface TripListData {
+  items: TripDto[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
 }
+
+export interface GetOpenTripsQuery {
+  page: number;
+  pageSize: number;
+}
+
+export type TripResponse = TripDto;
+
+export type CreateTripResponse = ApiResponse<TripDto>;
+export type GetOpenTripsResponse = ApiResponse<TripListData>;
+export type GetTripByIdResponse = ApiResponse<TripDto>;
