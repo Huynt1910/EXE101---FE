@@ -10,23 +10,22 @@ type Props = {
 export default function MessageContainer({ selectedConversation }: Props) {
   if (!selectedConversation) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-white h-full">
+      <div className="flex h-full flex-1 items-center justify-center bg-white">
         <MessagesEmptyState />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white h-full">
-      {/* Top bar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 flex-shrink-0">
-        <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center flex-shrink-0">
+    <div className="flex h-full flex-1 flex-col bg-white">
+      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 px-4 py-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-100">
           {selectedConversation.avatar ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={selectedConversation.avatar}
               alt={selectedConversation.name}
-              className="w-full h-full rounded-full object-cover"
+              className="h-full w-full rounded-full object-cover"
             />
           ) : (
             <span className="text-sm font-semibold text-rose-500">
@@ -37,30 +36,28 @@ export default function MessageContainer({ selectedConversation }: Props) {
         <div>
           <p className="text-sm font-semibold text-gray-900">{selectedConversation.name}</p>
           {selectedConversation.isOnline && (
-            <p className="text-xs text-green-500">Đang hoạt động</p>
+            <p className="text-xs text-green-500">Active now</p>
           )}
         </div>
       </div>
 
-      {/* Messages area — placeholder for future messages */}
       <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4">
-        <p className="text-center text-xs text-gray-400 mt-6">
-          Bắt đầu cuộc trò chuyện với {selectedConversation.name}
+        <p className="mt-6 text-center text-xs text-gray-400">
+          Start the conversation with {selectedConversation.name}
         </p>
       </div>
 
-      {/* Input area */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 flex-shrink-0">
+      <div className="flex shrink-0 items-center gap-2 border-t border-gray-200 px-4 py-3">
         <input
           type="text"
-          placeholder="Nhập tin nhắn..."
-          className="flex-1 px-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent"
+          placeholder="Type a message..."
+          className="flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-rose-400"
         />
         <button
-          className="flex-shrink-0 px-4 py-2 bg-rose-500 hover:bg-rose-600 transition-colors text-white text-sm font-medium rounded-full"
-          aria-label="Gửi tin nhắn"
+          className="shrink-0 rounded-full bg-rose-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-rose-600"
+          aria-label="Send message"
         >
-          Gửi
+          Send
         </button>
       </div>
     </div>

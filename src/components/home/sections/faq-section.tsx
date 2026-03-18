@@ -1,17 +1,15 @@
 "use client";
 
-import { useLanguage } from "@/lib/provider/appProviders";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 export function FAQ() {
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).faq;
+  const t = homePageContent.faq;
 
   return (
     <section className="bg-primary text-primary-foreground py-20 px-4 sm:px-6 lg:px-8 space-y-12">

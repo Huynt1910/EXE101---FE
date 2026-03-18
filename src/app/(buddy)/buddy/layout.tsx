@@ -2,13 +2,10 @@ import type React from 'react';
 import type { Metadata } from 'next';
 import '@/app/globals.css';
 import HeaderBuddy from '@/components/layouts/HeaderBuddy';
-//import { Inter } from 'next/font/google';
-
-//const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Quản lý bất động sản và khách hàng trên RevoLand',
-  description: 'Quản lý bất động sản và khách hàng trên RevoLand',
+  title: 'Buddy dashboard and customer management | Bonddy',
+  description: 'Manage trip requests, messages, and traveler relationships in Bonddy.',
 };
 
 export default function HostingLayout({
@@ -17,7 +14,7 @@ export default function HostingLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className=" ">
+    <div>
       <HeaderBuddy />
       {children}
     </div>

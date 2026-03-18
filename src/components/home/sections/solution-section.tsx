@@ -5,13 +5,11 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
 import Link from "next/link";
-import { useLanguage } from "@/lib/provider/appProviders";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 export function SolutionSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).solution;
+  const t = homePageContent.solution;
 
   useEffect(() => {
     const observer = new IntersectionObserver(

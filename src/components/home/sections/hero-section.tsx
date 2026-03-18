@@ -5,15 +5,13 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { AnimatedText } from "@/components/animations/animated-text";
-import { useLanguage } from "@/lib/provider/appProviders";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).hero;
+  const t = homePageContent.hero;
 
   useEffect(() => {
     const observer = new IntersectionObserver(

@@ -3,8 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { FlaskConical, Leaf, Shield, Users } from "lucide-react";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
-import { useLanguage } from "@/lib/provider/appProviders";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 const statIcons = {
   users: Users,
@@ -19,8 +18,7 @@ export function ProofSection() {
     [key: string]: number;
   }>({});
   const [hasAnimated, setHasAnimated] = useState(false);
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).proof;
+  const t = homePageContent.proof;
 
   useEffect(() => {
     const observer = new IntersectionObserver(

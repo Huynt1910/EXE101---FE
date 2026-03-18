@@ -3,8 +3,7 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ScrollBlurText } from "@/components/animations/scroll-blur-text";
-import { useLanguage } from "@/lib/provider/appProviders";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 type Highlight = {
   name: string;
@@ -15,8 +14,7 @@ export function VietnamHighlightsSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const topRowRef = useRef<HTMLDivElement>(null);
   const bottomRowRef = useRef<HTMLDivElement>(null);
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).vietnamHighlights;
+  const t = homePageContent.vietnamHighlights;
 
   useEffect(() => {
     const observer = new IntersectionObserver(

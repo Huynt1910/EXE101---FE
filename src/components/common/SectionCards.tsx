@@ -1,10 +1,10 @@
 'use client';
 
-import { TrendingDownIcon, TrendingUpIcon, Users, Target, Trophy, BarChart3 } from 'lucide-react';
+import { BarChart3, Target, TrendingDownIcon, TrendingUpIcon, Trophy, Users } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const MOCK_TOP_KPIS = {
   leadsAssignedToday: 12,
@@ -41,13 +41,13 @@ function MetricCard({
   footerIcon,
 }: MetricCardProps) {
   return (
-    <Card className="border-2 shadow-sm bg-white/50 backdrop-blur-sm">
+    <Card className="border-2 bg-white/50 shadow-sm backdrop-blur-sm">
       <CardHeader>
         <div className="flex items-end justify-between">
           <CardDescription className="text-sm font-medium text-muted-foreground">
             <div className="flex items-center gap-2">
               <div>{icon}</div>
-              <Badge className="text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/80">
+              <Badge className="bg-accent text-xs font-medium text-accent-foreground hover:bg-accent/80">
                 {title}
               </Badge>
             </div>
@@ -55,7 +55,7 @@ function MetricCard({
           {badge && (
             <Badge
               variant={badge.variant}
-              className="text-xs font-medium bg-accent text-accent-foreground hover:bg-accent/80"
+              className="bg-accent text-xs font-medium text-accent-foreground hover:bg-accent/80"
             >
               {badge.icon && <span className="mr-1">{badge.icon}</span>}
               {badge.text}
@@ -79,16 +79,16 @@ function MetricCard({
 
 function SectionCardsSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:gap-6 px-4 md:grid-cols-2 lg:grid-cols-4 lg:px-6">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
+    <div className="grid grid-cols-1 gap-4 px-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 lg:px-6">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <Card key={index} className="border-0 bg-white/50 shadow-sm backdrop-blur-sm">
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-5 w-16" />
             </div>
-            <Skeleton className="h-9 w-20 mt-2" />
-            <Skeleton className="h-4 w-32 mt-2" />
+            <Skeleton className="mt-2 h-9 w-20" />
+            <Skeleton className="mt-2 h-4 w-32" />
           </CardHeader>
           <CardContent className="pt-0">
             <Skeleton className="h-4 w-28" />
@@ -103,7 +103,9 @@ function SectionCardsError() {
   return (
     <div className="px-4 lg:px-6">
       <Alert variant="destructive" className="border-red-200 bg-red-50">
-        <AlertDescription>Không thể tải dữ liệu thống kê. Vui lòng thử lại sau.</AlertDescription>
+        <AlertDescription>
+          Unable to load KPI data. Please try again later.
+        </AlertDescription>
       </Alert>
     </div>
   );
@@ -125,12 +127,14 @@ export function SectionCards() {
   if (!topKpis?.data) {
     return (
       <div className="px-4 lg:px-6">
-        <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
+        <Card className="border-0 bg-white/50 shadow-sm backdrop-blur-sm">
           <CardContent className="flex flex-col items-center justify-center py-12">
-            <div className="text-center space-y-2">
-              <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto" />
-              <h3 className="text-lg font-semibold text-foreground">Không có dữ liệu</h3>
-              <p className="text-sm text-muted-foreground">Chưa có dữ liệu thống kê để hiển thị</p>
+            <div className="space-y-2 text-center">
+              <BarChart3 className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="text-lg font-semibold text-foreground">No data available</h3>
+              <p className="text-sm text-muted-foreground">
+                There is no KPI data to display yet.
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -146,28 +150,28 @@ export function SectionCards() {
   return (
     <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4">
       <MetricCard
-        title="Khách hàng tiềm năng"
+        title="Leads"
         value={data.leadsAssignedToday || 0}
         icon={<Users className="h-5 w-5 text-red-500" />}
         badge={{
-          text: `Tổng: ${data.totalLeadsAssigned || 0}`,
+          text: `Total: ${data.totalLeadsAssigned || 0}`,
           variant: 'secondary',
           icon: <TrendingUpIcon className="h-3 w-3" />,
         }}
-        footer={`Cần theo dõi: ${data.followUpsDueToday || 0}`}
+        footer={`Follow-ups due: ${data.followUpsDueToday || 0}`}
         footerIcon={<TrendingUpIcon className="h-4 w-4" />}
       />
 
       <MetricCard
-        title="Thoả thuận đang thực hiện"
+        title="Deals in progress"
         value={data.dealsInProgress || 0}
         icon={<Target className="h-5 w-5 text-amber-600" />}
-        footer={`Giao dịch đã chốt trong tháng: ${data.dealsClosedThisMonth || 0}`}
+        footer={`Closed this month: ${data.dealsClosedThisMonth || 0}`}
         footerIcon={<TrendingUpIcon className="h-4 w-4" />}
       />
 
       <MetricCard
-        title="Thoả thuận thành công"
+        title="Won deals"
         value={data.dealsWonThisMonth || 0}
         icon={<Trophy className="h-5 w-5 text-emerald-600" />}
         badge={{
@@ -180,16 +184,16 @@ export function SectionCards() {
               <TrendingDownIcon className="h-3 w-3" />
             ),
         }}
-        footer={`Thất bại: ${data.dealsLostThisMonth || 0}`}
+        footer={`Lost deals: ${data.dealsLostThisMonth || 0}`}
         footerIcon={<TrendingDownIcon className="h-4 w-4" />}
       />
 
       <MetricCard
-        title="Tỷ lệ chuyển đổi"
+        title="Conversion rate"
         value={`${(data.conversionRate || 0).toFixed(1)}%`}
         icon={<BarChart3 className="h-5 w-5 text-purple-600" />}
         badge={{
-          text: (data.conversionRate || 0) > 0 ? 'Tốt' : 'Thấp',
+          text: (data.conversionRate || 0) > 0 ? 'Healthy' : 'Low',
           variant: (data.conversionRate || 0) > 0 ? 'default' : 'destructive',
           icon:
             (data.conversionRate || 0) > 0 ? (
@@ -198,7 +202,7 @@ export function SectionCards() {
               <TrendingDownIcon className="h-3 w-3" />
             ),
         }}
-        footer={`Tổng thoả thuận: ${totalDeals} thoả thuận`}
+        footer={`Total deals: ${totalDeals}`}
       />
     </div>
   );

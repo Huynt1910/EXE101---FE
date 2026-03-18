@@ -4,13 +4,11 @@ import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useLanguage } from "@/lib/provider/appProviders";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 export function BuddiesFormSection() {
   const sectionRef = useRef<HTMLElement>(null);
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).buddiesForm;
+  const t = homePageContent.buddiesForm;
 
   useEffect(() => {
     const observer = new IntersectionObserver(

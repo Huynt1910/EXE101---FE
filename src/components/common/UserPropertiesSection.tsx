@@ -1,10 +1,25 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
+import {
+  AlertCircle,
+  Bookmark,
+  Building2,
+  CalendarDays,
+  CheckCircle,
+  Clock,
+  Heart,
+  Star,
+  X,
+  XCircle,
+} from 'lucide-react';
+import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent } from '@/components/ui/card';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Table,
   TableBody,
@@ -13,30 +28,31 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { toast } from 'sonner';
-import {
-  Heart,
-  Bookmark,
-  CheckCircle,
-  Clock,
-  Star,
-  XCircle,
-  AlertCircle,
-  Building2,
-  CalendarDays,
-  X,
-} from 'lucide-react';
-// import { formatPrice } from '@/utils/numbers/formatCurrency';
-// import { formatDate } from '@/utils/date/formatDate';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 
-const MOCK_PROPERTIES = [
+type PropertyStatus = 'Available' | 'Rented' | 'Sold' | 'Inactive';
+type TransactionType = 'ForRent' | 'ForSale';
+type DateFilterMode = 'All' | 'Today' | 'ThisWeek' | 'ThisMonth' | 'Custom';
+type SortBy = 'createdAt' | 'title' | 'status' | 'price';
+type SortOrder = 'asc' | 'desc';
+
+type Property = {
+  id: string;
+  title: string;
+  status: PropertyStatus;
+  transactionType: TransactionType;
+  rentalPrice: number;
+  salePrice: number;
+  type: string;
+  collectedCount: number;
+  totalFavorites: number;
+  createdAt: string;
+};
+
+const MOCK_PROPERTIES: Property[] = [
   {
     id: 'p-01',
-    title: 'Căn hộ 2PN Quận 7',
-    name: 'Căn hộ 2PN Quận 7',
+    title: '2-bedroom apartment in District 7',
     status: 'Available',
     transactionType: 'ForRent',
     rentalPrice: 14500000,
@@ -48,8 +64,7 @@ const MOCK_PROPERTIES = [
   },
   {
     id: 'p-02',
-    title: 'Nhà phố Thủ Đức',
-    name: 'Nhà phố Thủ Đức',
+    title: 'Townhouse in Thu Duc',
     status: 'Rented',
     transactionType: 'ForRent',
     rentalPrice: 28000000,
@@ -61,8 +76,7 @@ const MOCK_PROPERTIES = [
   },
   {
     id: 'p-03',
-    title: 'Biệt thự ven sông Quận 2',
-    name: 'Biệt thự ven sông Quận 2',
+    title: 'Riverside villa in District 2',
     status: 'Sold',
     transactionType: 'ForSale',
     rentalPrice: 0,
@@ -74,8 +88,7 @@ const MOCK_PROPERTIES = [
   },
   {
     id: 'p-04',
-    title: 'Đất nền Long An',
-    name: 'Đất nền Long An',
+    title: 'Land plot in Long An',
     status: 'Inactive',
     transactionType: 'ForSale',
     rentalPrice: 0,
@@ -87,8 +100,7 @@ const MOCK_PROPERTIES = [
   },
   {
     id: 'p-05',
-    title: 'Studio Phú Nhuận',
-    name: 'Studio Phú Nhuận',
+    title: 'Studio in Phu Nhuan',
     status: 'Available',
     transactionType: 'ForRent',
     rentalPrice: 9200000,
@@ -100,60 +112,46 @@ const MOCK_PROPERTIES = [
   },
 ];
 
-// Skeleton component cho loading state
-function UserPropertiesSkeleton() {
-  return (
-    <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
-      <CardContent className="p-6">
-        <div className="space-y-4">
-          {/* Header skeleton */}
-          <div className="flex justify-between items-center">
-            <div className="space-y-2">
-              <div className="h-6 w-48 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-4 w-64 bg-gray-200 rounded animate-pulse"></div>
-            </div>
-            <div className="h-10 w-24 bg-gray-200 rounded animate-pulse"></div>
-          </div>
-
-          {/* Table skeleton */}
-          <div className="border rounded-lg">
-            <div className="p-4">
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center space-x-4">
-                    <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-12 bg-gray-200 rounded animate-pulse"></div>
-                    <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+function formatDate(date: string) {
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(date));
 }
 
-// Error State Component
+function formatDateForButton(date?: Date) {
+  if (!date) return '';
+
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+}
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'VND',
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
 function UserPropertiesError({ message }: { message: string }) {
   return (
-    <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
+    <Card className="border-0 bg-white/50 shadow-sm backdrop-blur-sm">
       <CardContent className="flex flex-col items-center justify-center py-16">
-        <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+        <div className="space-y-4 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
             <AlertCircle className="h-8 w-8 text-red-600" />
           </div>
           <div className="space-y-2">
-            <h3 className="text-xl font-semibold text-foreground">Không thể tải dữ liệu</h3>
-            <p className="text-sm text-muted-foreground max-w-md">{message}</p>
+            <h3 className="text-xl font-semibold text-foreground">Unable to load properties</h3>
+            <p className="max-w-md text-sm text-muted-foreground">{message}</p>
           </div>
           <Button variant="outline" onClick={() => window.location.reload()} className="mt-4">
-            Thử lại
+            Retry
           </Button>
         </div>
       </CardContent>
@@ -161,48 +159,33 @@ function UserPropertiesError({ message }: { message: string }) {
   );
 }
 
-// StatusBadge component với các trạng thái mới
-function StatusBadge({ status }: { status: string }) {
-  const getStatusConfig = (status: string) => {
-    switch (status) {
-      case 'Available':
-        return {
-          label: 'Có sẵn',
-          className: 'bg-green-100 text-green-800 border-green-200',
-          icon: <CheckCircle className="h-3 w-3" />,
-        };
-      case 'Rented':
-        return {
-          label: 'Đã thuê',
-          className: 'bg-blue-100 text-blue-800 border-blue-200',
-          icon: <Clock className="h-3 w-3" />,
-        };
-      case 'Sold':
-        return {
-          label: 'Đã bán',
-          className: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-          icon: <Star className="h-3 w-3" />,
-        };
-      case 'Inactive':
-        return {
-          label: 'Không hoạt động',
-          className: 'bg-red-100 text-red-800 border-red-200',
-          icon: <XCircle className="h-3 w-3" />,
-        };
-      default:
-        return {
-          label: 'Không xác định',
-          className: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: <AlertCircle className="h-3 w-3" />,
-        };
-    }
-  };
-
-  const config = getStatusConfig(status);
+function StatusBadge({ status }: { status: PropertyStatus }) {
+  const config = {
+    Available: {
+      label: 'Available',
+      className: 'border-green-200 bg-green-100 text-green-800',
+      icon: <CheckCircle className="h-3 w-3" />,
+    },
+    Rented: {
+      label: 'Rented',
+      className: 'border-blue-200 bg-blue-100 text-blue-800',
+      icon: <Clock className="h-3 w-3" />,
+    },
+    Sold: {
+      label: 'Sold',
+      className: 'border-yellow-200 bg-yellow-100 text-yellow-800',
+      icon: <Star className="h-3 w-3" />,
+    },
+    Inactive: {
+      label: 'Inactive',
+      className: 'border-red-200 bg-red-100 text-red-800',
+      icon: <XCircle className="h-3 w-3" />,
+    },
+  }[status];
 
   return (
     <div
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${config.className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${config.className}`}
     >
       {config.icon}
       {config.label}
@@ -210,122 +193,117 @@ function StatusBadge({ status }: { status: string }) {
   );
 }
 
-// Main Component
+function getDateRange(mode: DateFilterMode, startDate?: Date, endDate?: Date) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  switch (mode) {
+    case 'Today':
+      return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1) };
+    case 'ThisWeek': {
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+      const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
+      return { start: startOfWeek, end: endOfWeek };
+    }
+    case 'ThisMonth': {
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      return { start: startOfMonth, end: endOfMonth };
+    }
+    case 'Custom': {
+      if (!startDate || !endDate) return { start: undefined, end: undefined };
+      const endOfDay = new Date(endDate);
+      endOfDay.setHours(23, 59, 59, 999);
+      return { start: startDate, end: endOfDay };
+    }
+    default:
+      return { start: undefined, end: undefined };
+  }
+}
+
 export function UserPropertiesSection() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
-  const [statusFilter] = useState<'All' | 'Available' | 'Rented' | 'Sold' | 'Inactive'>('All');
-  const [searchQuery] = useState('');
-
-  // Date filtering state
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [dateFilterMode, setDateFilterMode] = useState<
-    'All' | 'Today' | 'ThisWeek' | 'ThisMonth' | 'Custom'
-  >('All');
+  const [dateFilterMode, setDateFilterMode] = useState<DateFilterMode>('All');
+  const [sortBy, setSortBy] = useState<SortBy>('createdAt');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
+  const pageSize = 10;
 
-  // Sorting state
-  const [sortBy, setSortBy] = useState<'createdAt' | 'title' | 'status' | 'price'>('createdAt');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
-
-  const salersStatistic = { data: MOCK_PROPERTIES };
+  const properties = MOCK_PROPERTIES;
   const isLoading = false;
   const error = null;
-  // Xử lý loading state
-  if (isLoading && !salersStatistic) {
-    return <UserPropertiesSkeleton />;
-  }
-
-  // Xử lý error state
-//   if (error) {
-//     return (
-//       <UserPropertiesError
-//         message={error?.message || 'Đã xảy ra lỗi khi tải dữ liệu bất động sản.'}
-//       />
-//     );
-//   }
-
-  // Lấy data từ API response
-  const properties = salersStatistic?.data || [];
-
-  // Date filtering helper functions
-  const getDateRange = (mode: typeof dateFilterMode) => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    switch (mode) {
-      case 'Today':
-        return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000 - 1) };
-      case 'ThisWeek': {
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - today.getDay());
-        const endOfWeek = new Date(startOfWeek.getTime() + 7 * 24 * 60 * 60 * 1000 - 1);
-        return { start: startOfWeek, end: endOfWeek };
-      }
-      case 'ThisMonth': {
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        return { start: startOfMonth, end: endOfMonth };
-      }
-      case 'Custom': {
-        if (!startDate || !endDate) return { start: undefined, end: undefined };
-        const endOfDay = new Date(endDate);
-        endOfDay.setHours(23, 59, 59, 999);
-        return { start: startDate, end: endOfDay };
-      }
-      default:
-        return { start: undefined, end: undefined };
-    }
-  };
 
   const clearDateFilter = () => {
     setStartDate(undefined);
     setEndDate(undefined);
     setDateFilterMode('All');
-    setCurrentPage(1); // Reset về trang đầu
+    setCurrentPage(1);
   };
 
-  const applyDateFilter = (mode: typeof dateFilterMode) => {
+  const applyDateFilter = (mode: DateFilterMode) => {
     if (mode === 'Custom') {
       if (!startDate || !endDate) {
-        toast.error('Vui lòng chọn cả ngày bắt đầu và ngày kết thúc');
+        toast.error('Select both a start date and an end date.');
         return;
       }
 
-      // Kiểm tra ngày hợp lệ
       if (startDate > endDate) {
-        toast.error('Ngày bắt đầu không thể sau ngày kết thúc');
+        toast.error('The start date cannot be after the end date.');
         return;
       }
 
-      // Kiểm tra xem có properties nào trong khoảng thời gian này không
-      const { start, end } = getDateRange('Custom');
+      const { start, end } = getDateRange('Custom', startDate, endDate);
       if (start && end) {
-        const hasPropertiesInRange = properties.some(property => {
+        const hasPropertiesInRange = properties.some((property) => {
           const propertyDate = new Date(property.createdAt);
           return propertyDate >= start && propertyDate <= end;
         });
 
         if (!hasPropertiesInRange) {
-          toast.warning('Không có bất động sản nào trong khoảng thời gian đã chọn');
+          toast.warning('No properties were found in the selected date range.');
           return;
         }
       }
     }
 
     setDateFilterMode(mode);
-    setCurrentPage(1); // Reset về trang đầu khi filter
-    toast.success(
-      `Đã áp dụng bộ lọc: ${mode === 'Today' ? 'Hôm nay' : mode === 'ThisWeek' ? 'Tuần này' : mode === 'ThisMonth' ? 'Tháng này' : 'Khoảng thời gian tùy chỉnh'}`
-    );
+    setCurrentPage(1);
+
+    const label =
+      mode === 'Today'
+        ? 'Today'
+        : mode === 'ThisWeek'
+          ? 'This week'
+          : mode === 'ThisMonth'
+            ? 'This month'
+            : mode === 'Custom'
+              ? 'Custom range'
+              : 'All time';
+
+    toast.success(`Applied filter: ${label}`);
   };
 
-  // Sort properties function
-  const sortProperties = (properties: any[]) => {
-    return [...properties].sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+  const filteredProperties = useMemo(() => {
+    return properties.filter((property) => {
+      if (dateFilterMode === 'All') return true;
+
+      const { start, end } = getDateRange(dateFilterMode, startDate, endDate);
+      if (!start || !end) return true;
+
+      const propertyDate = new Date(property.createdAt);
+      if (Number.isNaN(propertyDate.getTime())) return true;
+
+      return propertyDate >= start && propertyDate <= end;
+    });
+  }, [dateFilterMode, endDate, properties, startDate]);
+
+  const sortedProperties = useMemo(() => {
+    return [...filteredProperties].sort((a, b) => {
+      let aValue: number | string = '';
+      let bValue: number | string = '';
 
       switch (sortBy) {
         case 'createdAt':
@@ -333,179 +311,136 @@ export function UserPropertiesSection() {
           bValue = new Date(b.createdAt).getTime();
           break;
         case 'title':
-          aValue = (a.title || a.name || '').toLowerCase();
-          bValue = (b.title || b.name || '').toLowerCase();
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
           break;
         case 'status':
-          aValue = a.status || '';
-          bValue = b.status || '';
+          aValue = a.status;
+          bValue = b.status;
           break;
         case 'price':
-          aValue = a.transactionType === 'ForRent' ? a.rentalPrice || 0 : a.salePrice || 0;
-          bValue = b.transactionType === 'ForRent' ? b.rentalPrice || 0 : b.salePrice || 0;
+          aValue = a.transactionType === 'ForRent' ? a.rentalPrice : a.salePrice;
+          bValue = b.transactionType === 'ForRent' ? b.rentalPrice : b.salePrice;
           break;
-        default:
-          return 0;
       }
 
       if (sortOrder === 'asc') {
         return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      } else {
-        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
       }
-    });
-  };
 
-  // Handle sort column click
-  const handleSort = (column: typeof sortBy) => {
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+    });
+  }, [filteredProperties, sortBy, sortOrder]);
+
+  const totalCount = sortedProperties.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginatedProperties = sortedProperties.slice(startIndex, startIndex + pageSize);
+
+  const handleSort = (column: SortBy) => {
     if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder((current) => (current === 'asc' ? 'desc' : 'asc'));
     } else {
       setSortBy(column);
       setSortOrder('desc');
     }
-    setCurrentPage(1); // Reset to first page when sorting
+    setCurrentPage(1);
   };
 
-  // Filter properties based on search, status, and date
-  const filteredProperties = properties.filter(property => {
-    const matchesSearch =
-      !searchQuery ||
-      (property.title && property.title.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (property.name && property.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  if (isLoading) {
+    return null;
+  }
 
-    const matchesStatus = statusFilter === 'All' || property.status === statusFilter;
+  if (error) {
+    return <UserPropertiesError message="Please try again in a moment." />;
+  }
 
-    // Date filtering - ít strict hơn
-    let matchesDate = true;
-    if (dateFilterMode !== 'All') {
-      const { start, end } = getDateRange(dateFilterMode);
-      if (start && end) {
-        try {
-          const propertyDate = new Date(property.createdAt);
-          // Kiểm tra xem propertyDate có hợp lệ không
-          if (!isNaN(propertyDate.getTime())) {
-            matchesDate = propertyDate >= start && propertyDate <= end;
-          } else {
-            // Nếu không parse được date, bỏ qua date filter
-            matchesDate = true;
-          }
-        } catch (error) {
-          // Nếu có lỗi, bỏ qua date filter
-          matchesDate = true;
-        }
-      }
-    }
-
-    return matchesSearch && matchesStatus && matchesDate;
-  });
-
-  // Sort the filtered properties
-  const sortedProperties = sortProperties(filteredProperties);
-
-  // Pagination
-  const totalCount = sortedProperties.length;
-  const totalPages = Math.ceil(totalCount / pageSize);
-  const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = startIndex + pageSize;
-  const paginatedProperties = sortedProperties.slice(startIndex, endIndex);
-
-  // Empty state
   if (totalCount === 0) {
-    if (searchQuery || statusFilter !== 'All' || dateFilterMode !== 'All') {
-      // Có filter nhưng không có kết quả
+    if (dateFilterMode !== 'All') {
       return (
-        <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
+        <Card className="border-0 bg-white/50 shadow-sm backdrop-blur-sm">
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
+            <div className="space-y-4 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-orange-100">
                 <Building2 className="h-8 w-8 text-orange-600" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-foreground">
-                  Không tìm thấy bất động sản
-                </h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Không có bất động sản nào thỏa mãn bộ lọc hiện tại. Hãy thử thay đổi bộ lọc hoặc
-                  xem tất cả bất động sản.
+                <h3 className="text-xl font-semibold text-foreground">No properties found</h3>
+                <p className="max-w-md text-sm text-muted-foreground">
+                  No properties matched the active date filter. Try a different range or clear the
+                  filter.
                 </p>
               </div>
-              <div className="flex gap-2"></div>
-            </div>
-          </CardContent>
-        </Card>
-      );
-    } else {
-      // Không có properties nào cả
-      return (
-        <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <div className="text-center space-y-4">
-              <div className="mx-auto w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-gray-400" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-foreground">Chưa có bất động sản nào</h3>
-                <p className="text-sm text-muted-foreground max-w-md">
-                  Bạn chưa đăng ký bất động sản nào. Hãy bắt đầu bằng cách tạo bất động sản đầu
-                  tiên.
-                </p>
-              </div>
-              <Button onClick={() => router.push('/hosting/property/new')}>
-                <Building2 className="h-4 w-4 mr-2" />
-                Tạo bất động sản đầu tiên
-              </Button>
             </div>
           </CardContent>
         </Card>
       );
     }
+
+    return (
+      <Card className="border-0 bg-white/50 shadow-sm backdrop-blur-sm">
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <div className="space-y-4 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <Building2 className="h-8 w-8 text-gray-400" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-semibold text-foreground">No properties yet</h3>
+              <p className="max-w-md text-sm text-muted-foreground">
+                You have not created any property listings yet. Start by publishing your first
+                listing.
+              </p>
+            </div>
+            <Button onClick={() => router.push('/hosting/property/new')}>
+              <Building2 className="mr-2 h-4 w-4" />
+              Create your first listing
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
     <div className="space-y-6">
-      {/* Properties Table */}
-      <Card className="border-0 shadow-sm bg-white/50 backdrop-blur-sm">
+      <Card className="border-0 bg-white/50 shadow-sm backdrop-blur-sm">
         <CardContent className="p-6">
           <div className="space-y-4">
-            {/* Date Filter Controls */}
-            <div className="flex items-center gap-3 flex-wrap">
-              <span className="text-sm font-medium text-muted-foreground">Lọc theo thời gian:</span>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-muted-foreground">Filter by date:</span>
 
-              {/* Quick Date Filters */}
               <div className="flex gap-2">
                 <Button
                   variant={dateFilterMode === 'All' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => applyDateFilter('All')}
                 >
-                  Tất cả
+                  All time
                 </Button>
                 <Button
                   variant={dateFilterMode === 'Today' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => applyDateFilter('Today')}
                 >
-                  Hôm nay
+                  Today
                 </Button>
                 <Button
                   variant={dateFilterMode === 'ThisWeek' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => applyDateFilter('ThisWeek')}
                 >
-                  Tuần này
+                  This week
                 </Button>
                 <Button
                   variant={dateFilterMode === 'ThisMonth' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => applyDateFilter('ThisMonth')}
                 >
-                  Tháng này
+                  This month
                 </Button>
               </div>
 
-              {/* Custom Date Range */}
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -513,20 +448,15 @@ export function UserPropertiesSection() {
                       size="sm"
                       className={cn(
                         'justify-start text-left font-normal',
-                        !startDate && 'text-muted-foreground'
+                        !startDate && 'text-muted-foreground',
                       )}
                     >
                       <CalendarDays className="mr-2 h-4 w-4" />
-                      {/* {startDate ? formatDate(startDate.toISOString()) : 'Từ ngày'} */}
+                      {startDate ? formatDateForButton(startDate) : 'From date'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={startDate}
-                      onSelect={setStartDate}
-                      initialFocus
-                    />
+                    <Calendar mode="single" selected={startDate} onSelect={setStartDate} initialFocus />
                   </PopoverContent>
                 </Popover>
 
@@ -539,11 +469,11 @@ export function UserPropertiesSection() {
                       size="sm"
                       className={cn(
                         'justify-start text-left font-normal',
-                        !endDate && 'text-muted-foreground'
+                        !endDate && 'text-muted-foreground',
                       )}
                     >
                       <CalendarDays className="mr-2 h-4 w-4" />
-                      {/* {endDate ? formatDate(endDate.toISOString()) : 'Đến ngày'} */}
+                      {endDate ? formatDateForButton(endDate) : 'To date'}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -557,11 +487,10 @@ export function UserPropertiesSection() {
                   onClick={() => applyDateFilter('Custom')}
                   disabled={!startDate || !endDate}
                 >
-                  Áp dụng
+                  Apply
                 </Button>
               </div>
 
-              {/* Clear Date Filter */}
               {dateFilterMode !== 'All' && (
                 <Button
                   variant="ghost"
@@ -569,75 +498,63 @@ export function UserPropertiesSection() {
                   onClick={clearDateFilter}
                   className="text-red-600 hover:text-red-700"
                 >
-                  <X className="h-4 w-4 mr-1" />
-                  Xóa lọc
+                  <X className="mr-1 h-4 w-4" />
+                  Clear filter
                 </Button>
               )}
             </div>
 
-            {/* Active Filters Display */}
             {dateFilterMode !== 'All' && (
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm text-muted-foreground">Bộ lọc đang áp dụng:</span>
-
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-muted-foreground">Active filter:</span>
                 <Badge variant="secondary" className="gap-1">
                   <CalendarDays className="h-3 w-3" />
-                  {dateFilterMode === 'Today' && 'Hôm nay'}
-                  {dateFilterMode === 'ThisWeek' && 'Tuần này'}
-                  {dateFilterMode === 'ThisMonth' && 'Tháng này'}
-                  {/* {dateFilterMode === 'Custom' &&
-                    `Từ ${startDate ? formatDate(startDate.toISOString()) : ''} đến ${endDate ? formatDate(endDate.toISOString()) : ''}`} */}
+                  {dateFilterMode === 'Today' && 'Today'}
+                  {dateFilterMode === 'ThisWeek' && 'This week'}
+                  {dateFilterMode === 'ThisMonth' && 'This month'}
+                  {dateFilterMode === 'Custom' &&
+                    `${formatDateForButton(startDate)} to ${formatDateForButton(endDate)}`}
                 </Badge>
               </div>
             )}
 
-            {/* Table */}
-            <div className="border rounded-lg">
+            <div className="rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('title')}
-                    >
+                    <TableHead className="cursor-pointer hover:bg-gray-50" onClick={() => handleSort('title')}>
                       <div className="flex items-center gap-1">
-                        Bất động sản
+                        Property
                         {sortBy === 'title' && (
                           <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                         )}
                       </div>
                     </TableHead>
-                    <TableHead
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('status')}
-                    >
+                    <TableHead className="cursor-pointer hover:bg-gray-50" onClick={() => handleSort('status')}>
                       <div className="flex items-center gap-1">
-                        Trạng thái
+                        Status
                         {sortBy === 'status' && (
                           <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                         )}
                       </div>
                     </TableHead>
-                    <TableHead
-                      className="cursor-pointer hover:bg-gray-50"
-                      onClick={() => handleSort('price')}
-                    >
+                    <TableHead className="cursor-pointer hover:bg-gray-50" onClick={() => handleSort('price')}>
                       <div className="flex items-center gap-1">
-                        Giá
+                        Price
                         {sortBy === 'price' && (
                           <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                         )}
                       </div>
                     </TableHead>
-                    <TableHead>Loại</TableHead>
-                    <TableHead className="text-center">Lưu</TableHead>
-                    <TableHead className="text-center">Thích</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead className="text-center">Saves</TableHead>
+                    <TableHead className="text-center">Likes</TableHead>
                     <TableHead
                       className="cursor-pointer hover:bg-gray-50"
                       onClick={() => handleSort('createdAt')}
                     >
                       <div className="flex items-center gap-1">
-                        Ngày tạo
+                        Created
                         {sortBy === 'createdAt' && (
                           <span className="text-xs">{sortOrder === 'asc' ? '↑' : '↓'}</span>
                         )}
@@ -646,37 +563,33 @@ export function UserPropertiesSection() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedProperties.map(property => (
+                  {paginatedProperties.map((property) => (
                     <TableRow key={property.id}>
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="font-medium">{property.title || property.name}</div>
+                          <div className="font-medium">{property.title}</div>
                           <div className="text-sm text-muted-foreground">
-                            {property.transactionType === 'ForRent'
-                              ? 'Cho thuê'
-                              : property.transactionType === 'ForSale'
-                                ? 'Bán'
-                                : property.transactionType === 'Project'
-                                  ? 'Dự án'
-                                  : 'N/A'}
+                            {property.transactionType === 'ForRent' ? 'For rent' : 'For sale'}
                           </div>
                         </div>
                       </TableCell>
                       <TableCell>
-                        <StatusBadge status={property.status || 'Unknown'} />
+                        <StatusBadge status={property.status} />
                       </TableCell>
                       <TableCell>
                         <div className="font-medium">
-                          {/* {property.transactionType === 'ForRent'
-                            ? formatPrice(property.rentalPrice || 0, TransactionType.FOR_RENT)
-                            : formatPrice(property.salePrice || 0, TransactionType.FOR_SALE)} */}
+                          {formatCurrency(
+                            property.transactionType === 'ForRent'
+                              ? property.rentalPrice
+                              : property.salePrice,
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {property.transactionType === 'ForRent' ? 'Giá thuê' : 'Giá bán'}
+                          {property.transactionType === 'ForRent' ? 'Rental price' : 'Sale price'}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="text-sm">{property.type || 'N/A'}</div>
+                        <div className="text-sm">{property.type}</div>
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1">
@@ -691,7 +604,7 @@ export function UserPropertiesSection() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {/* <div className="text-sm">{formatDate(property.createdAt)}</div> */}
+                        <div className="text-sm">{formatDate(property.createdAt)}</div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -699,36 +612,33 @@ export function UserPropertiesSection() {
               </Table>
             </div>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-between items-center">
-                <div className="text-sm text-muted-foreground">
-                  Hiển thị {startIndex + 1} - {Math.min(endIndex, totalCount)} trong tổng số{' '}
-                  {totalCount} bất động sản
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    Trước
-                  </Button>
-                  <span className="text-sm">
-                    Trang {currentPage} / {totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                  >
-                    Sau
-                  </Button>
-                </div>
+            <div className="flex flex-col gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+              <span>
+                Showing {startIndex + 1} to {Math.min(startIndex + pageSize, totalCount)} of {totalCount}{' '}
+                properties
+              </span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
               </div>
-            )}
+            </div>
           </div>
         </CardContent>
       </Card>

@@ -2,12 +2,10 @@
 
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
-import { useLanguage } from "@/lib/provider/appProviders";
-import { getHomepageContent } from "@/i18n";
+import { homePageContent } from "@/content/site-content";
 
 export function AboutUsSection() {
-  const { language } = useLanguage();
-  const t = getHomepageContent(language).about;
+  const t = homePageContent.about;
 
   return (
     <section id="about" className="w-full px-8 pt-24 pb-16">
