@@ -25,7 +25,7 @@ export const localeMessages = {
   },
 } as const;
 
-export type LocaleNamespace = keyof (typeof localeMessages)["vi"];
+export type LocaleNamespace = keyof (typeof localeMessages)["en"];
 
 export function getLocaleBundle(language: Language) {
   return localeMessages[language];

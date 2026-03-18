@@ -1,5 +1,8 @@
-import { buddiesData, type Buddy } from "@/lib/data/buddies";
 import type { CreateTripRequest, TripDto } from "@/features/trip/type";
+import {
+  defaultTripRequestFormData,
+  validateTripRequest,
+} from "@/lib/data/trip-request";
 
 export const TRIP_REQUEST_STORAGE_KEY = "bonddy.latestTripRequest";
 export const TRIP_REQUEST_DRAFT_STORAGE_KEY = "bonddy.tripRequestDraft";
@@ -63,18 +66,6 @@ export type TripRequestValidationErrors = Partial<
   Record<keyof TripRequestFormData, string>
 >;
 
-export const defaultTripRequestFormData: TripRequestFormData = {
-  city: "",
-  startTime: "",
-  durationMinutes: 180,
-  groupSize: 1,
-  preferredLanguage: "English",
-  budgetMin: 20,
-  budgetMax: 120,
-  meetingPoint: "",
-  notes: "",
-};
-
 const normalize = (value: string) => value.trim().toLowerCase();
 
 function safeJsonParse<T>(value: string): T | null {
@@ -99,62 +90,7 @@ function createTimelineItem(title: string, description: string): TimelineItem {
   };
 }
 
-export function validateTripRequest(
-  formData: TripRequestFormData,
-): TripRequestValidationErrors {
-  const errors: TripRequestValidationErrors = {};
-
-  if (!formData.city.trim()) {
-    errors.city = "Location is required.";
-  }
-
-  if (!formData.startTime) {
-    errors.startTime = "Please choose a start time.";
-  } else if (!isValidDateString(formData.startTime)) {
-    errors.startTime = "Start time is invalid.";
-  } else if (new Date(formData.startTime).getTime() <= Date.now()) {
-    errors.startTime = "Start time must be in the future.";
-  }
-
-  if (
-    !Number.isFinite(formData.durationMinutes) ||
-    formData.durationMinutes <= 0
-  ) {
-    errors.durationMinutes = "Duration must be greater than 0.";
-  }
-
-  if (!Number.isFinite(formData.groupSize) || formData.groupSize < 1) {
-    errors.groupSize = "Group size must be at least 1.";
-  }
-
-  if (!formData.preferredLanguage.trim()) {
-    errors.preferredLanguage = "Preferred language is required.";
-  }
-
-  if (!Number.isFinite(formData.budgetMin) || formData.budgetMin < 0) {
-    errors.budgetMin = "Budget min is invalid.";
-  }
-
-  if (!Number.isFinite(formData.budgetMax) || formData.budgetMax < 0) {
-    errors.budgetMax = "Budget max is invalid.";
-  }
-
-  if (
-    Number.isFinite(formData.budgetMin) &&
-    Number.isFinite(formData.budgetMax) &&
-    formData.budgetMin > formData.budgetMax
-  ) {
-    errors.budgetMin = "Budget min must not exceed budget max.";
-    errors.budgetMax =
-      "Budget max must be greater than or equal to budget min.";
-  }
-
-  if (formData.meetingPoint.trim().length < 8) {
-    errors.meetingPoint = "Meeting point should be at least 8 characters.";
-  }
-
-  return errors;
-}
+export { defaultTripRequestFormData, validateTripRequest };
 
 export function getBookingStatusMeta(status: BookingStatus) {
   switch (status) {

@@ -10,7 +10,7 @@ import {
 } from "../../type";
 import type { ApiResponse } from "@/features/api-type";
 
-const AUTH_BASE_PATH = "/api/Auth";
+const AUTH_BASE_PATH = "/Auth";
 
 export const authApi = {
   async login(payload: LoginRequest) {
@@ -22,18 +22,18 @@ export const authApi = {
   },
 
   async register(payload: SignUpRequest) {
-    const res = await httpClient.post<ApiResponse<SignUpResponse>, SignUpRequest>(
-      `${AUTH_BASE_PATH}/register`,
-      payload,
-    );
+    const res = await httpClient.post<
+      ApiResponse<SignUpResponse>,
+      SignUpRequest
+    >(`${AUTH_BASE_PATH}/register`, payload);
     return res.data;
   },
 
   async verifyEmail(payload: VerifyEmailRequest) {
-    const res = await httpClient.post<ApiResponse<VerifyEmailResponse>, VerifyEmailRequest>(
-      `${AUTH_BASE_PATH}/verify-otp`,
-      payload,
-    );
+    const res = await httpClient.post<
+      ApiResponse<VerifyEmailResponse>,
+      VerifyEmailRequest
+    >(`${AUTH_BASE_PATH}/verify-otp`, payload);
     return res.data;
   },
 
