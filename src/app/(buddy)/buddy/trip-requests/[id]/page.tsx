@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useTripDetailQuery } from "@/features/trip/hooks/useTrip";
+import { useTripDetail } from "@/features/trip/hooks/useTripQueries";
 import { TripDetailBreadcrumb } from "./components/TripDetailBreadcrumb";
 import { TripDetailHero } from "./components/TripDetailHero";
 import { TripDetailLeftContent } from "./components/TripDetailLeftContent";
@@ -10,7 +10,7 @@ import { TripDetailRightCard } from "./components/TripDetailRightCard";
 export default function TripRequestDetailPage() {
   const params = useParams<{ id: string }>();
   const tripId = Array.isArray(params?.id) ? params.id[0] : params?.id;
-  const tripDetailQuery = useTripDetailQuery(tripId ?? "");
+  const tripDetailQuery = useTripDetail(tripId ?? "");
   const trip = tripDetailQuery.data?.data;
 
   if (tripDetailQuery.isLoading) {
@@ -40,7 +40,6 @@ export default function TripRequestDetailPage() {
   return (
     <main className="min-h-[calc(100vh-84px)] bg-[linear-gradient(180deg,#f4f7f6_0%,#f7f7f8_55%,#f8f6f2_100%)]">
       <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6 md:py-10 flex flex-col gap-6">
-
         {/* Breadcrumb */}
         <TripDetailBreadcrumb />
 
@@ -55,7 +54,6 @@ export default function TripRequestDetailPage() {
 
         {/* 2-column body */}
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_380px] gap-8 items-start">
-
           {/* Left — main content */}
           <TripDetailLeftContent
             city={trip.city}
