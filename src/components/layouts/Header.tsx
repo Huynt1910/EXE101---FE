@@ -57,7 +57,7 @@ export function Header() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 p-6">
-      <nav className="max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-full shadow-lg">
+      <nav className="max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-4xl shadow-lg">
         <div className="flex items-center justify-between h-20 px-6 lg:px-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
