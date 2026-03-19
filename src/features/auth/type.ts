@@ -10,7 +10,8 @@ export interface LoginGoogleRequest {
 export interface LoginResponse {
   email: string;
   fullName: string;
-  role: string[];
+  roles: string[];
+  role?: string[];
   isEmailVerified: boolean;
   accessToken: string;
   refreshToken: string;

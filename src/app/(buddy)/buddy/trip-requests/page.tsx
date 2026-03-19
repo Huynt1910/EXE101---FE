@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { TripRequestsFilters } from "./components/TripRequestsFilters";
 import { TripRequestsGrid } from "./components/TripRequestsGrid";
@@ -10,7 +11,8 @@ import type {
   SortMode,
   TripRequestViewModel,
 } from "./components/types";
-import { useOpenTrips } from "@/features/trip/hooks/useTripQueries";
+import { useTripRequest } from "@/features/trip/hooks/useTripRequest";
+import type { ContactOfferPayload } from "./components/ContactOfferModal";
 
 function isWeekend(date: Date) {
   const day = date.getDay();
@@ -89,13 +91,17 @@ function buildStartDateTime(startDate: string, startTime: string) {
 }
 
 export default function BuddyTripRequestsPage() {
+  const router = useRouter();
   const [dateFilter, setDateFilter] = useState<DateFilter>("All");
   const [peopleFilter, setPeopleFilter] = useState<PeopleFilter>("All");
   const [languageFilter, setLanguageFilter] = useState("All");
   const [sortMode, setSortMode] = useState<SortMode>("Recommended");
   const [appliedIds, setAppliedIds] = useState<string[]>([]);
 
-  const openTripsQuery = useOpenTrips({ PageSize: 50 });
+  const { openTripsQuery, submitOfferMutation } = useTripRequest({
+    openTripsParams: { PageSize: 50 },
+    enableOpenTrips: true,
+  });
   const tripItems = openTripsQuery.data?.data.items ?? [];
 
   const requests = useMemo(
@@ -152,16 +158,44 @@ export default function BuddyTripRequestsPage() {
     return sortRequests(filtered, sortMode);
   }, [dateFilter, languageFilter, peopleFilter, requests, sortMode]);
 
-  const handleApplyContact = (requestId: string) => {
-    setAppliedIds((current) =>
-      current.includes(requestId) ? current : [...current, requestId],
-    );
-    toast.success(
-      "You have contacted this traveler. Continue the conversation in Messages.",
-    );
-  };
+  const handleApplyContact = async (
+    requestId: string,
+    payload: ContactOfferPayload,
+  ) => {
+    const selectedTrip = requests.find((item) => item.id === requestId);
+    if (!selectedTrip) {
+      toast.error("Could not find selected trip request.");
+      return;
+    }
 
-  const highlightedCity = viewData[0]?.city ?? "Ho Chi Minh City";
+    try {
+      const offerRes = await submitOfferMutation.mutateAsync({
+        payload: {
+          tripId: requestId,
+          offeredPrice: payload.offeredPrice,
+          isInboxOnly: payload.isInboxOnly,
+          note: payload.note,
+        },
+      });
+
+      const roomId = offerRes.data?.existingChatRoomId;
+
+      setAppliedIds((current) =>
+        current.includes(requestId) ? current : [...current, requestId],
+      );
+      toast.success("Offer sent! Continue the conversation in Messages.");
+
+      if (roomId) {
+        router.push(`/buddy/messages?roomId=${encodeURIComponent(roomId)}`);
+      } else {
+        router.push("/buddy/messages");
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to send offer";
+      toast.error(message);
+      throw error;
+    }
+  };
 
   if (openTripsQuery.isLoading) {
     return (

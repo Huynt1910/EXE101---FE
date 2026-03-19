@@ -41,9 +41,36 @@ function getTokenMaxAge(token: string) {
 	return Math.max(maxAge, 0);
 }
 
-function setAuthFromToken(token: string, writeCookie = true) {
+function normalizeRoles(roles: unknown): string[] {
+	if (!Array.isArray(roles)) return [];
+
+	return roles
+		.filter((role): role is string => typeof role === "string" && role.trim() !== "")
+		.map((role) => role.trim());
+}
+
+function getStoredRoles(): string[] {
+	const raw = getCookie(cookieConfig.authRoles.name);
+	if (!raw) return [];
+
+	try {
+		return normalizeRoles(JSON.parse(raw));
+	} catch {
+		return [];
+	}
+}
+
+function setAuthFromToken(token: string, roles: string[] = [], writeCookie = true) {
 	const payload = decodeJwtPayload(token);
-	const user = mapJwtPayloadToUser(payload);
+	const baseUser = mapJwtPayloadToUser(payload);
+	const normalizedRoles = normalizeRoles(roles);
+
+	const user: AuthUser | null = baseUser
+		? {
+				...baseUser,
+				roles: normalizedRoles,
+			}
+		: null;
 
 	if (!user) {
 		return false;
@@ -52,6 +79,11 @@ function setAuthFromToken(token: string, writeCookie = true) {
 	if (writeCookie) {
 		setCookie(cookieConfig.authToken.name, token, {
 			...cookieConfig.authToken.options,
+			maxAge: getTokenMaxAge(token),
+		});
+
+		setCookie(cookieConfig.authRoles.name, JSON.stringify(normalizedRoles), {
+			...cookieConfig.authRoles.options,
 			maxAge: getTokenMaxAge(token),
 		});
 	}
@@ -68,6 +100,7 @@ function setAuthFromToken(token: string, writeCookie = true) {
 
 function clearAuthState() {
 	removeCookie(cookieConfig.authToken.name, cookieConfig.authToken.options.path);
+	removeCookie(cookieConfig.authRoles.name, cookieConfig.authRoles.options.path);
 	httpClient.setAuthToken(null);
 	setState(initialState);
 }
@@ -88,7 +121,10 @@ async function login(payload: LoginRequest) {
 		throw new Error(response.message ?? "Login failed");
 	}
 
-	const isValid = setAuthFromToken(response.data.accessToken);
+	const isValid = setAuthFromToken(
+		response.data.accessToken,
+		response.data.roles ?? response.data.role ?? [],
+	);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");
 	}
@@ -103,7 +139,10 @@ async function loginGoogle(payload: LoginGoogleRequest) {
 		throw new Error(response.message ?? "Google login failed");
 	}
 
-	const isValid = setAuthFromToken(response.data.accessToken);
+	const isValid = setAuthFromToken(
+		response.data.accessToken,
+		response.data.roles ?? response.data.role ?? [],
+	);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");
 	}
@@ -117,19 +156,20 @@ function logout() {
 
 function restoreAuth() {
 	const token = getCookie(cookieConfig.authToken.name);
+	const roles = getStoredRoles();
 	if (!token) {
 		clearAuthState();
 		return;
 	}
 
-	const isValid = setAuthFromToken(token, false);
+	const isValid = setAuthFromToken(token, roles, false);
 	if (!isValid) {
 		clearAuthState();
 	}
 }
 
-function setAuthToken(token: string) {
-	const isValid = setAuthFromToken(token, true);
+function setAuthToken(token: string, roles: string[] = []) {
+	const isValid = setAuthFromToken(token, roles, true);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");
 	}

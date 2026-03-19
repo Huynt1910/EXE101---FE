@@ -9,25 +9,29 @@ import {
   Users,
   Baby,
   Languages,
-  ArrowLeft,
   CheckCircle2,
-  Loader2,
   MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  ContactOfferModal,
+  type ContactOfferPayload,
+} from "../../components/ContactOfferModal";
+import { toast } from "sonner";
+import { useTripRequest } from "@/features/trip/hooks/useTripRequest";
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function formatDate(dateStr: string) {
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr;
+  if (Number.isNaN(d.getTime())) return dateStr;
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function formatTime(timeStr: string) {
   if (!timeStr) return "";
   const [h, m] = timeStr.split(":");
-  const hour = parseInt(h, 10);
+  const hour = Number.parseInt(h, 10);
   const suffix = hour >= 12 ? "PM" : "AM";
   const hour12 = hour % 12 === 0 ? 12 : hour % 12;
   return `${hour12}:${m} ${suffix}`;
@@ -38,15 +42,15 @@ function SummaryRow({
   icon: Icon,
   label,
   value,
-}: {
+}: Readonly<{
   icon: React.ElementType;
   label: string;
   value: string;
-}) {
+}>) {
   return (
     <div className="flex items-center justify-between gap-2 py-2.5 border-b border-slate-100 last:border-b-0">
       <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Icon className="h-3.5 w-3.5 flex-shrink-0" />
+        <Icon className="h-3.5 w-3.5 shrink-0" />
         <span>{label}</span>
       </div>
       <span className="text-sm font-semibold text-slate-800 text-right">{value}</span>
@@ -58,6 +62,9 @@ function SummaryRow({
 export type TripStatus = "open" | "closed" | "applied";
 
 interface TripDetailRightCardProps {
+  tripId: string;
+  travelerName?: string;
+  city?: string;
   startDate: string;
   startTime: string;
   durationHours: number;
@@ -70,6 +77,9 @@ interface TripDetailRightCardProps {
 }
 
 export function TripDetailRightCard({
+  tripId,
+  travelerName,
+  city,
   startDate,
   startTime,
   durationHours,
@@ -79,21 +89,43 @@ export function TripDetailRightCard({
   notes,
   status,
   isApplied: initialApplied = false,
-}: TripDetailRightCardProps) {
+}: Readonly<TripDetailRightCardProps>) {
   const router = useRouter();
   const [applied, setApplied] = useState(initialApplied);
-  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const { submitOfferMutation } = useTripRequest({ enableOpenTrips: false });
 
   const isClosed = status?.toLowerCase() === "closed";
   const hourLabel = durationHours === 1 ? "1 hour" : `${durationHours} hours`;
+  const groupSize = adults + childCount;
 
-  const handleApply = async () => {
-    if (applied || isClosed) return;
-    setLoading(true);
-    // Simulate async call — swap with real API when ready
-    await new Promise((res) => setTimeout(res, 800));
-    setLoading(false);
-    setApplied(true);
+  const sendOfferFromDetail = async (payload: ContactOfferPayload) => {
+    try {
+      const offerRes = await submitOfferMutation.mutateAsync({
+        payload: {
+          tripId,
+          offeredPrice: payload.offeredPrice,
+          isInboxOnly: payload.isInboxOnly,
+          note: payload.note,
+        },
+      });
+
+      const roomId = offerRes.data?.existingChatRoomId;
+
+      setApplied(true);
+      setModalOpen(false);
+      toast.success("Offer sent! Continue the conversation in Messages.");
+
+      if (roomId) {
+        router.push(`/buddy/messages?roomId=${encodeURIComponent(roomId)}`);
+      } else {
+        router.push("/buddy/messages");
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to send offer";
+      toast.error(message);
+      throw error;
+    }
   };
 
   // ── CTA label / state ──────────────────────────────────────────────────────
@@ -118,7 +150,7 @@ export function TripDetailRightCard({
     <div className="sticky top-24">
       <div className="rounded-2xl border border-slate-200 bg-white shadow-md overflow-hidden">
         {/* Card header */}
-        <div className="bg-gradient-to-br from-slate-800 to-slate-700 px-5 py-4">
+        <div className="bg-linear-to-br from-slate-800 to-slate-700 px-5 py-4">
           <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
             Trip summary
           </p>
@@ -155,36 +187,37 @@ export function TripDetailRightCard({
         {/* CTA section */}
         <div className="px-5 pb-5 pt-3 flex flex-col gap-3">
           <Button
-            onClick={handleApply}
-            disabled={ctaDisabled || loading}
+            onClick={() => {
+              if (!ctaDisabled) setModalOpen(true);
+            }}
+            disabled={ctaDisabled}
             variant={ctaVariant}
             className={`w-full h-11 rounded-xl text-sm font-semibold transition-all duration-200
-              ${!ctaDisabled && !loading
-                ? "bg-orange-700 text-white hover:bg-orange-600 active:scale-[0.98]"
-                : ""
+              ${ctaDisabled
+                ? ""
+                : "bg-orange-700 text-white hover:bg-orange-600 active:scale-[0.98]"
               }
               ${applied ? "bg-emerald-50 text-emerald-700 border-emerald-200" : ""}
             `}
           >
-            {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-            ) : applied ? (
+            {applied ? (
               <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-600" />
             ) : null}
-            {loading ? "Contacting…" : ctaLabel}
-          </Button>
-
-          {/* Secondary action */}
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="w-full h-10 rounded-xl text-sm text-slate-500 hover:text-slate-800 hover:bg-slate-50 gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to requests
+            {ctaLabel}
           </Button>
         </div>
       </div>
+
+      {/* ── Offer Modal ── */}
+      <ContactOfferModal
+        open={modalOpen}
+        travelerName={travelerName}
+        city={city}
+        groupSize={groupSize}
+        durationHours={durationHours}
+        onClose={() => setModalOpen(false)}
+        onSubmit={sendOfferFromDetail}
+      />
     </div>
   );
 }

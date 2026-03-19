@@ -2,24 +2,8 @@
 
 import * as React from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  BuildingIcon,
-  CalendarIcon,
-  ClockIcon,
-  HeartIcon,
-  House,
-  LayoutDashboardIcon,
-  Menu,
-  MenuIcon,
-  MessageSquare,
-  PlusIcon,
-  UserCircleIcon,
-  UsersIcon,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import AnimatedTabs from '@/components/common/AnimatedTabs';
+import { usePathname, useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +14,34 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  UserCircleIcon,
+  Menu,
+  LayoutDashboardIcon,
+  UsersIcon,
+  HeartIcon,
+  CalendarIcon,
+  PlusIcon,
+  BuildingIcon,
+  ClockIcon,
+  MenuIcon,
+  MessageSquare,
+  House,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import AnimatedTabs from '@/components/common/AnimatedTabs';
+import { authStore } from '@/lib/store/authStore';
+
+const navigationData: Record<string, unknown[]> = {
+  default: [],
+};
+
+function DropdownContent({ data }: { data: unknown[] }) {
+  if (!data || data.length === 0) {
+    return <div className="h-2" />;
+  }
+  return <div className="h-2" />;
+}
 
 const MOCK_USER = {
   name: 'Host',
@@ -155,8 +167,11 @@ function AccountMenu({
 
 function BottomNavigation() {
   const isAuthenticated = true;
-  const logout = () => undefined;
-  const pathname = usePathname();
+  const router = useRouter();
+  const logout = () => {
+    authStore.logout();
+    router.push('/');
+  };
   const [isAccountOpen, setIsAccountOpen] = React.useState(false);
   const [isNavVisible, setIsNavVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
@@ -246,7 +261,18 @@ function BottomNavigation() {
 
 export default function HeaderBuddy() {
   const isAuthenticated = true;
-  const logout = () => undefined;
+  const router = useRouter();
+  const logout = () => {
+    authStore.logout();
+    router.push('/');
+  };
+  const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null);
+
+  const handleMouseLeave = () => {
+    setActiveDropdown(null);
+  };
+
+  // Get unread messages count once at the top level
   const hasUnread = MOCK_HAS_UNREAD;
   const displayCount = MOCK_DISPLAY_COUNT;
   const initials = getInitials(MOCK_USER.name);
@@ -305,11 +331,108 @@ export default function HeaderBuddy() {
                         )}
                       </Button>
                     </DropdownMenuTrigger>
-                    <AccountMenu
-                      logout={logout}
-                      hasUnread={hasUnread}
-                      displayCount={displayCount}
-                    />
+                    <DropdownMenuContent className="w-[17rem] shadow-2xl" align="end" forceMount>
+                      {/* <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user.name}</p>
+                          <p className="text-xs leading-none text-muted-foreground">
+                            {user.email ? user.email : user.phone}
+                          </p>
+                        </div>
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator /> */}
+
+                      {/* Quick Actions Section */}
+                      {/* <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
+                        Tin đăng
+                      </DropdownMenuLabel> */}
+                      <DropdownMenuGroup className="p-2 space-y-1">
+                        <DropdownMenuItem asChild>
+                          <Link href="/myrevo?tab=saved-homes" className="cursor-pointer">
+                            <HeartIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Danh sách yêu thích</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/messages" className="cursor-pointer relative">
+                            <MessageSquare className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Message</span>
+                            {hasUnread ? (
+                              <span className="ml-auto bg-red-500 text-white text-xs rounded-full min-w-[18px] h-4 flex items-center justify-center px-1 font-medium">
+                                {displayCount}
+                              </span>
+                            ) : null}
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/myrevo?tab=account-settings" className="cursor-pointer">
+                            <UserCircleIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Profile</span>
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild>
+                          <Link href="/myrevo?tab=manage-tours" className="cursor-pointer">
+                            <CalendarIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Appointments</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
+                      {/* <DropdownMenuGroup className="p-2 space-y-2">
+                        <DropdownMenuItem asChild>
+                          <Link href="/hosting/property/new" className="cursor-pointer">
+                            <PlusIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Đăng tin bất động sản</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/hosting/property" className="cursor-pointer">
+                            <BuildingIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Quản lý bất động sản</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" /> */}
+
+                      <DropdownMenuGroup className="p-2 space-y-2">
+                        <DropdownMenuItem asChild>
+                          <Link href="/hosting" className="cursor-pointer">
+                            <LayoutDashboardIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Overview</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/hosting/lead" className="cursor-pointer">
+                            <UsersIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Manage customers</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
+
+                      {/* <DropdownMenuGroup className="p-2 space-y-2"> */}
+                      {/* <DropdownMenuItem asChild>
+                          <Link href="/agents" className="cursor-pointer">
+                            <span className="text-sm font-medium">Tìm kiếm môi giới</span>
+                          </Link>
+                        </DropdownMenuItem> */}
+                      {/* <DropdownMenuItem asChild>
+                          <Link href="/" className="cursor-pointer">
+                            <span className="text-sm font-medium">Chuyển sang khách hàng</span>
+                          </Link>
+                        </DropdownMenuItem> */}
+                      {/* </DropdownMenuGroup> */}
+                      {/* <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" /> */}
+                      <DropdownMenuGroup className="p-2 space-y-2">
+                        <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
+                          <span className="text-sm font-medium">Logout</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
                   </DropdownMenu>
                 </>
               ) : (
