@@ -1,5 +1,9 @@
 export interface JwtPayload {
   sub?: string;
+  nameid?: string;
+  userId?: string;
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"?: string;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"?: string;
   email?: string;
   fullName?: string;
   name?: string;
@@ -13,7 +17,7 @@ export interface JwtPayload {
 export interface AuthUser {
   email: string;
   fullName: string;
-  role: number | null;
+  roles: string[];
 }
 
 function decodeBase64Url(input: string) {
@@ -43,13 +47,24 @@ export function decodeJwtPayload(token?: string | null): JwtPayload | null {
   }
 }
 
-function normalizeRole(role: unknown) {
-  if (typeof role === "number" && Number.isFinite(role)) return role;
-  if (typeof role === "string" && role.trim() !== "") {
-    const parsed = Number(role);
-    return Number.isNaN(parsed) ? null : parsed;
+export function extractJwtUserId(payload: JwtPayload | null): string | undefined {
+  if (!payload) return undefined;
+
+  const candidates = [
+    payload.sub,
+    payload.nameid,
+    payload.userId,
+    payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"],
+    payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"],
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim() !== "") {
+      return candidate;
+    }
   }
-  return null;
+
+  return undefined;
 }
 
 export function mapJwtPayloadToUser(payload: JwtPayload | null): AuthUser | null {
@@ -76,6 +91,6 @@ export function mapJwtPayloadToUser(payload: JwtPayload | null): AuthUser | null
   return {
     email,
     fullName,
-    role: normalizeRole(payload.role),
+    roles: [],
   };
 }

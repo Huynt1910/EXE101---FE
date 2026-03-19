@@ -7,8 +7,8 @@ import HeaderBuddy from '@/components/layouts/HeaderBuddy';
 //const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Quản lý bất động sản và khách hàng trên RevoLand',
-  description: 'Quản lý bất động sản và khách hàng trên RevoLand',
+  title: 'Buddy Dashboard | Manage Trip Requests on Bonddy',
+  description: 'Browse trip requests, review traveler details, and manage your buddy activities on Bonddy',
 };
 
 export default function HostingLayout({

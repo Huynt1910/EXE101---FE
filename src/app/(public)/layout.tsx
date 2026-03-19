@@ -10,7 +10,7 @@ export default function PublicLayout({
     <>
       <Header />
       <main className="min-h-screen">{children}</main>
-      <Footer />
+      <Footer/>
     </>
   );
 }

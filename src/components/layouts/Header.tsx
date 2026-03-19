@@ -9,7 +9,11 @@ import { Button } from "@/components/ui/button";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/callback-url";
 
-export function Header() {
+type HeaderProps = {
+  variant?: "default" | "user";
+};
+
+export function Header({ variant = "default" }: Readonly<HeaderProps>) {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user } = useAuthStore();
   const pathname = usePathname();
@@ -52,10 +56,27 @@ export function Header() {
     router.push("/");
   };
 
+  const isUserHeader = variant === "user";
+
+  const wrapperClassName = isUserHeader
+    ? "fixed top-0 left-0 right-0 z-50 border-b border-border bg-white"
+    : "fixed top-0 left-0 right-0 z-50 p-6";
+
+  const navClassName = isUserHeader
+    ? "w-full"
+    : "max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-full shadow-lg";
+
+  const navInnerClassName = "flex items-center shadow-md justify-between h-20 px-6 lg:px-8";
+
+  const mobilePanelClassName = isUserHeader
+    ? "md:hidden border-t border-border/50 px-6 py-4 lg:px-8"
+    : "md:hidden py-6 px-6 lg:px-8 border-t border-border/50";
+
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 p-6">
-      <nav className="max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-full shadow-lg">
-        <div className="flex items-center justify-between h-20 px-6 lg:px-8">
+    <>
+      <div className={wrapperClassName}>
+      <nav className={navClassName}>
+        <div className={navInnerClassName}>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <span className="font-serif text-accent text-2xl font-normal">
@@ -64,6 +85,7 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
+          {isUserHeader ? null : (
           <div className="hidden md:flex items-center gap-10">
             <Link
               href="/login"
@@ -90,6 +112,7 @@ export function Header() {
               Blog
             </Link>
           </div>
+          )}
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3 pointer-events-auto">
@@ -101,7 +124,7 @@ export function Header() {
                   className="rounded-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
                 >
                   <Link
-                    href="/inbox"
+                    href="/messages"
                     className="inline-flex items-center gap-2"
                   >
                     Chat
@@ -154,7 +177,7 @@ export function Header() {
 
                       <DropdownMenu.Item asChild>
                         <Link
-                          href="/inbox"
+                          href="/messages"
                           className="mt-1 block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
                           Chat
@@ -229,7 +252,7 @@ export function Header() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <div className="md:hidden py-6 px-6 lg:px-8 border-t border-border/50">
+          <div className={mobilePanelClassName}>
             <div className="flex flex-col gap-4">
               <Link
                 href="#produits"
@@ -266,7 +289,7 @@ export function Header() {
                     variant="ghost"
                     className="rounded-full w-full mt-4 bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-accent"
                   >
-                    <Link href="/inbox" onClick={() => setIsOpen(false)}>
+                    <Link href="/messages" onClick={() => setIsOpen(false)}>
                       Chat
                     </Link>
                   </Button>
@@ -326,6 +349,9 @@ export function Header() {
           </div>
         )}
       </nav>
-    </div>
+      </div>
+
+      {isUserHeader ? <div aria-hidden className="h-20" /> : null}
+    </>
   );
 }

@@ -10,7 +10,7 @@ import { GroupBudgetStep } from "@/app/(trip)/trip-request/components/step-secti
 import { MeetingNotesStep } from "@/app/(trip)/trip-request/components/step-section/step3";
 import { Card } from "@/components/ui/card";
 import { useTripRequestForm } from "@/features/trip/hooks/useTripRequestForm";
-import { useTripMutations } from "@/features/trip/hooks/useTripMutation";
+import { useTripRequest } from "@/features/trip/hooks/useTripRequest";
 import {
   clearTripRequestDraft,
   mapTripDtoToStoredTripRequest,
@@ -21,7 +21,7 @@ import { TRIP_REQUEST_STEPS } from "./trip-request.config";
 
 export default function TripRequestPage() {
   const router = useRouter();
-  const { createTripMutation } = useTripMutations();
+  const { createTripMutation } = useTripRequest();
   const {
     step,
     draftSaved,
