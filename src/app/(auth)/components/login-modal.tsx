@@ -7,7 +7,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
-import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
+import {
+  consumeGoogleRedirectIdToken,
+  signInWithGoogleAndGetIdToken,
+} from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface LoginModalProps {
@@ -48,11 +51,36 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   const handleGoogleSignIn = async () => {
     try {
       const idToken = await signInWithGoogleAndGetIdToken();
-      googleLoginMutation.mutate({ idToken });
+      if (idToken) {
+        googleLoginMutation.mutate({ idToken });
+      }
     } catch (error) {
       handleApiError(error);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveRedirectSignIn = async () => {
+      try {
+        const idToken = await consumeGoogleRedirectIdToken();
+        if (!cancelled && idToken) {
+          googleLoginMutation.mutate({ idToken });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          handleApiError(error);
+        }
+      }
+    };
+
+    void resolveRedirectSignIn();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [googleLoginMutation]);
 
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {

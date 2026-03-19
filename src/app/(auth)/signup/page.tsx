@@ -4,14 +4,20 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import SignUpForm from "@/app/(auth)/components/signup-form";
+import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSignup } from "@/features/auth/hooks/useSignup";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
+import {
+  consumeGoogleRedirectIdToken,
+  signInWithGoogleAndGetIdToken,
+} from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export default function SignUpPage() {
   const router = useRouter();
   const sp = useSearchParams();
   const { signupMutation } = useSignup();
+  const { sessionQuery, googleLoginMutation } = useAuth();
   const [submittedEmail, setSubmittedEmail] = useState<string>("");
 
   const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
@@ -27,6 +33,17 @@ export default function SignUpPage() {
 
   const handleLogin = () => {
     router.push(buildAuthUrl("/login", callbackUrl));
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const idToken = await signInWithGoogleAndGetIdToken();
+      if (idToken) {
+        googleLoginMutation.mutate({ idToken });
+      }
+    } catch (error) {
+      handleApiError(error);
+    }
   };
 
   // Redirect to verify-email on success
@@ -47,13 +64,50 @@ export default function SignUpPage() {
     }
   }, [signupMutation.isError, signupMutation.error]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveRedirectSignIn = async () => {
+      try {
+        const idToken = await consumeGoogleRedirectIdToken();
+        if (!cancelled && idToken) {
+          googleLoginMutation.mutate({ idToken });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          handleApiError(error);
+        }
+      }
+    };
+
+    void resolveRedirectSignIn();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [googleLoginMutation]);
+
+  useEffect(() => {
+    if (googleLoginMutation.isError) {
+      handleApiError(googleLoginMutation.error);
+    }
+  }, [googleLoginMutation.isError, googleLoginMutation.error]);
+
+  useEffect(() => {
+    if (sessionQuery.data?.accessToken) {
+      router.replace(callbackUrl);
+    }
+  }, [sessionQuery.data?.accessToken, callbackUrl, router]);
+
   return (
     <SignUpForm
       mode="page"
       callbackUrl={callbackUrl}
       onSubmit={handleSubmit}
+      onGoogleSignIn={handleGoogleSignIn}
       onLogIn={handleLogin}
       isLoading={signupMutation.isPending}
+      isGoogleLoading={googleLoginMutation.isPending}
     />
   );
 }

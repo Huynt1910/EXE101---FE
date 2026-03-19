@@ -9,7 +9,10 @@ import { toast } from "sonner";
 import SignUpForm from "@/app/(auth)/components/signup-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSignup } from "@/features/auth/hooks/useSignup";
-import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
+import {
+  consumeGoogleRedirectIdToken,
+  signInWithGoogleAndGetIdToken,
+} from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface SignUpModalProps {
@@ -48,11 +51,36 @@ export default function SignUpModal({
   const handleGoogleSignIn = async () => {
     try {
       const idToken = await signInWithGoogleAndGetIdToken();
-      googleLoginMutation.mutate({ idToken });
+      if (idToken) {
+        googleLoginMutation.mutate({ idToken });
+      }
     } catch (error) {
       handleApiError(error);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveRedirectSignIn = async () => {
+      try {
+        const idToken = await consumeGoogleRedirectIdToken();
+        if (!cancelled && idToken) {
+          googleLoginMutation.mutate({ idToken });
+        }
+      } catch (error) {
+        if (!cancelled) {
+          handleApiError(error);
+        }
+      }
+    };
+
+    void resolveRedirectSignIn();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [googleLoginMutation]);
 
   // ============================================================================
   // Navigation Logic - Dual layer for mobile/desktop reliability
