@@ -10,63 +10,22 @@ export const TRIP_REQUEST_DRAFT_STORAGE_KEY = "bonddy.tripRequestDraft";
 export type TripRequestFormData = {
   city: string;
   startTime: string;
-  durationMinutes: number;
-  groupSize: number;
+  durationHours: number;
+  adults: number;
+  children: number;
   preferredLanguage: string;
-  budgetMin: number;
-  budgetMax: number;
-  meetingPoint: string;
-  notes: string;
-};
-
-export type BookingStatus =
-  | "OPEN"
-  | "PENDING_BUDDY_CONFIRMATION"
-  | "MATCHED"
-  | "PROPOSAL_SENT"
-  | "PAYMENT_PENDING"
-  | "CONFIRMED"
-  | "IN_PROGRESS"
-  | "COMPLETED"
-  | "PROPOSAL_REJECTED";
-
-export type PaymentStatus = "unpaid" | "pending" | "paid";
-
-export type TimelineItem = {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-};
-
-export type ProposalData = {
-  startTime: string;
-  durationMinutes: number;
-  meetingPoint: string;
-  groupSize: number;
-  preferredLanguage: string;
-  itinerarySummary: string;
-  finalPrice: number;
-  cancellationPolicy: string;
   notes: string;
 };
 
 export type StoredTripRequest = TripRequestFormData & {
   id: string;
   createdAt: string;
-  bookingStatus: BookingStatus;
-  paymentStatus: PaymentStatus;
-  selectedBuddyId: number | null;
-  recommendedBuddyIds: number[];
-  proposal: ProposalData | null;
-  timeline: TimelineItem[];
+  status: string;
 };
 
 export type TripRequestValidationErrors = Partial<
   Record<keyof TripRequestFormData, string>
 >;
-
-const normalize = (value: string) => value.trim().toLowerCase();
 
 function safeJsonParse<T>(value: string): T | null {
   try {
@@ -81,70 +40,9 @@ function isValidDateString(value: string) {
   return !Number.isNaN(new Date(value).getTime());
 }
 
-function createTimelineItem(title: string, description: string): TimelineItem {
-  return {
-    id: `TL-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-    title,
-    description,
-    createdAt: new Date().toISOString(),
-  };
-}
+const normalize = (value: string) => value.trim().toLowerCase();
 
 export { defaultTripRequestFormData, validateTripRequest };
-
-export function getBookingStatusMeta(status: BookingStatus) {
-  switch (status) {
-    case "PENDING_BUDDY_CONFIRMATION":
-      return {
-        label: "Pending buddy confirmation",
-        description:
-          "The selected buddy has received the invite and has not confirmed yet.",
-      };
-    case "MATCHED":
-      return {
-        label: "Matched",
-        description:
-          "The buddy confirmed. You can continue in chat and align the plan.",
-      };
-    case "PROPOSAL_SENT":
-      return {
-        label: "Proposal sent",
-        description: "A proposal is available for review before payment.",
-      };
-    case "PAYMENT_PENDING":
-      return {
-        label: "Payment pending",
-        description: "The final plan is accepted. Payment is the next step.",
-      };
-    case "CONFIRMED":
-      return {
-        label: "Confirmed",
-        description: "Payment is complete and the trip is confirmed.",
-      };
-    case "IN_PROGRESS":
-      return {
-        label: "In progress",
-        description: "The trip is currently ongoing.",
-      };
-    case "COMPLETED":
-      return {
-        label: "Completed",
-        description: "The trip is done. The user can leave a review.",
-      };
-    case "PROPOSAL_REJECTED":
-      return {
-        label: "Proposal rejected",
-        description:
-          "The current proposal was rejected. Return to chat or shortlist.",
-      };
-    case "OPEN":
-    default:
-      return {
-        label: "Open",
-        description: "The request is open and ready for buddy selection.",
-      };
-  }
-}
 
 export function formatTripRequestDateTime(value: string) {
   if (!isValidDateString(value)) return "Not available";
@@ -155,120 +53,39 @@ export function formatTripRequestDateTime(value: string) {
   }).format(new Date(value));
 }
 
-export function formatBudgetRange(min: number, max: number) {
-  return `${min.toLocaleString("en-US")} - ${max.toLocaleString("en-US")} USD`;
+export function formatDurationHours(value: number) {
+  if (value === 1) return "1 hour";
+  return `${value} hours`;
 }
 
-export function formatDurationMinutes(value: number) {
-  if (value < 60) return `${value} minutes`;
+export function formatTravelerSummary(adults: number, children: number) {
+  const parts = [`${adults} adult${adults === 1 ? "" : "s"}`];
 
-  const hours = Math.floor(value / 60);
-  const minutes = value % 60;
+  if (children > 0) {
+    parts.push(`${children} child${children === 1 ? "" : "ren"}`);
+  }
 
-  if (minutes === 0) return `${hours} hours`;
-  return `${hours} hours ${minutes} minutes`;
-}
-
-export function getRecommendedBuddies(formData: TripRequestFormData): Buddy[] {
-  const city = normalize(formData.city);
-  const language = normalize(formData.preferredLanguage);
-  const notes = normalize(formData.notes);
-
-  return Object.values(buddiesData)
-    .map((buddy) => {
-      const haystack = normalize(
-        [
-          buddy.location,
-          buddy.title,
-          buddy.description,
-          buddy.buddyBio,
-          buddy.highlights.join(" "),
-          buddy.activities.join(" "),
-          buddy.groupSize,
-        ].join(" "),
-      );
-
-      let score = buddy.buddyRating * 10;
-
-      if (city && haystack.includes(city)) score += 50;
-      if (language) {
-        if (language.includes("english")) score += 12;
-        if (language.includes("vietnamese")) score += 8;
-      }
-      if (notes) {
-        for (const token of notes.split(/\s+/)) {
-          if (token.length > 3 && haystack.includes(token)) score += 2;
-        }
-      }
-
-      if (buddy.price * Math.max(formData.groupSize, 1) <= formData.budgetMax) {
-        score += 10;
-      }
-
-      if (formData.groupSize <= 2 && buddy.groupSize.includes("1-")) score += 4;
-      if (formData.groupSize >= 4 && buddy.groupSize.includes("10")) score += 4;
-
-      return { buddy, score };
-    })
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 6)
-    .map(({ buddy }) => buddy);
-}
-
-function createDefaultProposal(formData: TripRequestFormData): ProposalData {
-  return {
-    startTime: formData.startTime,
-    durationMinutes: formData.durationMinutes,
-    meetingPoint: formData.meetingPoint,
-    groupSize: formData.groupSize,
-    preferredLanguage: formData.preferredLanguage,
-    itinerarySummary: `A curated local experience in ${formData.city} with flexible stops based on your notes and budget.`,
-    finalPrice: Math.max(
-      formData.budgetMin,
-      Math.min(formData.budgetMax, formData.groupSize * 35),
-    ),
-    cancellationPolicy: "Free cancellation 24 hours before start time.",
-    notes:
-      formData.notes ||
-      "Buddy can refine details in chat before final confirmation.",
-  };
-}
-
-export function createStoredTripRequest(
-  formData: TripRequestFormData,
-): StoredTripRequest {
-  const recommendedBuddyIds = getRecommendedBuddies(formData).map(
-    (buddy) => buddy.id,
-  );
-
-  return {
-    ...formData,
-    id: `REQ-${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    bookingStatus: "OPEN",
-    paymentStatus: "unpaid",
-    selectedBuddyId: null,
-    recommendedBuddyIds,
-    proposal: createDefaultProposal(formData),
-    timeline: [
-      createTimelineItem(
-        "Request created",
-        `Trip request for ${formData.city} was created and is now open for buddy selection.`,
-      ),
-    ],
-  };
+  return parts.join(", ");
 }
 
 function mapPreferredLanguageToApiCodes(preferredLanguage: string) {
-  const normalized = preferredLanguage.trim().toLowerCase();
+  const tokens = preferredLanguage
+    .split(",")
+    .map((token) => token.trim())
+    .filter(Boolean);
 
-  if (!normalized) return ["EN"];
-  if (normalized.includes("vietnam")) return ["VN"];
-  if (normalized.includes("english")) return ["EN"];
-  if (normalized.includes("korean")) return ["KR"];
-  if (normalized.includes("japanese")) return ["JP"];
+  if (tokens.length === 0) return [];
 
-  return [preferredLanguage.trim().slice(0, 2).toUpperCase() || "EN"];
+  return tokens.map((token) => {
+    const normalized = normalize(token);
+
+    if (normalized.includes("vietnam")) return "VN";
+    if (normalized.includes("english")) return "EN";
+    if (normalized.includes("korean")) return "KR";
+    if (normalized.includes("japanese")) return "JP";
+
+    return token.slice(0, 2).toUpperCase();
+  });
 }
 
 function mapApiLanguageCodeToLabel(code?: string) {
@@ -280,30 +97,26 @@ function mapApiLanguageCodeToLabel(code?: string) {
     case "JP":
       return "Japanese";
     case "EN":
-    default:
       return "English";
+    default:
+      return code?.toUpperCase() || "English";
   }
 }
 
 export function mapTripFormDataToCreateTripRequest(
   formData: TripRequestFormData,
 ): CreateTripRequest {
-  const startDate = formData.startTime.split("T")[0] ?? "";
-  const startTime = formData.startTime.split("T")[1]
-    ? `${formData.startTime.split("T")[1]}:00`
-    : "10:00:00";
+  const [startDatePart, startClock = "10:00"] = formData.startTime.split("T");
 
   return {
     city: formData.city,
-    startDate,
-    startTime,
-    durationHours: Math.max(1, Math.round(formData.durationMinutes / 60)),
-    adults: Math.max(1, formData.groupSize),
-    children: 0,
-    preferredLanguages: mapPreferredLanguageToApiCodes(
-      formData.preferredLanguage,
-    ),
-    notes: formData.notes || "",
+    startDate: startDatePart ?? "",
+    startTime: startClock.length === 5 ? `${startClock}:00` : startClock,
+    durationHours: Math.max(1, formData.durationHours),
+    adults: Math.max(1, formData.adults),
+    children: Math.max(0, formData.children),
+    preferredLanguages: mapPreferredLanguageToApiCodes(formData.preferredLanguage),
+    notes: formData.notes.trim(),
   };
 }
 
@@ -311,35 +124,20 @@ export function mapTripDtoToStoredTripRequest(
   trip: TripDto,
   fallbackFormData: TripRequestFormData,
 ): StoredTripRequest {
-  const normalizedFormData: TripRequestFormData = {
+  return {
     ...fallbackFormData,
+    id: trip.id,
     city: trip.city,
     startTime: `${trip.startDate}T${trip.startTime.slice(0, 5)}`,
-    durationMinutes: Math.max(60, trip.durationHours * 60),
-    groupSize: Math.max(1, trip.adults + trip.children),
-    preferredLanguage: mapApiLanguageCodeToLabel(trip.preferredLanguages[0]),
-    notes: trip.notes || fallbackFormData.notes,
-  };
-
-  const recommendedBuddyIds = getRecommendedBuddies(normalizedFormData).map(
-    (buddy) => buddy.id,
-  );
-
-  return {
-    ...normalizedFormData,
-    id: trip.id,
+    durationHours: Math.max(1, trip.durationHours),
+    adults: Math.max(1, trip.adults),
+    children: Math.max(0, trip.children),
+    preferredLanguage: trip.preferredLanguages
+      .map((languageCode) => mapApiLanguageCodeToLabel(languageCode))
+      .join(", "),
+    notes: trip.notes || "",
     createdAt: trip.createdAt,
-    bookingStatus: "OPEN",
-    paymentStatus: "unpaid",
-    selectedBuddyId: null,
-    recommendedBuddyIds,
-    proposal: createDefaultProposal(normalizedFormData),
-    timeline: [
-      createTimelineItem(
-        "Request created",
-        `Trip request for ${trip.city} was created successfully and is now open for buddy selection.`,
-      ),
-    ],
+    status: trip.status,
   };
 }
 
@@ -349,118 +147,6 @@ export function saveLatestTripRequest(request: StoredTripRequest) {
     TRIP_REQUEST_STORAGE_KEY,
     JSON.stringify(request),
   );
-}
-
-export function updateLatestTripRequest(
-  updates: Partial<StoredTripRequest>,
-): StoredTripRequest | null {
-  const current = getLatestTripRequest();
-  if (!current) return null;
-
-  const next = { ...current, ...updates };
-  saveLatestTripRequest(next);
-  return next;
-}
-
-export function appendTripRequestTimeline(
-  title: string,
-  description: string,
-): StoredTripRequest | null {
-  const current = getLatestTripRequest();
-  if (!current) return null;
-
-  const next = {
-    ...current,
-    timeline: [...current.timeline, createTimelineItem(title, description)],
-  };
-
-  saveLatestTripRequest(next);
-  return next;
-}
-
-export function chooseBuddyForLatestTripRequest(
-  buddyId: number,
-): StoredTripRequest | null {
-  const current = getLatestTripRequest();
-  if (!current) return null;
-
-  const next = {
-    ...current,
-    selectedBuddyId: buddyId,
-    bookingStatus: "PENDING_BUDDY_CONFIRMATION" as BookingStatus,
-    timeline: [
-      ...current.timeline,
-      createTimelineItem(
-        "Buddy selected",
-        `Buddy #${buddyId} was selected and is pending confirmation.`,
-      ),
-    ],
-  };
-
-  saveLatestTripRequest(next);
-  return next;
-}
-
-export function advanceBookingStatus(
-  status: BookingStatus,
-  description?: string,
-): StoredTripRequest | null {
-  const current = getLatestTripRequest();
-  if (!current) return null;
-
-  const titleMap: Record<BookingStatus, string> = {
-    OPEN: "Request opened",
-    PENDING_BUDDY_CONFIRMATION: "Buddy selected",
-    MATCHED: "Buddy confirmed",
-    PROPOSAL_SENT: "Proposal sent",
-    PAYMENT_PENDING: "Payment pending",
-    CONFIRMED: "Trip confirmed",
-    IN_PROGRESS: "Trip in progress",
-    COMPLETED: "Trip completed",
-    PROPOSAL_REJECTED: "Proposal rejected",
-  };
-
-  const next = {
-    ...current,
-    bookingStatus: status,
-    timeline: [
-      ...current.timeline,
-      createTimelineItem(
-        titleMap[status],
-        description ?? getBookingStatusMeta(status).description,
-      ),
-    ],
-  };
-
-  if (status === "PAYMENT_PENDING") {
-    next.paymentStatus = "pending";
-  }
-  if (status === "CONFIRMED") {
-    next.paymentStatus = "paid";
-  }
-
-  saveLatestTripRequest(next);
-  return next;
-}
-
-export function updateLatestTripProposal(
-  proposal: ProposalData,
-): StoredTripRequest | null {
-  const current = getLatestTripRequest();
-  if (!current) return null;
-
-  const next = {
-    ...current,
-    proposal,
-    startTime: proposal.startTime,
-    durationMinutes: proposal.durationMinutes,
-    meetingPoint: proposal.meetingPoint,
-    groupSize: proposal.groupSize,
-    preferredLanguage: proposal.preferredLanguage,
-  };
-
-  saveLatestTripRequest(next);
-  return next;
 }
 
 export function getLatestTripRequest(): StoredTripRequest | null {

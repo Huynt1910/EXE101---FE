@@ -7,6 +7,7 @@ type TripRequestActionsProps = {
   step: number;
   totalSteps: number;
   nextLabel: string;
+  submitLabel?: string;
   draftSaved: boolean;
   isSubmitting: boolean;
   onSave: () => void;
@@ -19,6 +20,7 @@ export function TripRequestActions({
   step,
   totalSteps,
   nextLabel,
+  submitLabel = "Create my trip",
   draftSaved,
   isSubmitting,
   onSave,
@@ -71,7 +73,7 @@ export function TripRequestActions({
             onClick={onSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Creating trip..." : "Create my trip"}
+            {isSubmitting ? "Saving trip..." : submitLabel}
             <MoveRight className="h-4 w-4" />
           </Button>
         )}

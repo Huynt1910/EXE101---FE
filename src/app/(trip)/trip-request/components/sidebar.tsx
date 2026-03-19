@@ -1,7 +1,8 @@
 import { CheckCircle2, Coins, ShieldCheck, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
-  formatBudgetRange,
+  formatDurationHours,
+  formatTravelerSummary,
   formatTripRequestDateTime,
   type TripRequestFormData,
 } from "@/lib/trip-request";
@@ -83,26 +84,28 @@ export function TripPreviewCard({
         </div>
         <div className="rounded-2xl border border-border p-4">
           <p className="text-sm text-muted-foreground">Travelers</p>
-          <p className="mt-2 font-medium">{formData.groupSize}</p>
+          <p className="mt-2 font-medium">
+            {formatTravelerSummary(formData.adults, formData.children)}
+          </p>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-border p-4">
-            <p className="text-sm text-muted-foreground">Language</p>
+            <p className="text-sm text-muted-foreground">Languages</p>
             <p className="mt-2 font-medium">
-              {formData.preferredLanguage || "Add preferred language"}
+              {formData.preferredLanguage || "Add preferred languages"}
             </p>
           </div>
           <div className="rounded-2xl border border-border p-4">
-            <p className="text-sm text-muted-foreground">Budget</p>
+            <p className="text-sm text-muted-foreground">Duration</p>
             <p className="mt-2 font-medium">
-              {formatBudgetRange(formData.budgetMin, formData.budgetMax)}
+              {formatDurationHours(formData.durationHours)}
             </p>
           </div>
         </div>
         <div className="rounded-2xl border border-border p-4">
-          <p className="text-sm text-muted-foreground">Meeting point</p>
+          <p className="text-sm text-muted-foreground">Notes</p>
           <p className="mt-2 font-medium">
-            {formData.meetingPoint || "Choose a convenient meeting point"}
+            {formData.notes || "Add any extra details for your buddy"}
           </p>
         </div>
       </div>
@@ -130,8 +133,8 @@ export function MatchingTipsCard() {
       <h3 className="text-xl font-semibold">Tips for a better match</h3>
       <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
         <li>Add clear notes about your interests</li>
-        <li>Pick a realistic meeting point</li>
-        <li>Choose a flexible budget range</li>
+        <li>Choose a realistic start time and duration</li>
+        <li>Include the correct number of adults and children</li>
         <li>
           Mention food, culture, photography, shopping, or nightlife if relevant
         </li>

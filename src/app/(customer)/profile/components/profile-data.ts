@@ -11,7 +11,13 @@ import type { CourseItem, MenuItem } from "./profile-types";
 
 export const MENU_ITEMS: MenuItem[] = [
   { label: "Profile", icon: UserRound, href: "/profile" },
-  { label: "My booking", icon: BookOpen, href: "/booking", badge: 3 },
+  {
+    label: "My trips",
+    icon: BookOpen,
+    href: "/profile?section=trips",
+    section: "trips",
+    badge: 0,
+  },
   {
     label: "Completed",
     icon: CheckCheck,

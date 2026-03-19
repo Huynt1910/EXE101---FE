@@ -5,13 +5,25 @@ import type {
 } from "@/lib/trip-request";
 
 export const TRIP_REQUEST_CITIES = [
-  "Ha Noi",
-  "Ho Chi Minh City",
-  "Da Nang",
-  "Hoi An",
-  "Da Lat",
-  "Nha Trang",
-  "Sa Pa",
+  "District 1",
+  "District 2",
+  "District 3",
+  "District 4",
+  "District 5",
+  "District 6",
+  "District 7",
+  "District 8",
+  "District 9",
+  "District 10",
+  "District 11",
+  "District 12",
+  "Phu Nhuan District",
+  "Tan Binh District",
+  "Binh Thanh District",
+  "Go Vap District",
+  "Nha Be District",
+  "Cu Chi District",
+  "Hoc Mon District",
 ] as const;
 
 export const location = TRIP_REQUEST_CITIES;
@@ -19,12 +31,10 @@ export const location = TRIP_REQUEST_CITIES;
 export const defaultTripRequestFormData: TripRequestFormData = {
   city: "",
   startTime: "",
-  durationMinutes: 180,
-  groupSize: 1,
+  durationHours: 3,
+  adults: 1,
+  children: 0,
   preferredLanguage: "English",
-  budgetMin: 20,
-  budgetMax: 120,
-  meetingPoint: "",
   notes: "",
 };
 
@@ -37,15 +47,10 @@ export const tripRequestFormSchema = z
   .object({
     city: z.string().trim().min(1, "Location is required."),
     startTime: z.string(),
-    durationMinutes: z.number().finite(),
-    groupSize: z.number().finite(),
-    preferredLanguage: z
-      .string()
-      .trim()
-      .min(1, "Preferred language is required."),
-    budgetMin: z.number().finite(),
-    budgetMax: z.number().finite(),
-    meetingPoint: z.string(),
+    durationHours: z.number().finite(),
+    adults: z.number().finite(),
+    children: z.number().finite(),
+    preferredLanguage: z.string().trim(),
     notes: z.string(),
   })
   .superRefine((formData, ctx) => {
@@ -69,56 +74,27 @@ export const tripRequestFormSchema = z
       });
     }
 
-    if (formData.durationMinutes <= 0) {
+    if (formData.durationHours <= 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["durationMinutes"],
+        path: ["durationHours"],
         message: "Duration must be greater than 0.",
       });
     }
 
-    if (formData.groupSize < 1) {
+    if (formData.adults < 1) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["groupSize"],
-        message: "Group size must be at least 1.",
+        path: ["adults"],
+        message: "At least one adult traveler is required.",
       });
     }
 
-    if (formData.budgetMin < 0) {
+    if (formData.children < 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ["budgetMin"],
-        message: "Budget min is invalid.",
-      });
-    }
-
-    if (formData.budgetMax < 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["budgetMax"],
-        message: "Budget max is invalid.",
-      });
-    }
-
-    if (formData.budgetMin > formData.budgetMax) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["budgetMin"],
-        message: "Budget min must not exceed budget max.",
-      });
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["budgetMax"],
-        message: "Budget max must be greater than or equal to budget min.",
-      });
-    }
-
-    if (formData.meetingPoint.trim().length < 8) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["meetingPoint"],
-        message: "Meeting point should be at least 8 characters.",
+        path: ["children"],
+        message: "Children count cannot be negative.",
       });
     }
   });

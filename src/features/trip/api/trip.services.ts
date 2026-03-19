@@ -1,7 +1,8 @@
 import { httpClient } from "@/lib/http/client";
 import type {
-  TripRequest,
-  TripResponse,
+  CreateTripRequest,
+  TripUpdateRequest,
+  TripDto,
   GetTripsQuery,
 } from "@/features/trip/type";
 import type { ApiResponse, PaginatedResult } from "@/features/api-type";
@@ -9,23 +10,23 @@ import type { ApiResponse, PaginatedResult } from "@/features/api-type";
 const TRIP_BASE_PATH = "/Trips";
 
 export const tripApi = {
-  async createTrip(payload: TripRequest) {
-    const res = await httpClient.post<ApiResponse<TripResponse>, TripRequest>(
+  async createTrip(payload: CreateTripRequest) {
+    const res = await httpClient.post<ApiResponse<TripDto>, CreateTripRequest>(
       `${TRIP_BASE_PATH}`,
       payload,
     );
     return res.data;
   },
-  async updateTrip(id: string, payload: TripRequest) {
-    const res = await httpClient.put<ApiResponse<TripResponse>, TripRequest>(
+  async updateTrip(id: string, payload: TripUpdateRequest) {
+    const res = await httpClient.put<ApiResponse<TripDto>, TripUpdateRequest>(
       `${TRIP_BASE_PATH}/${id}`,
       payload,
     );
     return res.data;
   },
 
-  async patchTrip(id: string, payload: TripRequest) {
-    const res = await httpClient.patch<ApiResponse<TripResponse>, TripRequest>(
+  async patchTrip(id: string, payload: TripUpdateRequest) {
+    const res = await httpClient.patch<ApiResponse<TripDto>, TripUpdateRequest>(
       `${TRIP_BASE_PATH}/${id}`,
       payload,
     );
@@ -33,7 +34,7 @@ export const tripApi = {
   },
 
   async getTripById(id: string) {
-    const res = await httpClient.get<ApiResponse<TripResponse>>(
+    const res = await httpClient.get<ApiResponse<TripDto>>(
       `${TRIP_BASE_PATH}/${id}`,
     );
     return res.data;
@@ -41,22 +42,29 @@ export const tripApi = {
 
   async getMyTrips(params?: GetTripsQuery) {
     const res = await httpClient.get<
-      ApiResponse<PaginatedResult<TripResponse>>
+      ApiResponse<PaginatedResult<TripDto>>
     >(`${TRIP_BASE_PATH}/my`, params);
     return res.data;
   },
 
   async getTripsForAdmin(params?: GetTripsQuery) {
     const res = await httpClient.get<
-      ApiResponse<PaginatedResult<TripResponse>>
+      ApiResponse<PaginatedResult<TripDto>>
     >(TRIP_BASE_PATH,  params );
     return res.data;
   },
 
   async getOpenTrips(params?: GetTripsQuery) {
     const res = await httpClient.get<
-      ApiResponse<PaginatedResult<TripResponse>>
+      ApiResponse<PaginatedResult<TripDto>>
     >(`${TRIP_BASE_PATH}/open`,  params );
+    return res.data;
+  },
+
+  async deleteTrip(id: string) {
+    const res = await httpClient.delete<ApiResponse<null>>(
+      `${TRIP_BASE_PATH}/${id}`,
+    );
     return res.data;
   },
 };

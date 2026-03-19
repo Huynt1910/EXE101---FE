@@ -11,19 +11,17 @@ import type {
 type GroupBudgetStepProps = {
   formData: TripRequestFormData;
   errors: TripRequestValidationErrors;
-  onGroupSizeChange: (value: number) => void;
+  onAdultsChange: (value: number) => void;
+  onChildrenChange: (value: number) => void;
   onLanguageChange: (value: string) => void;
-  onBudgetMinChange: (value: number) => void;
-  onBudgetMaxChange: (value: number) => void;
 };
 
 export function GroupBudgetStep({
   formData,
   errors,
-  onGroupSizeChange,
+  onAdultsChange,
+  onChildrenChange,
   onLanguageChange,
-  onBudgetMinChange,
-  onBudgetMaxChange,
 }: GroupBudgetStepProps) {
   return (
     <div className="space-y-6">
@@ -38,40 +36,43 @@ export function GroupBudgetStep({
 
       <FieldGroup className="grid gap-4 md:grid-cols-2">
         <Field>
-          <FieldLabel htmlFor="trip-group-size">
+          <FieldLabel htmlFor="trip-adults">
             <span className="inline-flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
-              Number of travelers
+              Adults
             </span>
           </FieldLabel>
           <Input
-            id="trip-group-size"
+            id="trip-adults"
             type="number"
             min={1}
-            value={formData.groupSize}
+            value={formData.adults}
             onChange={(event) =>
-              onGroupSizeChange(Number(event.target.value) || 0)
+              onAdultsChange(Number(event.target.value) || 0)
             }
-            className={cn(errors.groupSize && "border-red-500")}
+            className={cn(errors.adults && "border-red-500")}
           />
-          <FieldError message={errors.groupSize} />
+          <FieldError message={errors.adults} />
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="trip-language">
+          <FieldLabel htmlFor="trip-children">
             <span className="inline-flex items-center gap-2">
-              <Globe2 className="h-4 w-4 text-primary" />
-              Preferred language
+              <Users className="h-4 w-4 text-primary" />
+              Children
             </span>
           </FieldLabel>
           <Input
-            id="trip-language"
-            placeholder="English, Vietnamese, Korean..."
-            value={formData.preferredLanguage}
-            onChange={(event) => onLanguageChange(event.target.value)}
-            className={cn(errors.preferredLanguage && "border-red-500")}
+            id="trip-children"
+            type="number"
+            min={0}
+            value={formData.children}
+            onChange={(event) =>
+              onChildrenChange(Number(event.target.value) || 0)
+            }
+            className={cn(errors.children && "border-red-500")}
           />
-          <FieldError message={errors.preferredLanguage} />
+          <FieldError message={errors.children} />
         </Field>
       </FieldGroup>
 
@@ -79,44 +80,29 @@ export function GroupBudgetStep({
         <div className="mb-4">
           <h3 className="flex items-center gap-2 text-lg font-semibold">
             <Coins className="h-5 w-5 text-primary" />
-            Budget range
+            Language preference
           </h3>
           <p className="mt-1 text-sm text-muted-foreground">
-            Enter the range you are comfortable with for this trip.
+            Add one or more preferred languages, separated by commas.
           </p>
         </div>
 
-        <FieldGroup className="grid gap-4 md:grid-cols-2">
-          <Field>
-            <FieldLabel htmlFor="trip-budget-min">Minimum budget</FieldLabel>
-            <Input
-              id="trip-budget-min"
-              type="number"
-              min={0}
-              value={formData.budgetMin}
-              onChange={(event) =>
-                onBudgetMinChange(Number(event.target.value) || 0)
-              }
-              className={cn(errors.budgetMin && "border-red-500")}
-            />
-            <FieldError message={errors.budgetMin} />
-          </Field>
-
-          <Field>
-            <FieldLabel htmlFor="trip-budget-max">Maximum budget</FieldLabel>
-            <Input
-              id="trip-budget-max"
-              type="number"
-              min={0}
-              value={formData.budgetMax}
-              onChange={(event) =>
-                onBudgetMaxChange(Number(event.target.value) || 0)
-              }
-              className={cn(errors.budgetMax && "border-red-500")}
-            />
-            <FieldError message={errors.budgetMax} />
-          </Field>
-        </FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="trip-language">
+            <span className="inline-flex items-center gap-2">
+              <Globe2 className="h-4 w-4 text-primary" />
+              Preferred languages
+            </span>
+          </FieldLabel>
+          <Input
+            id="trip-language"
+            placeholder="English, Vietnamese, Korean"
+            value={formData.preferredLanguage}
+            onChange={(event) => onLanguageChange(event.target.value)}
+            className={cn(errors.preferredLanguage && "border-red-500")}
+          />
+          <FieldError message={errors.preferredLanguage} />
+        </Field>
       </div>
     </div>
   );

@@ -6,15 +6,18 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useHydratedStore } from "@/hooks/useHydratedStore";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/callback-url";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const isHydrated = useHydratedStore();
   const { isAuthenticated, user } = useAuthStore();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const canUseAuthenticatedView = isHydrated && isAuthenticated;
 
   const callbackUrl = useMemo(() => {
     const query = searchParams.toString();
@@ -65,13 +68,13 @@ export function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-10">
-            <Link
+            {/* <Link
               href="/login"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Find Buddies
-            </Link>
-            <Link
+            </Link> */}
+            {/* <Link
               href="#science"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
@@ -88,12 +91,12 @@ export function Header() {
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
               Blog
-            </Link>
+            </Link> */}
           </div>
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3 pointer-events-auto">
-            {isAuthenticated ? (
+            {canUseAuthenticatedView ? (
               <>
                 <Button
                   asChild
@@ -231,7 +234,7 @@ export function Header() {
         {isOpen && (
           <div className="md:hidden py-6 px-6 lg:px-8 border-t border-border/50">
             <div className="flex flex-col gap-4">
-              <Link
+              {/* <Link
                 href="#produits"
                 className="text-lg text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
@@ -258,8 +261,8 @@ export function Header() {
                 onClick={() => setIsOpen(false)}
               >
                 Blog
-              </Link>
-              {isAuthenticated ? (
+              </Link> */}
+              {canUseAuthenticatedView ? (
                 <>
                   <Button
                     asChild

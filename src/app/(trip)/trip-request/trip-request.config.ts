@@ -10,15 +10,15 @@ export const TRIP_REQUEST_STEPS = [
     icon: MapPin,
   },
   {
-    label: "Group & budget",
-    subtitle: "Who is joining and spending",
-    intro: "Add the details for your group",
+    label: "Travelers & languages",
+    subtitle: "Who is joining this trip",
+    intro: "Add the traveler details",
     cta: "Continue to meeting details",
     icon: Users,
   },
   {
-    label: "Meeting & notes",
-    subtitle: "Practical details",
+    label: "Notes",
+    subtitle: "Extra context for your buddy",
     intro: "Add the last details before creating your trip",
     cta: "Create my trip",
     icon: Sparkles,
@@ -29,7 +29,7 @@ export const TRIP_REQUEST_COMPLETED_ICON = CheckCircle2;
 
 export const TRIP_REQUEST_STEP_FIELDS: Array<Array<keyof TripRequestFormData>> =
   [
-    ["city", "startTime"],
-    ["groupSize", "preferredLanguage", "budgetMin", "budgetMax"],
-    ["meetingPoint", "notes"],
+    ["city", "startTime", "durationHours"],
+    ["adults", "children", "preferredLanguage"],
+    ["notes"],
   ];

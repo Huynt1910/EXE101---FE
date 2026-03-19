@@ -167,6 +167,11 @@ export function DestinationTimingStep({
             }}
             className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
           />
+          {errors.durationHours ? (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.durationHours}
+            </p>
+          ) : null}
         </Field>
       </FieldGroup>
     </div>

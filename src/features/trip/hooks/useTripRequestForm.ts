@@ -52,10 +52,10 @@ export function useTripRequestForm() {
   const selectedEndTime = useMemo(() => {
     if (!formData.startTime) return null;
     return dayjs(formData.startTime).add(
-      formData.durationMinutes || 180,
-      "minute",
+      formData.durationHours || 3,
+      "hour",
     );
-  }, [formData.durationMinutes, formData.startTime]);
+  }, [formData.durationHours, formData.startTime]);
 
   const effectiveEndTime = useMemo(() => {
     if (!selectedStartTime || !selectedEndTime) return selectedEndTime;
@@ -91,9 +91,9 @@ export function useTripRequestForm() {
   const syncDuration = (start: Dayjs | null, end: Dayjs | null) => {
     if (!start || !end) return;
 
-    const diff = end.diff(start, "minute");
+    const diff = end.diff(start, "hour");
     if (diff > 0) {
-      updateField("durationMinutes", diff);
+      updateField("durationHours", diff);
     }
   };
 
@@ -182,6 +182,13 @@ export function useTripRequestForm() {
     syncDuration(selectedStartTime, time);
   };
 
+  const replaceFormData = (nextFormData: TripRequestFormData) => {
+    setFormData(nextFormData);
+    setErrors({});
+    setSubmitError(null);
+    setDraftSaved(false);
+  };
+
   return {
     step,
     draftSaved,
@@ -204,5 +211,6 @@ export function useTripRequestForm() {
     handlePreferredDateChange,
     handlePreferredStartTimeChange,
     handlePreferredEndTimeChange,
+    replaceFormData,
   };
 }
