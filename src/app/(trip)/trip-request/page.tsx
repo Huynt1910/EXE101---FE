@@ -12,7 +12,7 @@ import { MeetingNotesStep } from "@/app/(trip)/trip-request/components/step-sect
 import { Card } from "@/components/ui/card";
 import { useTripRequestForm } from "@/features/trip/hooks/useTripRequestForm";
 import { useTripMutations } from "@/features/trip/hooks/useTripMutation";
-import { useTripDetail } from "@/features/trip/hooks/useTripQueries";
+import { useTripDetail } from "../../../features/trip/hooks/useTripRequest";
 import {
   clearTripRequestDraft,
   defaultTripRequestFormData,
