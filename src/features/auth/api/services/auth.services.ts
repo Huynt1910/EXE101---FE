@@ -11,7 +11,7 @@ import {
 } from "../../type";
 import type { ApiResponse } from "@/features/api-type";
 
-const AUTH_BASE_PATH = "/Auth";
+const AUTH_BASE_PATH = "/api/Auth";
 
 export const authApi = {
   async login(payload: LoginRequest) {

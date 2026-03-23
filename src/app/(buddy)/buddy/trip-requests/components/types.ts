@@ -17,4 +17,3 @@ export type TripRequestViewModel = {
 
 export type DateFilter = "All" | "Today" | "ThisWeek" | "Weekend";
 export type PeopleFilter = "All" | "1-2" | "3-5" | "6+";
-export type SortMode = "Recommended" | "Newest" | "Earliest" | "LargestGroup";

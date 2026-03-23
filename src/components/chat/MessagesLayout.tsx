@@ -1,18 +1,23 @@
-  'use client';
+  "use client";
 
-import { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import ConversationList, { type Conversation } from './ConversationList';
-import MessageContainer from './MessageContainer';
+  import { useCallback, useEffect, useMemo, useState } from "react";
+  import * as signalR from "@microsoft/signalr";
+  import { useSearchParams } from "next/navigation";
+  import { toast } from "sonner";
+  import ConversationList, { type Conversation } from "./ConversationList";
+  import MessageContainer from "./MessageContainer";
 import {
   useChatRoomMessages,
   useChatRooms,
-  useSendChatMessageMutation,
-} from '@/features/chat/hooks/useChat';
-import type { ChatRoom, ChatRoomsList } from '@/features/chat/type';
-import { useAuthStore } from '@/lib/store/authStore';
-import { decodeJwtPayload, extractJwtUserId } from '@/lib/auth/decode-jwt';
+  } from "@/features/chat/hooks/useChat";
+  import { useChatSignalR } from "@/features/chat/hooks/useChatSignalR";
+  import type { ChatMessage, ChatRoom, ChatRoomsList } from "@/features/chat/type";
+  import { useAuthStore } from "@/lib/store/authStore";
+  import { decodeJwtPayload, extractJwtUserId } from "@/lib/auth/decode-jwt";
+  import { getChatConnectionDiagnostics } from "@/lib/hub/chatHub";
+
+const GUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function mapRoomToConversation(room: ChatRoom): Conversation {
   const shortTripRequestId = room.tripRequestId ? room.tripRequestId.slice(0, 8) : null;
@@ -25,13 +30,13 @@ function mapRoomToConversation(room: ChatRoom): Conversation {
     id: room.id,
     name,
     avatar: room.avatar ?? room.otherUserAvatar ?? undefined,
-    lastMessage: room.lastMessage ?? room.roomType ?? 'No messages yet',
+    lastMessage: room.lastMessage ?? room.roomType ?? "No messages yet",
     lastMessageTime: room.lastMessageAt
       ? new Date(room.lastMessageAt).toLocaleTimeString('en-GB', {
-          hour: '2-digit',
-          minute: '2-digit',
+          hour: "2-digit",
+          minute: "2-digit",
         })
-      : '',
+      : "",
     unreadCount: room.unreadCount,
     isOnline: room.isOnline,
   };
@@ -46,14 +51,16 @@ export default function MessagesLayout() {
   const searchParams = useSearchParams();
   const authState = useAuthStore();
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [draft, setDraft] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [draft, setDraft] = useState("");
+  const [isSendingRealtime, setIsSendingRealtime] = useState(false);
+  const [realtimeMessages, setRealtimeMessages] = useState<ChatMessage[]>([]);
   const [hasAppliedInitialRoom, setHasAppliedInitialRoom] = useState(false);
 
   const requestedRoomId = searchParams.get('roomId');
+  const normalizedToken = (authState.token ?? "").trim();
 
   const roomsQuery = useChatRooms();
-  const sendMessageMutation = useSendChatMessageMutation();
   const messagesQuery = useChatRoomMessages(selectedId ?? undefined, {
     page: 1,
     pageSize: 50,
@@ -64,15 +71,53 @@ export default function MessagesLayout() {
     return extractJwtUserId(payload);
   }, [authState.token]);
 
+  const handleMessageCreated = useCallback(
+    (message: ChatMessage) => {
+      if (!selectedId || message.roomId !== selectedId) return;
+
+      setRealtimeMessages((current) => {
+        if (current.some((item) => item.id === message.id)) return current;
+        return [...current, message];
+      });
+    },
+    [selectedId],
+  );
+
+  const {
+    sendRealtimeMessage,
+    connected: isRealtimeConnected,
+    connectionState,
+  } = useChatSignalR({
+    accessToken: normalizedToken,
+    roomId: selectedId ?? undefined,
+    onMessageCreated: handleMessageCreated,
+  });
+
   const conversations = useMemo(
     () => normalizeRooms(roomsQuery.data?.data).map(mapRoomToConversation),
     [roomsQuery.data?.data],
   );
 
-  const messages = useMemo(
-    () => messagesQuery.data?.data?.items ?? [],
-    [messagesQuery.data?.data],
-  );
+  useEffect(() => {
+    const baseMessages = messagesQuery.data?.data?.items ?? [];
+    setRealtimeMessages(baseMessages);
+  }, [messagesQuery.data?.data?.items, selectedId]);
+
+  const messages = useMemo(() => realtimeMessages, [realtimeMessages]);
+
+  useEffect(() => {
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    // Prevent page-level scroll; only chat panes should scroll.
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
 
   useEffect(() => {
     if (conversations.length === 0) return;
@@ -97,31 +142,39 @@ export default function MessagesLayout() {
   const handleSend = async () => {
     const roomId = selectedId;
     const content = draft.trim();
-    if (!roomId || !content) return;
+    if (!roomId || !content || !isRealtimeConnected) {
+      if (!isRealtimeConnected) {
+        toast.error("SignalR chưa connected, vui lòng đợi rồi gửi lại");
+      }
+      return;
+    }
+
+    const hasRoomInList = conversations.some((conversation) => conversation.id === roomId);
+    if (!hasRoomInList) {
+      toast.error("Room không tồn tại trong danh sách hiện tại");
+      return;
+    }
 
     try {
-      await sendMessageMutation.mutateAsync({
-        roomId,
-        payload: {
-          contentText: content,
-          contextText: content,
-        },
-      });
-      setDraft('');
+      setIsSendingRealtime(true);
+      await sendRealtimeMessage(roomId, content);
+      setDraft("");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to send message';
+      const message = error instanceof Error ? error.message : "Failed to send message";
       toast.error(message);
+    } finally {
+      setIsSendingRealtime(false);
     }
   };
 
   const selectedConversation = conversations.find((c) => c.id === selectedId) ?? null;
 
   return (
-    <div className="flex h-[calc(100vh-64px)] overflow-hidden border border-gray-200 bg-white shadow-sm mx-4 md:mx-6 2xl:mx-16">
+    <div className="mx-4 flex h-full overflow-hidden border border-gray-200 bg-white shadow-sm md:mx-6 2xl:mx-16">
       {/* Left sidebar — fixed width on desktop, hidden on mobile when conversation is open */}
       <div
         className={`
-          w-full md:w-75 lg:w-85 shrink-0
+          w-full md:w-75 lg:w-85 shrink-0 min-h-0 min-w-0
           ${selectedId ? 'hidden md:flex' : 'flex'}
           flex-col border-r border-gray-200
         `}
@@ -138,7 +191,7 @@ export default function MessagesLayout() {
       {/* Right main area — takes remaining space */}
       <div
         className={`
-          flex-1 flex flex-col
+          flex-1 flex flex-col min-h-0 min-w-0
           ${selectedId ? 'flex' : 'hidden md:flex'}
         `}
       >
@@ -146,10 +199,11 @@ export default function MessagesLayout() {
           selectedConversation={selectedConversation}
           messages={messages}
           currentUserId={currentUserId}
+          isRealtimeConnected={isRealtimeConnected}
           draft={draft}
           onDraftChange={setDraft}
           onSend={handleSend}
-          isSending={sendMessageMutation.isPending}
+          isSending={isSendingRealtime}
           isLoadingMessages={messagesQuery.isLoading || roomsQuery.isLoading}
         />
       </div>
