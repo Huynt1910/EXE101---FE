@@ -8,7 +8,7 @@ import type {
 } from "@/features/chat/type";
 import { httpClient } from "@/lib/http/client";
 
-const CHAT_BASE_PATH = "/Chat";
+const CHAT_BASE_PATH = "/api/Chat";
 
 export const chatApi = {
   async getRooms() {

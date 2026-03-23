@@ -1,5 +1,6 @@
 'use client';
 
+import { useCallback, useEffect, useRef } from 'react';
 import MessagesEmptyState from './MessagesEmptyState';
 import { type Conversation } from './ConversationList';
 import type { ChatMessage } from '@/features/chat/type';
@@ -16,6 +17,7 @@ type Props = {
   selectedConversation: Conversation | null;
   messages: ChatMessage[];
   currentUserId?: string;
+  isRealtimeConnected?: boolean;
   draft: string;
   onDraftChange: (value: string) => void;
   onSend: () => void;
@@ -44,12 +46,37 @@ export default function MessageContainer({
   selectedConversation,
   messages,
   currentUserId,
+  isRealtimeConnected = false,
   draft,
   onDraftChange,
   onSend,
   isSending = false,
   isLoadingMessages = false,
 }: Readonly<Props>) {
+  const isSendDisabled = isSending || draft.trim() === '' || !isRealtimeConnected;
+  const messagesViewportRef = useRef<HTMLDivElement>(null);
+  const previousConversationIdRef = useRef<string | null>(null);
+  const previousLastMessageIdRef = useRef<string | null>(null);
+
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    const viewport = messagesViewportRef.current;
+    if (!viewport) return;
+
+    viewport.scrollTo({
+      top: viewport.scrollHeight,
+      behavior,
+    });
+  }, []);
+
+  const handleSendMessage = useCallback(() => {
+    if (isSendDisabled) return;
+
+    onSend();
+    requestAnimationFrame(() => {
+      scrollToLatest('smooth');
+    });
+  }, [isSendDisabled, onSend, scrollToLatest]);
+
   const displayMessages: MessageUI[] = [...messages]
     .sort(
       (a, b) =>
@@ -62,6 +89,42 @@ export default function MessageContainer({
       contentText: item.contentText ?? getFallbackContentText(item.contentType),
       createdAt: item.createdAt,
     }));
+
+  useEffect(() => {
+    if (!selectedConversation) {
+      previousConversationIdRef.current = null;
+      previousLastMessageIdRef.current = null;
+      return;
+    }
+
+    const normalizedCurrentUserId = currentUserId?.trim().toLowerCase() ?? '';
+    const conversationId = selectedConversation.id;
+    const lastMessage = displayMessages.at(-1);
+    const lastMessageId = lastMessage?.id ?? null;
+
+    const isConversationChanged = previousConversationIdRef.current !== conversationId;
+    const isNewLastMessage =
+      Boolean(lastMessageId) && lastMessageId !== previousLastMessageIdRef.current;
+
+    if (isConversationChanged) {
+      requestAnimationFrame(() => {
+        scrollToLatest('auto');
+      });
+    } else if (isNewLastMessage) {
+      const normalizedSenderUserId = lastMessage?.senderUserId.trim().toLowerCase() ?? '';
+      const isOwnMessage =
+        Boolean(normalizedCurrentUserId) && normalizedSenderUserId === normalizedCurrentUserId;
+
+      if (isOwnMessage) {
+        requestAnimationFrame(() => {
+          scrollToLatest('smooth');
+        });
+      }
+    }
+
+    previousConversationIdRef.current = conversationId;
+    previousLastMessageIdRef.current = lastMessageId;
+  }, [currentUserId, displayMessages, scrollToLatest, selectedConversation]);
 
   if (!selectedConversation) {
     return (
@@ -114,17 +177,15 @@ export default function MessageContainer({
               )}
 
               <div
-                className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                  isMine
-                    ? 'bg-[#4a5df9] text-white rounded-br-md'
+                className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${isMine
+                    ? 'bg-[#ffdb5b] text-black rounded-br-md'
                     : 'bg-[#f3f5f7] text-gray-800 rounded-bl-md'
-                }`}
+                  }`}
               >
                 <p className="whitespace-pre-wrap wrap-break-word">{message.contentText}</p>
                 <p
-                  className={`mt-1 text-[10px] ${
-                    isMine ? 'text-rose-100' : 'text-gray-400'
-                  }`}
+                  className={`mt-1 text-[10px] ${isMine ? 'text-black' : 'text-gray-400'
+                    }`}
                 >
                   {formatTime(message.createdAt)}
                 </p>
@@ -163,7 +224,7 @@ export default function MessageContainer({
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4">
+      <div ref={messagesViewportRef} className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4">
         {messageBody}
       </div>
 
@@ -174,22 +235,22 @@ export default function MessageContainer({
           value={draft}
           onChange={(event) => onDraftChange(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
+            if (event.key === 'Enter' && !event.shiftKey && !isSendDisabled) {
               event.preventDefault();
-              onSend();
+              handleSendMessage();
             }
           }}
-          placeholder="Nhập tin nhắn..."
+          placeholder="Type a message..."
           className="flex-1 px-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-400 focus:border-transparent"
         />
         <button
           type="button"
-          onClick={onSend}
-          disabled={isSending || draft.trim() === ''}
-          className="shrink-0 px-4 py-2 bg-rose-500 hover:bg-rose-600 transition-colors text-white text-sm font-medium rounded-full"
-          aria-label="Gửi tin nhắn"
+          onClick={handleSendMessage}
+          disabled={isSendDisabled}
+          className="shrink-0 px-4 py-2 bg-rose-500 hover:bg-rose-600 disabled:bg-rose-300 transition-colors text-white text-sm font-medium rounded-full cursor-pointer"
+          aria-label="Send message"
         >
-          {isSending ? 'Đang gửi...' : 'Gửi'}
+          {isSending ? 'Sending...' : 'Send'}
         </button>
       </div>
     </div>

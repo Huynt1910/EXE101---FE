@@ -3,9 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Calendar,
   ChevronLeft,
   ChevronRight,
+  Clock,
   MessageSquare,
+  Timer,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { TripRequestViewModel } from "./types";
@@ -52,6 +55,25 @@ function tagColor(tag: string) {
 function formatDuration(h: number) {
   if (!Number.isFinite(h)) return "N/A";
   return h === 1 ? "1 hr" : `${h} hrs`;
+}
+
+function formatDate(dateStr: string) {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatTime(timeStr: string) {
+  if (!timeStr) return "";
+  const [h, m] = timeStr.split(":");
+  const hour = Number.parseInt(h, 10);
+  const suffix = hour >= 12 ? "PM" : "AM";
+  const hour12 = hour % 12 === 0 ? 12 : hour % 12;
+  return `${hour12}:${m} ${suffix}`;
 }
 
 // ─── RequestCard ───────────────────────────────────────────────────────────────
@@ -172,6 +194,25 @@ function RequestCard({
               {groupSize} {groupSize === 1 ? "guest" : "guests"}
             </span>
           </div>
+
+          {/* Date and time */}
+          <div className="flex flex-col gap-1.5 text-[12px] text-slate-600">
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-3.5 w-3.5 text-slate-500" />
+              <span className="truncate">{formatDate(request.startDate)}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Clock className="h-3.5 w-3.5 text-slate-500" />
+                <span className="truncate">{formatTime(request.startTime)}</span>
+              </div>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <Timer className="h-3.5 w-3.5 text-slate-500" />
+                <span className="truncate">{formatDuration(request.durationHours)}</span>
+              </div>
+            </div>
+          </div>
+
 
           {/* Description */}
           <p className="text-[13px] leading-5 text-slate-500 line-clamp-2">

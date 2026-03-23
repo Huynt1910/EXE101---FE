@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,18 +8,16 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { DateFilter, PeopleFilter, SortMode } from "./types";
+import type { DateFilter, PeopleFilter } from "./types";
 
 type TripRequestsFiltersProps = {
   dateFilter: DateFilter;
   peopleFilter: PeopleFilter;
   languageFilter: string;
-  sortMode: SortMode;
   languageOptions: string[];
   onDateFilterChange: (value: DateFilter) => void;
   onPeopleFilterChange: (value: PeopleFilter) => void;
   onLanguageFilterChange: (value: string) => void;
-  onSortModeChange: (value: SortMode) => void;
 };
 
 type Option = {
@@ -77,12 +74,10 @@ export function TripRequestsFilters({
   dateFilter,
   peopleFilter,
   languageFilter,
-  sortMode,
   languageOptions,
   onDateFilterChange,
   onPeopleFilterChange,
   onLanguageFilterChange,
-  onSortModeChange,
 }: Readonly<TripRequestsFiltersProps>) {
   const dateOptions: Option[] = [
     { value: "All", label: "All dates" },
@@ -103,23 +98,8 @@ export function TripRequestsFilters({
     ...languageOptions.map((l) => ({ value: l, label: l })),
   ];
 
-  const sortOptions: Option[] = [
-    { value: "Recommended", label: "Recommended" },
-    { value: "Newest", label: "Newest" },
-    { value: "Earliest", label: "Earliest date" },
-    { value: "LargestGroup", label: "Largest group" },
-  ];
-
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Rating / Sort */}
-      <FilterDropdown
-        label="Rating"
-        value={sortMode}
-        options={sortOptions}
-        onValueChange={(v) => onSortModeChange(v as SortMode)}
-      />
-
       {/* Date / "Price" equivalent */}
       <FilterDropdown
         label="Date"

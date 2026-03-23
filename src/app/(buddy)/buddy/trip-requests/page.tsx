@@ -3,12 +3,12 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Pagination } from "@heroui/pagination";
 import { TripRequestsFilters } from "./components/TripRequestsFilters";
 import { TripRequestsGrid } from "./components/TripRequestsGrid";
 import type {
   DateFilter,
   PeopleFilter,
-  SortMode,
   TripRequestViewModel,
 } from "./components/types";
 import { useTripRequest } from "@/features/trip/hooks/useTripRequest";
@@ -47,28 +47,13 @@ function matchesPeopleFilter(groupSize: number, filter: PeopleFilter) {
   return groupSize >= 6;
 }
 
-function sortRequests(requests: TripRequestViewModel[], sortMode: SortMode) {
+function sortRequests(requests: TripRequestViewModel[]) {
   const next = [...requests];
-  if (sortMode === "Newest") {
-    next.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-    return next;
-  }
-  if (sortMode === "Earliest") {
-    next.sort(
-      (a, b) =>
-        new Date(`${a.startDate}T${a.startTime}`).getTime() -
-        new Date(`${b.startDate}T${b.startTime}`).getTime(),
-    );
-    return next;
-  }
-  if (sortMode === "LargestGroup") {
-    next.sort((a, b) => b.adults + b.children - (a.adults + a.children));
-    return next;
-  }
   next.sort((a, b) => b.matchScore - a.matchScore);
+  next.sort(
+    (a, b) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  );
   return next;
 }
 
@@ -92,16 +77,23 @@ function buildStartDateTime(startDate: string, startTime: string) {
 
 export default function BuddyTripRequestsPage() {
   const router = useRouter();
+  const [currentPage, setCurrentPage] = useState(1);
   const [dateFilter, setDateFilter] = useState<DateFilter>("All");
   const [peopleFilter, setPeopleFilter] = useState<PeopleFilter>("All");
   const [languageFilter, setLanguageFilter] = useState("All");
-  const [sortMode, setSortMode] = useState<SortMode>("Recommended");
   const [appliedIds, setAppliedIds] = useState<string[]>([]);
 
   const { openTripsQuery, submitOfferMutation } = useTripRequest({
-    openTripsParams: { PageSize: 50 },
+    openTripsParams: { PageSize: 12, Page: currentPage },
     enableOpenTrips: true,
   });
+  const paginationData = openTripsQuery.data?.data;
+  const totalPages =
+    paginationData?.totalPages ??
+    Math.max(
+      1,
+      Math.ceil((paginationData?.totalCount ?? 0) / (paginationData?.pageSize ?? 12)),
+    );
   const tripItems = openTripsQuery.data?.data.items ?? [];
 
   const requests = useMemo(
@@ -155,8 +147,8 @@ export default function BuddyTripRequestsPage() {
       }
       return true;
     });
-    return sortRequests(filtered, sortMode);
-  }, [dateFilter, languageFilter, peopleFilter, requests, sortMode]);
+    return sortRequests(filtered);
+  }, [dateFilter, languageFilter, peopleFilter, requests]);
 
   const handleApplyContact = async (
     requestId: string,
@@ -234,12 +226,10 @@ export default function BuddyTripRequestsPage() {
           dateFilter={dateFilter}
           peopleFilter={peopleFilter}
           languageFilter={languageFilter}
-          sortMode={sortMode}
           languageOptions={languageOptions}
           onDateFilterChange={setDateFilter}
           onPeopleFilterChange={setPeopleFilter}
           onLanguageFilterChange={setLanguageFilter}
-          onSortModeChange={setSortMode}
         />
 
         {/* Grid */}
@@ -247,6 +237,26 @@ export default function BuddyTripRequestsPage() {
           requests={viewData}
           onApplyContact={handleApplyContact}
         />
+
+        <div className="flex justify-center pt-2">
+          <Pagination
+            showControls
+            initialPage={1}
+            page={currentPage}
+            total={Math.max(1, totalPages)}
+            onChange={setCurrentPage}
+            isDisabled={totalPages <= 1}
+            classNames={{
+              item:
+                "transition-colors hover:bg-orange-100 hover:text-orange-700",
+              prev:
+                "transition-colors hover:bg-orange-100 hover:text-orange-700",
+              next:
+                "transition-colors hover:bg-orange-100 hover:text-orange-700",
+              cursor: "bg-orange-600 text-white",
+            }}
+          />
+        </div>
       </div>
     </main>
   );
