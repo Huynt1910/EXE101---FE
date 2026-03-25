@@ -42,6 +42,13 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
     [user?.email, user?.fullName],
   );
 
+  const chatHref = useMemo(() => {
+    const hasBuddyRole =
+      user?.roles?.some((role) => role?.toLowerCase() === "buddy") ?? false;
+
+    return hasBuddyRole ? "/buddy/messages" : "/messages";
+  }, [user?.roles]);
+
   const initials = useMemo(() => {
     const chars = fullName
       .split(" ")
@@ -127,7 +134,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                   className="rounded-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
                 >
                   <Link
-                    href="/messages"
+                    href={chatHref}
                     className="inline-flex items-center gap-2"
                   >
                     Chat
@@ -180,7 +187,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
 
                       <DropdownMenu.Item asChild>
                         <Link
-                          href="/messages"
+                          href={chatHref}
                           className="mt-1 block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
                           Chat
@@ -292,7 +299,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                     variant="ghost"
                     className="rounded-full w-full mt-4 bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-accent"
                   >
-                    <Link href="/messages" onClick={() => setIsOpen(false)}>
+                    <Link href={chatHref} onClick={() => setIsOpen(false)}>
                       Chat
                     </Link>
                   </Button>

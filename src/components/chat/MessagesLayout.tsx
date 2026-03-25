@@ -1,7 +1,6 @@
   "use client";
 
   import { useCallback, useEffect, useMemo, useState } from "react";
-  import * as signalR from "@microsoft/signalr";
   import { useSearchParams } from "next/navigation";
   import { toast } from "sonner";
   import ConversationList, { type Conversation } from "./ConversationList";
@@ -11,40 +10,58 @@ import {
   useChatRooms,
   } from "@/features/chat/hooks/useChat";
   import { useChatSignalR } from "@/features/chat/hooks/useChatSignalR";
-  import type { ChatMessage, ChatRoom, ChatRoomsList } from "@/features/chat/type";
+  import type { ChatMessage, ChatRoom } from "@/features/chat/type";
   import { useAuthStore } from "@/lib/store/authStore";
   import { decodeJwtPayload, extractJwtUserId } from "@/lib/auth/decode-jwt";
-  import { getChatConnectionDiagnostics } from "@/lib/hub/chatHub";
 
 const GUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function formatRelativeLastMessageAt(value: string | null | undefined): string {
+  if (!value) return "";
+
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) return "";
+
+  const elapsedMs = Math.max(0, Date.now() - timestamp);
+  const minuteMs = 60 * 1000;
+  const hourMs = 60 * minuteMs;
+  const dayMs = 24 * hourMs;
+  const weekMs = 7 * dayMs;
+
+  if (elapsedMs < minuteMs) {
+    return "now";
+  }
+
+  if (elapsedMs < hourMs) {
+    return `${Math.max(1, Math.floor(elapsedMs / minuteMs))}m`;
+  }
+
+  if (elapsedMs < dayMs) {
+    return `${Math.floor(elapsedMs / hourMs)}h`;
+  }
+
+  if (elapsedMs < weekMs) {
+    return `${Math.floor(elapsedMs / dayMs)}d`;
+  }
+
+  return `${Math.floor(elapsedMs / weekMs)}w`;
+}
+
 function mapRoomToConversation(room: ChatRoom): Conversation {
   const shortTripRequestId = room.tripRequestId ? room.tripRequestId.slice(0, 8) : null;
   const name =
-    room.name ??
     room.otherUserName ??
     (shortTripRequestId ? `Trip Request ${shortTripRequestId}` : `Room ${room.id.slice(0, 8)}`);
 
   return {
     id: room.id,
+    tripRequestId: room.tripRequestId,
     name,
-    avatar: room.avatar ?? room.otherUserAvatar ?? undefined,
     lastMessage: room.lastMessage ?? room.roomType ?? "No messages yet",
-    lastMessageTime: room.lastMessageAt
-      ? new Date(room.lastMessageAt).toLocaleTimeString('en-GB', {
-          hour: "2-digit",
-          minute: "2-digit",
-        })
-      : "",
-    unreadCount: room.unreadCount,
-    isOnline: room.isOnline,
+    lastMessageAt: room.lastMessageAt ?? null,
+    lastMessageTime: formatRelativeLastMessageAt(room.lastMessageAt),
   };
-}
-
-function normalizeRooms(data: ChatRoomsList | null | undefined): ChatRoom[] {
-  if (!data) return [];
-  return Array.isArray(data) ? data : data.items ?? [];
 }
 
 export default function MessagesLayout() {
@@ -86,7 +103,6 @@ export default function MessagesLayout() {
   const {
     sendRealtimeMessage,
     connected: isRealtimeConnected,
-    connectionState,
   } = useChatSignalR({
     accessToken: normalizedToken,
     roomId: selectedId ?? undefined,
@@ -94,7 +110,7 @@ export default function MessagesLayout() {
   });
 
   const conversations = useMemo(
-    () => normalizeRooms(roomsQuery.data?.data).map(mapRoomToConversation),
+    () => (roomsQuery.data?.data ?? []).map(mapRoomToConversation),
     [roomsQuery.data?.data],
   );
 

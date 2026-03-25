@@ -5,18 +5,14 @@ export type ChatContentType = "Text" | "BookingCard" | "Image" | "File" | "Syste
 
 export interface ChatRoom {
 	id: string;
-	roomType?: string;
-	tripId?: string | null;
-	tripRequestId?: string | null;
-	buddyUserId?: string | null;
-	name?: string;
-	avatar?: string | null;
-	lastMessage?: string | null;
-	lastMessageAt?: string | null;
-	unreadCount?: number;
-	isOnline?: boolean;
-	otherUserName?: string;
-	otherUserAvatar?: string | null;
+	roomType: string;
+	tripId: string | null;
+	tripRequestId: string | null;
+	buddyUserId: string | null;
+	otherUserId: string | null;
+	otherUserName: string | null;
+	lastMessage: string | null;
+	lastMessageAt: string | null;
 }
 
 export interface ChatMessage {
@@ -36,11 +32,7 @@ export interface ChatMessageList extends PaginatedResult<ChatMessage> {
 	isOnline?: boolean;
 }
 
-export type ChatRoomsList =
-	| ChatRoom[]
-	| {
-			items: ChatRoom[];
-	  };
+export type ChatRoomsList = ChatRoom[];
 
 export interface GetRoomMessagesQuery extends RequestParams {
 	page?: number;

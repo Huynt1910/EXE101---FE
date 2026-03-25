@@ -70,7 +70,6 @@ export async function getOrCreateChatConnection(accessToken: string) {
   startPromise = connection
     .start()
     .then(() => {
-      console.log("[SignalR] connected");
       return connection!;
     })
     .finally(() => {

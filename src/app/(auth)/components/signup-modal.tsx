@@ -20,7 +20,6 @@ export interface SignUpModalProps {
 
 const VERIFY_EMAIL_PATH = "/verify-email";
 const SUCCESS_TOAST_DURATION_MS = 3000;
-const MODAL_DISMISS_TIMEOUT_MS = 100;
 
 export default function SignUpModal({
   callbackUrl,
@@ -55,33 +54,6 @@ export default function SignUpModal({
   };
 
   // ============================================================================
-  // Navigation Logic - Dual layer for mobile/desktop reliability
-  // ============================================================================
-
-  const closeAndNavigateToVerifyEmail = (email: string) => {
-    const targetUrl = `${VERIFY_EMAIL_PATH}?email=${encodeURIComponent(email)}`;
-
-    // Layer 1: Try soft navigation (works on desktop & most mobile browsers)
-    // router.push() changes URL → (.)signup route dismissed → modal auto-closes
-    router.push(targetUrl);
-
-    // Layer 2: Fallback for mobile/intercepted-route edge cases
-    // If modal still visible after timeout, explicitly close it and retry navigate
-    setTimeout(() => {
-      if (globalThis.location.pathname !== VERIFY_EMAIL_PATH) {
-        // Modal didn't dismiss via route change, close it explicitly
-        onClose(); // Calls router.back()
-        
-        // Navigate again with replace instead of push
-        // This ensures URL changes even if modal is still transitioning
-        setTimeout(() => {
-          router.replace(targetUrl);
-        }, 50);
-      }
-    }, MODAL_DISMISS_TIMEOUT_MS);
-  };
-
-  // ============================================================================
   // Effects
   // ============================================================================
 
@@ -91,9 +63,11 @@ export default function SignUpModal({
       toast.success("Account created! Check your email for verification code.", {
         duration: SUCCESS_TOAST_DURATION_MS,
       });
-      closeAndNavigateToVerifyEmail(submittedEmail);
+      router.replace(
+        `${VERIFY_EMAIL_PATH}?email=${encodeURIComponent(submittedEmail)}`,
+      );
     }
-  }, [signupMutation.isSuccess, submittedEmail]);
+  }, [signupMutation.isSuccess, submittedEmail, router]);
 
   // Handle signup error: show error toast
   useEffect(() => {

@@ -5,7 +5,7 @@ import type {
 } from "@/features/trip/type";
 import { httpClient } from "@/lib/http/client";
 
-const TRIP_REQUEST_BASE_PATH = "/TripRequests";
+const TRIP_REQUEST_BASE_PATH = "/api/TripRequests";
 
 export const tripRequestApi = {
   async submitOffer(payload: SubmitTripRequestOfferPayload) {

@@ -5,9 +5,11 @@ import { cn } from '@/lib/utils';
 
 export type Conversation = {
   id: string;
+  tripRequestId?: string | null;
   name: string;
   avatar?: string;
   lastMessage: string;
+  lastMessageAt?: string | null;
   lastMessageTime: string;
   unreadCount?: number;
   isOnline?: boolean;
@@ -27,17 +29,18 @@ export default function ConversationList({
   onSelect,
   searchQuery,
   onSearchChange,
-}: Props) {
+}: Readonly<Props>) {
   const filtered = conversations.filter(
     (conversation) =>
       conversation.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()),
+      conversation.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      conversation.lastMessageTime.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
     <div className="flex flex-col h-full border-r border-gray-200 bg-white">
       {/* Header */}
-      <div className="px-4 py-4 flex-shrink-0">
+      <div className="px-4 py-4 shrink-0">
         <h1 className="text-base font-semibold text-gray-900">Chat</h1>
       </div>
 
@@ -104,9 +107,6 @@ export default function ConversationList({
                       >
                         {conversation.name}
                       </span>
-                      <span className="shrink-0 text-[10px] text-gray-400">
-                        {conversation.lastMessageTime}
-                      </span>
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-1">
                       <p
@@ -116,6 +116,7 @@ export default function ConversationList({
                         )}
                       >
                         {conversation.lastMessage}
+                        {conversation.lastMessageTime ? ` · ${conversation.lastMessageTime}` : ''}
                       </p>
                       {conversation.unreadCount ? (
                         <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500 text-[10px] font-semibold text-white">
