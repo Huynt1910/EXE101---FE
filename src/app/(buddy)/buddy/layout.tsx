@@ -4,8 +4,8 @@ import '@/app/globals.css';
 import HeaderBuddy from '@/components/layouts/HeaderBuddy';
 
 export const metadata: Metadata = {
-  title: 'Quản lý bất động sản và khách hàng trên RevoLand',
-  description: 'Quản lý bất động sản và khách hàng trên RevoLand',
+  title: 'Buddy Operations Dashboard - Bonddy',
+  description: 'Buddy Operations Dashboard - Bonddy',
 };
 
 export default function HostingLayout({

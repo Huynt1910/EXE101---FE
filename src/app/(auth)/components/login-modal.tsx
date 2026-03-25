@@ -38,7 +38,8 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   };
 
   const handleSignUp = () => {
-    router.push(buildAuthUrl("/signup", callbackUrl), { scroll: false });
+    // Replace to avoid stacking login->signup in history inside intercepted modal flow.
+    router.replace(buildAuthUrl("/signup", callbackUrl), { scroll: false });
   };
 
   const handleForgotPassword = () => {
