@@ -7,7 +7,7 @@ import type {
 } from "@/features/trip/type";
 import type { ApiResponse, PaginatedResult } from "@/features/api-type";
 
-const TRIP_BASE_PATH = "/Trips";
+const TRIP_BASE_PATH = "/api/Trips";
 
 export const tripApi = {
   async createTrip(payload: CreateTripRequest) {

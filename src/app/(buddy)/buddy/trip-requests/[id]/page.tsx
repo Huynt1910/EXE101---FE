@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useTripDetail } from "@/features/trip/hooks/useTripQueries";
+import { useTripRequest } from "@/features/trip/hooks/useTripRequest";
 import { TripDetailBreadcrumb } from "./components/TripDetailBreadcrumb";
 import { TripDetailHero } from "./components/TripDetailHero";
 import { TripDetailLeftContent } from "./components/TripDetailLeftContent";
@@ -10,7 +10,11 @@ import { TripDetailRightCard } from "./components/TripDetailRightCard";
 export default function TripRequestDetailPage() {
   const params = useParams<{ id: string }>();
   const tripId = Array.isArray(params?.id) ? params.id[0] : params?.id;
-  const tripDetailQuery = useTripDetail(tripId ?? "");
+  const { tripDetailQuery } = useTripRequest({
+    detailId: tripId ?? "",
+    enableDetail: Boolean(tripId),
+    enableOpenTrips: false,
+  });
   const trip = tripDetailQuery.data?.data;
 
   if (tripDetailQuery.isLoading) {
@@ -69,6 +73,7 @@ export default function TripRequestDetailPage() {
 
           {/* Right — sticky card */}
           <TripDetailRightCard
+            tripId={trip.id}
             startDate={trip.startDate}
             startTime={trip.startTime}
             durationHours={trip.durationHours}

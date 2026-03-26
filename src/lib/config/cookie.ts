@@ -25,6 +25,14 @@ export const cookieConfig = {
       secure: process.env.NODE_ENV === "production",
     },
   },
+  authRoles: {
+    name: "bonddy_auth_roles",
+    options: {
+      path: "/",
+      sameSite: "lax" as const,
+      secure: process.env.NODE_ENV === "production",
+    },
+  },
 };
 
 function isBrowser() {

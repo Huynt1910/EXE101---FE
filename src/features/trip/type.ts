@@ -53,3 +53,37 @@ export interface GetTripsQuery extends RequestParams {
   SortBy?: string;
   SortOrder?: "asc" | "desc";
 }
+
+export interface SubmitTripRequestOfferPayload {
+  tripId: string;
+  offeredPrice: number | null;
+  isInboxOnly: boolean;
+  note: string;
+}
+
+export interface TripRequestOfferResponse {
+  id: string;
+  trip: {
+    id: string;
+    city: string;
+    startDate: string;
+    startTime: string;
+    durationHours: number;
+    adults: number;
+    children: number;
+  };
+  buddy: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  offer: {
+    price: number;
+    isInboxOnly: boolean;
+    note: string;
+  };
+  isExpired: boolean;
+  expiresAt: string;
+  createdAt: string;
+  existingChatRoomId: string | null;
+}

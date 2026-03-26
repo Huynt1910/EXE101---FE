@@ -7,7 +7,7 @@ import { CalendarDays, Globe2, MapPin, PencilLine, Trash2, Users } from "lucide-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useMyTrips } from "@/features/trip/hooks/useTripQueries";
+import { useMyTrips } from "../../../../features/trip/hooks/useTripRequest";
 import { useTripMutations } from "@/features/trip/hooks/useTripMutation";
 import {
   formatDurationHours,

@@ -4,8 +4,8 @@ import '@/app/globals.css';
 import HeaderBuddy from '@/components/layouts/HeaderBuddy';
 
 export const metadata: Metadata = {
-  title: 'Buddy dashboard and customer management | Bonddy',
-  description: 'Manage trip requests, messages, and traveler relationships in Bonddy.',
+  title: 'Buddy Operations Dashboard - Bonddy',
+  description: 'Buddy Operations Dashboard - Bonddy',
 };
 
 export default function HostingLayout({

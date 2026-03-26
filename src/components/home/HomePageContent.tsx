@@ -6,6 +6,8 @@ import { ProofSection } from "@/components/home/sections/proof-section";
 import { SolutionSection } from "@/components/home/sections/solution-section";
 import { TestimonialsSection } from "@/components/home/sections/testimonials-section";
 import { VietnamHighlightsSection } from "@/components/home/sections/vietnam-highlight-section";
+import { Footer } from "@/components/layouts/Footer";
+
 
 export default function HomePageContent() {
   return (

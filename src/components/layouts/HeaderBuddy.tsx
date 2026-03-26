@@ -1,27 +1,11 @@
 'use client';
 
 import * as React from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import {
-  BuildingIcon,
-  CalendarIcon,
-  ClockIcon,
-  HeartIcon,
-  House,
-  LayoutDashboardIcon,
-  Menu,
-  MenuIcon,
-  MessageSquare,
-  PlusIcon,
-  UserCircleIcon,
-  UsersIcon,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import AnimatedTabs from '@/components/common/AnimatedTabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Image from 'next/image';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,140 +14,41 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  UserCircleIcon,
+  Menu,
+  LayoutDashboardIcon,
+  CalendarIcon,
+  MenuIcon,
+  MessageSquare,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import AnimatedTabs from '@/components/common/AnimatedTabs';
+import { authStore, useAuthStore } from '@/lib/store/authStore';
+import { useHydratedStore } from '@/hooks/useHydratedStore';
 
-const MOCK_USER = {
-  name: 'Host',
-  email: 'host@example.com',
-  avatar: '',
-  phone: '0900000000',
-};
-
-const MOCK_HAS_UNREAD = false;
-const MOCK_DISPLAY_COUNT = 0;
-
-const mobileNavItems = [
-  {
-    icon: LayoutDashboardIcon,
-    label: 'Overview',
-    href: '/buddy',
-    match: (pathname: string | null) => pathname === '/buddy' || pathname === '/buddy/',
-  },
-  {
-    icon: House,
-    label: 'Trips',
-    href: '/buddy/trip-requests',
-    match: (pathname: string | null) => Boolean(pathname?.startsWith('/buddy/trip-requests')),
-  },
-  {
-    icon: UsersIcon,
-    label: 'Customers',
-    href: '/buddy/lead',
-    match: (pathname: string | null) => Boolean(pathname?.startsWith('/buddy/lead')),
-  },
-  {
-    icon: MessageSquare,
-    label: 'Messages',
-    href: '/buddy/messages',
-    match: (pathname: string | null) => Boolean(pathname?.startsWith('/buddy/messages')),
-  },
-];
-
-const accountLinks = [
-  { href: '/myrevo?tab=saved-homes', label: 'Saved homes', icon: HeartIcon },
-  { href: '/messages', label: 'Messages', icon: MessageSquare },
-  { href: '/myrevo?tab=account-settings', label: 'Profile', icon: UserCircleIcon },
-  { href: '/myrevo?tab=manage-tours', label: 'Appointments', icon: CalendarIcon },
-  { href: '/myrevo?tab=recently-viewed', label: 'Recently viewed', icon: ClockIcon },
-];
-
-const hostLinks = [
-  { href: '/hosting/property/new', label: 'Create property listing', icon: PlusIcon },
-  { href: '/hosting/property', label: 'Manage properties', icon: BuildingIcon },
-  { href: '/hosting', label: 'Overview', icon: LayoutDashboardIcon },
-  { href: '/hosting/lead', label: 'Manage customers', icon: UsersIcon },
-];
-
-function getInitials(name: string) {
-  return name
-    .split(' ')
-    .map((part) => part[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
-}
-
-function AccountMenu({
-  logout,
-  hasUnread,
-  displayCount,
-}: {
-  logout: () => void;
-  hasUnread: boolean;
-  displayCount: number;
-}) {
-  return (
-    <DropdownMenuContent className="w-[17rem] shadow-2xl" align="end" forceMount>
-      <DropdownMenuGroup className="space-y-1 p-2">
-        {accountLinks.map((item) => (
-          <DropdownMenuItem key={item.label} asChild>
-            <Link href={item.href} className="cursor-pointer">
-              <item.icon className="mr-1 h-5 w-5" />
-              <span className="text-sm font-medium">{item.label}</span>
-              {item.label === 'Messages' && hasUnread ? (
-                <span className="ml-auto flex h-4 min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-medium text-white">
-                  {displayCount}
-                </span>
-              ) : null}
-            </Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuGroup>
-
-      <DropdownMenuSeparator className="mx-4 my-0 h-[1.5px] bg-gray-200" />
-
-      <DropdownMenuGroup className="space-y-2 p-2">
-        {hostLinks.map((item) => (
-          <DropdownMenuItem key={item.label} asChild>
-            <Link href={item.href} className="cursor-pointer">
-              <item.icon className="mr-1 h-5 w-5" />
-              <span className="text-sm font-medium">{item.label}</span>
-            </Link>
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuGroup>
-
-      <DropdownMenuSeparator className="mx-4 my-0 h-[1.5px] bg-gray-200" />
-
-      <DropdownMenuGroup className="space-y-2 p-2">
-        <DropdownMenuItem asChild>
-          <Link href="/" className="cursor-pointer">
-            <span className="text-sm font-medium">Switch to traveler view</span>
-          </Link>
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
-
-      <DropdownMenuSeparator className="mx-4 my-0 h-[1.5px] bg-gray-200" />
-
-      <DropdownMenuGroup className="space-y-2 p-2">
-        <DropdownMenuItem onClick={logout} className="cursor-pointer">
-          <span className="text-sm font-medium">Log out</span>
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
-    </DropdownMenuContent>
-  );
-}
-
-function BottomNavigation() {
-  const isAuthenticated = true;
-  const logout = () => undefined;
-  const pathname = usePathname();
+// Bottom Navigation Component
+function BottomNavigation({
+  canUseAuthenticatedView,
+  initials,
+  fullName,
+}: Readonly<{
+  canUseAuthenticatedView: boolean;
+  initials: string;
+  fullName: string;
+}>) {
   const [isAccountOpen, setIsAccountOpen] = React.useState(false);
   const [isNavVisible, setIsNavVisible] = React.useState(true);
   const [lastScrollY, setLastScrollY] = React.useState(0);
-  const hasUnread = MOCK_HAS_UNREAD;
-  const displayCount = MOCK_DISPLAY_COUNT;
-  const initials = getInitials(MOCK_USER.name);
+  const pathname = usePathname();
+  const router = useRouter();
 
+  const handleLogout = () => {
+    authStore.logout();
+    router.push('/');
+  };
+
+  // Update navigation visibility based on scroll direction
   React.useEffect(() => {
     const handleScroll = () => {
       const currentY = window.scrollY;
@@ -181,82 +66,190 @@ function BottomNavigation() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
+  // Define navigation item type
+  type NavItem = {
+    icon: React.ComponentType<{ className?: string }>;
+    label: string;
+    href: string;
+    active?: boolean;
+    isAccount?: boolean;
+    onClick?: () => void;
+  };
+
+  // Function to check if current path matches navigation item
+  const isActiveNavItem = (navHref: string) => {
+    if (!pathname) return false;
+    if (navHref === '/buddy') {
+      return pathname === '/buddy' || pathname === '/buddy/';
+    }
+
+    return pathname.startsWith(navHref);
+  };
+
+  const defaultNavItems: NavItem[] = [
+    {
+      icon: LayoutDashboardIcon,
+      label: 'Tổng quan',
+      href: '/buddy',
+      active: isActiveNavItem('/buddy'),
+    },
+    {
+      icon: CalendarIcon,
+      label: 'Trip requests',
+      href: '/buddy/trip-requests',
+      active: isActiveNavItem('/buddy/trip-requests'),
+    },
+    {
+      icon: MessageSquare,
+      label: 'Tin nhắn',
+      href: '/buddy/messages',
+      active: isActiveNavItem('/buddy/messages'),
+    },
+    {
+      icon: Menu,
+      label: 'Tài khoản',
+      href: '#',
+      active: false,
+      isAccount: true,
+    },
+  ];
   return (
-    <motion.div
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white/95 shadow-lg backdrop-blur-sm md:hidden"
-      initial={{ y: 0, opacity: 1 }}
-      animate={{
-        y: isNavVisible ? 0 : 120,
-        opacity: isNavVisible ? 1 : 0.8,
-      }}
-      transition={{
-        type: 'spring',
-        stiffness: 400,
-        damping: 35,
-        mass: 0.8,
-      }}
-      style={{ willChange: 'transform, opacity' }}
-    >
-      <div className="flex items-center justify-around py-1">
-        {mobileNavItems.map((item) => {
-          const active = item.match(pathname);
+    <>
+      {/* Bottom Navigation */}
+      <motion.div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden shadow-lg"
+        initial={{ y: 0, opacity: 1 }}
+        animate={{
+          y: isNavVisible ? 0 : 120,
+          opacity: isNavVisible ? 1 : 0.8,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 400,
+          damping: 35,
+          mass: 0.8,
+        }}
+        style={{
+          willChange: 'transform, opacity',
+        }}
+      >
+        <div className="flex items-center justify-around py-1">
+          {defaultNavItems.map((item: NavItem, index: number) => (
+            <div key={item.href || `account-${index}`} className="flex flex-col items-center">
+              {item.isAccount && canUseAuthenticatedView ? (
+                <DropdownMenu open={isAccountOpen} onOpenChange={setIsAccountOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <div className="flex flex-col items-center gap-1 p-1 rounded-lg transition-colors hover:bg-gray-50 cursor-pointer">
+                      <Avatar className="size-7">
+                        <AvatarImage src="" alt={fullName} className="object-cover" />
+                        <AvatarFallback className="bg-red-500/10 text-red-500 text-[0.60rem]">
+                          {initials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-[0.60rem] font-light text-muted-foreground">
+                        {item.label}
+                      </span>
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-64 mb-2 mr-2" align="center" side="top">
+                    <DropdownMenuGroup className="p-2 space-y-2">
+                      <DropdownMenuItem asChild>
+                        <Link href="/buddy/messages" className="cursor-pointer">
+                          <MessageSquare className="mr-2 h-4 w-4" />
+                          Tin nhắn
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/buddy/trip-requests" className="cursor-pointer">
+                          <CalendarIcon className="mr-1 h-5 w-5" />
+                          <span className="text-sm font-medium">Trip requests</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/profile" className="cursor-pointer">
+                          <UserCircleIcon className="mr-1 h-5 w-5" />
+                          <span className="text-sm font-medium">Hồ sơ</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex flex-col items-center gap-1 rounded-lg p-1 transition-colors"
-            >
-              <item.icon
-                className={`size-6 stroke-[1.5] ${active ? 'text-red-500' : 'text-muted-foreground'}`}
-              />
-              <span
-                className={`text-[0.62rem] ${active ? 'font-medium text-red-500' : 'font-light text-muted-foreground'}`}
-              >
-                {item.label}
-              </span>
-            </Link>
-          );
-        })}
+                    <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
 
-        {isAuthenticated ? (
-          <DropdownMenu open={isAccountOpen} onOpenChange={setIsAccountOpen}>
-            <DropdownMenuTrigger asChild>
-              <div className="flex cursor-pointer flex-col items-center gap-1 rounded-lg p-1 transition-colors hover:bg-gray-50">
-                <Avatar className="size-7">
-                  <AvatarImage src={MOCK_USER.avatar} alt={MOCK_USER.name} className="object-cover" />
-                  <AvatarFallback className="bg-red-500/10 text-[0.60rem] text-red-500">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="text-[0.60rem] font-light text-muted-foreground">Account</span>
-              </div>
-            </DropdownMenuTrigger>
-            <AccountMenu
-              logout={logout}
-              hasUnread={hasUnread}
-              displayCount={displayCount}
-            />
-          </DropdownMenu>
-        ) : null}
-      </div>
-    </motion.div>
+                    <DropdownMenuGroup className="p-2 space-y-2">
+                      <DropdownMenuItem className="cursor-pointer">
+                        <Link href="/" className="cursor-pointer">
+                          <span className="text-sm font-medium">Chuyển sang trang người dùng</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
+                    <DropdownMenuGroup className="p-2 space-y-2">
+                      <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                        <span className="text-sm font-medium">Đăng xuất</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Link
+                  href={item.href}
+                  className={`flex flex-col items-center gap-1 p-1 rounded-lg transition-colors `}
+                >
+                  <item.icon
+                    className={`size-6 stroke-[1.5] ${item.active ? 'text-red-500' : 'text-muted-foreground'}`}
+                  />
+                  <span
+                    className={`text-[0.62rem] font-light ${item.active ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+    </>
   );
 }
 
-export default function HeaderBuddy() {
-  const isAuthenticated = true;
-  const logout = () => undefined;
-  const hasUnread = MOCK_HAS_UNREAD;
-  const displayCount = MOCK_DISPLAY_COUNT;
-  const initials = getInitials(MOCK_USER.name);
+export default function HeaderHosting() {
+  const isHydrated = useHydratedStore();
+  const { isAuthenticated, user } = useAuthStore();
+  const canUseAuthenticatedView = isHydrated && isAuthenticated;
+  const router = useRouter();
+
+  const handleLogout = () => {
+    authStore.logout();
+    router.push('/');
+  };
+
+  const fullName = React.useMemo(
+    () => user?.fullName ?? user?.email?.split('@')[0] ?? 'Buddy',
+    [user?.email, user?.fullName],
+  );
+
+  const initials = React.useMemo(() => {
+    const chars = fullName
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word[0]?.toUpperCase() ?? '')
+      .join('');
+
+    return chars || 'B';
+  }, [fullName]);
 
   return (
     <>
-      <header className="sticky top-0 z-50 flex-shrink-0 bg-white text-foreground shadow-sm">
-        <div className="hidden items-center px-4 py-2 md:block md:py-4 2xl:px-16">
-          <div className="relative hidden items-center justify-between md:flex">
-            <div className="flex shrink-0 items-center">
+      <header
+        className={`w-full bg-white text-foreground sticky top-0 z-50 shrink-0 shadow-sm`}
+      >
+        <div className="hidden md:block items-center px-4 2xl:px-16 py-2 md:py-4">
+          {/* Desktop Layout using Flexbox for True Centering */}
+          <div className="hidden md:flex items-center justify-between relative">
+            {/* Logo Section */}
+            <div className="flex items-center shrink-0">
               <Link href="/" className="flex items-center">
                 <Image
                   src="/bonddy_logo.png"
@@ -266,24 +259,23 @@ export default function HeaderBuddy() {
                   priority
                   className="rounded-md"
                 />
+                {/* <span className="xl:block hidden text-2xl font-medium text-red-500">Bonddy</span> */}
               </Link>
             </div>
 
-            <div className="absolute left-1/2 -translate-x-1/2">
+            {/* Centered Search Autocomplete */}
+            <div className="absolute left-1/2 transform -translate-x-1/2">
               <AnimatedTabs />
             </div>
 
-            <div className="flex shrink-0 items-center gap-4">
-              {isAuthenticated ? (
-                <>
+            {/* Auth Buttons Section */}
+            <div className="flex items-center gap-2 shrink-0">
+              {canUseAuthenticatedView ? (
+                <div className="flex items-center gap-4">
                   <Button variant="ghost" className="relative size-12 rounded-full">
-                    <Link href="/myrevo?tab=account-settings">
+                    <Link href="/profile">
                       <Avatar className="size-12">
-                        <AvatarImage
-                          src={MOCK_USER.avatar}
-                          alt={MOCK_USER.name}
-                          className="object-cover"
-                        />
+                        <AvatarImage src="" alt={fullName} className="object-cover" />
                         <AvatarFallback className="bg-[#849cb1] text-[#0d3b66]">
                           {initials}
                         </AvatarFallback>
@@ -295,27 +287,57 @@ export default function HeaderBuddy() {
                       <Button
                         variant="default"
                         size="icon"
-                        className="relative h-12 w-12 rounded-full bg-gray-100 text-black hover:bg-gray-200"
+                        className="max-md:hidden rounded-full bg-gray-100 hover:bg-gray-200 text-black h-12 w-12 relative"
                       >
                         <MenuIcon className="h-5 w-5" />
-                        {hasUnread && (
-                          <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-medium text-white">
-                            {displayCount}
-                          </span>
-                        )}
                       </Button>
                     </DropdownMenuTrigger>
-                    <AccountMenu
-                      logout={logout}
-                      hasUnread={hasUnread}
-                      displayCount={displayCount}
-                    />
+                    <DropdownMenuContent className="w-68 shadow-2xl" align="end" forceMount>
+                      <DropdownMenuGroup className="p-2 space-y-1">
+                        <DropdownMenuItem asChild>
+                          <Link href="/buddy" className="cursor-pointer">
+                            <LayoutDashboardIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Overview</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/buddy/messages" className="cursor-pointer">
+                            <MessageSquare className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Messages</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/buddy/trip-requests" className="cursor-pointer">
+                            <CalendarIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Trip requests</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href="/profile" className="cursor-pointer">
+                            <UserCircleIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Profile</span>
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+
+                      <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
+                      <DropdownMenuGroup className="p-2 space-y-2">
+                        <DropdownMenuItem className="cursor-pointer" asChild>
+                          <Link href="/" className="cursor-pointer">
+                            <span className="text-sm font-medium">Switch to User</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                          <span className="text-sm font-medium">Logout</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuGroup>
+                    </DropdownMenuContent>
                   </DropdownMenu>
-                </>
+                </div>
               ) : (
                 <div className="flex items-center gap-2 py-1">
-                  <Button asChild variant="ghost" size="default">
-                    <Link href="/login?redirect=/">Log in</Link>
+                  <Button asChild variant="ghost" size="default" className="max-md:hidden">
+                    <Link href="/login?redirect=/buddy">Đăng nhập</Link>
                   </Button>
                   <Button
                     asChild
@@ -323,37 +345,21 @@ export default function HeaderBuddy() {
                     size="default"
                     className="bg-red-500 hover:bg-red-600"
                   >
-                    <Link href="/login?redirect=/hosting/property/new">Create listing</Link>
+                    <Link href="/login?redirect=/buddy/trip-requests">Bắt đầu</Link>
                   </Button>
                 </div>
               )}
             </div>
           </div>
         </div>
-
-        <div className="flex items-center justify-between px-4 py-3 md:hidden">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/bonddy_logo.png"
-              alt="Bonddy icon"
-              width={64}
-              height={64}
-              priority
-              className="rounded-md"
-            />
-          </Link>
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-full border-gray-200 bg-white"
-            aria-label="Navigation menu"
-          >
-            <Menu className="h-5 w-5" />
-          </Button>
-        </div>
       </header>
 
-      <BottomNavigation />
+      {/* Bottom Navigation for Mobile */}
+      <BottomNavigation
+        canUseAuthenticatedView={canUseAuthenticatedView}
+        initials={initials}
+        fullName={fullName}
+      />
     </>
   );
 }
