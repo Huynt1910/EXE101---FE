@@ -42,12 +42,15 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
     [user?.email, user?.fullName],
   );
 
-  const chatHref = useMemo(() => {
-    const hasBuddyRole =
-      user?.roles?.some((role) => role?.toLowerCase() === "buddy") ?? false;
+  const hasBuddyRole = useMemo(
+    () => user?.roles?.some((role) => role?.toLowerCase() === "buddy") ?? false,
+    [user?.roles],
+  );
 
-    return hasBuddyRole ? "/buddy/messages" : "/messages";
-  }, [user?.roles]);
+  const chatHref = useMemo(
+    () => (hasBuddyRole ? "/buddy/messages" : "/messages"),
+    [hasBuddyRole],
+  );
 
   const initials = useMemo(() => {
     const chars = fullName
@@ -74,7 +77,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
 
   const navClassName = isUserHeader
     ? "w-full"
-    : "max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-full shadow-lg";
+    : "max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-4xl shadow-lg";
 
   const navInnerClassName = "flex items-center shadow-md justify-between h-20 px-6 lg:px-8";
 
@@ -97,30 +100,6 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
           {/* Desktop Navigation */}
           {isUserHeader ? null : (
           <div className="hidden md:flex items-center gap-10">
-            {/* <Link
-              href="/login"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Find Buddies
-            </Link> */}
-            {/* <Link
-              href="#science"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Science
-            </Link>
-            <Link
-              href="#temoignages"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Testimonials
-            </Link>
-            <Link
-              href="#mission"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Blog
-            </Link> */}
           </div>
           )}
 
@@ -181,7 +160,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                           href="/profile"
                           className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
-                          View profile
+                          My account
                         </Link>
                       </DropdownMenu.Item>
 
@@ -196,29 +175,58 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
 
                       <DropdownMenu.Item asChild>
                         <Link
-                          href="/booking"
+                          href="/trip-request"
                           className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
                           My trips
                         </Link>
                       </DropdownMenu.Item>
 
-                      <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                      {hasBuddyRole ? (
+                        <>
+                          <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                          <DropdownMenu.Item asChild>
+                            <Link
+                              href="/buddy/trip-requests"
+                              className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
+                            >
+                              Become a buddy
+                            </Link>
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                        </>
+                      ) : (
+                        <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                      )}
 
                       <DropdownMenu.Item asChild>
                         <Link
-                          href="#"
+                          href="/"
+                          className="block rounded-xl px-4 py-3 text-[18  px] leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
+                        >
+                          Privacy policy
+                        </Link>
+                      </DropdownMenu.Item>
+
+                      <DropdownMenu.Item asChild>
+                        <Link
+                          href="/"
                           className="block rounded-xl px-4 py-3 text-[18  px] leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                         >
                           Help
                         </Link>
                       </DropdownMenu.Item>
 
-                      <DropdownMenu.Item className="rounded-xl px-4 py-3 leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          Currency: USD
-                          <ChevronRight className="h-4 w-4" />
-                        </span>
+                      <DropdownMenu.Item asChild>
+                        <Link
+                          href="/"
+                          className="rounded-xl px-4 py-3 leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
+                        >
+                          <span className="inline-flex items-center gap-1">
+                            Currency
+                            <ChevronRight className="h-4 w-4" />
+                          </span>
+                        </Link>
                       </DropdownMenu.Item>
 
                       <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
@@ -264,70 +272,95 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
         {isOpen && (
           <div className={mobilePanelClassName}>
             <div className="flex flex-col gap-4">
-              {/* <Link
-                href="#produits"
-                className="text-lg text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Find buddies
-              </Link>
-              <Link
-                href="#science"
-                className="text-lg text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Science
-              </Link>
-              <Link
-                href="#temoignages"
-                className="text-lg text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Testimonials
-              </Link>
-              <Link
-                href="#mission"
-                className="text-lg text-muted-foreground hover:text-foreground transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Blog
-              </Link> */}
               {canUseAuthenticatedView ? (
                 <>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="rounded-full w-full mt-4 bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-accent"
-                  >
-                    <Link href={chatHref} onClick={() => setIsOpen(false)}>
-                      Chat
+                  <div className="mt-3">
+                    <p className="text-sm text-muted-foreground">Manage</p>
+                    <div className="mt-3 flex flex-col gap-4">
+                      <Link
+                        href={chatHref}
+                        className="text-base font-semibold text-foreground"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Chat
+                      </Link>
+                      <Link
+                        href="/trip-request"
+                        className="text-base font-semibold text-foreground"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Create a trip
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">Account</p>
+                    <div className="mt-3 flex flex-col gap-4">
+                      <Link
+                        href="/profile"
+                        className="text-base font-semibold text-foreground"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        My account
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div>
+                    <p className="text-sm text-muted-foreground">Support</p>
+                    <div className="mt-3 flex flex-col gap-4">
+                      {hasBuddyRole ? (
+                        <Link
+                          href="/buddy/trip-requests"
+                          className="text-base font-semibold text-foreground"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Become a buddy
+                        </Link>
+                      ) : null}
+                      <Link
+                        href="/"
+                        className="text-left text-base font-semibold text-foreground"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Privacy policy
+                      </Link>
+                      <Link
+                        href="/"
+                        className="text-left text-base font-semibold text-foreground"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Help
+                      </Link>
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <div>
+                    <Link
+                      href="/"
+                      className="block w-full text-left text-base font-semibold text-foreground"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      Currency
                     </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="rounded-full w-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-accent"
-                  >
-                    <Link href="/trip-request" onClick={() => setIsOpen(false)}>
-                      Create a trip
-                    </Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="secondary"
-                    className="rounded-full w-full"
-                  >
-                    <Link href="/profile" onClick={() => setIsOpen(false)}>
-                      {fullName}
-                    </Link>
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    className="rounded-full w-full"
+                  </div>
+
+                  <div className="h-px bg-border/60" />
+
+                  <button
+                    type="button"
+                    className="w-full text-left text-base font-semibold text-foreground"
                     onClick={handleLogout}
                   >
-                    Log out
-                  </Button>
+                    Logout
+                  </button>
                 </>
               ) : (
                 <>
