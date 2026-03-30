@@ -2,8 +2,17 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CalendarDays, Globe2, MapPin, PencilLine, Trash2, Users } from "lucide-react";
+import { Pagination } from "@heroui/pagination";
+import {
+  CalendarDays,
+  Globe2,
+  MapPin,
+  PencilLine,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,8 +26,33 @@ import {
 
 export function MyTripsSection() {
   const router = useRouter();
-  const myTripsQuery = useMyTrips({ PageSize: 20 });
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 4;
+  const myTripsQuery = useMyTrips({ PageSize: pageSize, Page: currentPage });
   const { deleteTripMutation } = useTripMutations();
+  const paginationData = myTripsQuery.data?.data;
+  const trips = paginationData?.items ?? [];
+  const totalCount = paginationData?.totalCount ?? 0;
+  const totalPages = useMemo(
+    () =>
+      paginationData?.totalPages ??
+      Math.max(
+        1,
+        Math.ceil(totalCount / (paginationData?.pageSize ?? pageSize)),
+      ),
+    [
+      pageSize,
+      paginationData?.pageSize,
+      paginationData?.totalPages,
+      totalCount,
+    ],
+  );
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const handleDelete = async (tripId: string) => {
     const shouldDelete = window.confirm(
@@ -47,7 +81,7 @@ export function MyTripsSection() {
     return (
       <Card>
         <CardContent className="p-6 text-sm text-muted-foreground">
-          Loading your trips...
+          Loading your trips…
         </CardContent>
       </Card>
     );
@@ -62,8 +96,6 @@ export function MyTripsSection() {
       </Card>
     );
   }
-
-  const trips = myTripsQuery.data?.data.items ?? [];
 
   if (trips.length === 0) {
     return (
@@ -84,12 +116,17 @@ export function MyTripsSection() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div>
+    <div className="min-w-0 space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
           <h2 className="text-2xl font-semibold text-foreground">My trips</h2>
           <p className="text-sm text-muted-foreground">
-            Review your requests, update details, or remove trips that are no longer needed.
+            Review your requests, update details, or remove trips that are no
+            longer needed.
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Showing page {paginationData?.page ?? currentPage} of {totalPages}
+            {totalCount > 0 ? ` • ${totalCount} total trips` : ""}
           </p>
         </div>
         <Button asChild>
@@ -97,12 +134,12 @@ export function MyTripsSection() {
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className="min-w-0 grid gap-2">
         {trips.map((trip) => (
-          <Card key={trip.id}>
+          <Card key={trip.id} className="min-w-0 overflow-hidden">
             <CardContent className="p-6">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-4">
+              <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                <div className="min-w-0 flex-1 space-y-4">
                   <div className="flex flex-wrap items-center gap-3">
                     <Badge variant="secondary">{trip.status}</Badge>
                     <span className="text-sm text-muted-foreground">
@@ -111,11 +148,14 @@ export function MyTripsSection() {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-semibold text-foreground">
+                    <h3 className="break-words text-xl font-semibold text-foreground">
                       {trip.city}
                     </h3>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Trip starts {formatTripRequestDateTime(`${trip.startDate}T${trip.startTime.slice(0, 5)}`)}
+                      Trip starts{" "}
+                      {formatTripRequestDateTime(
+                        `${trip.startDate}T${trip.startTime.slice(0, 5)}`,
+                      )}
                     </p>
                   </div>
 
@@ -126,11 +166,13 @@ export function MyTripsSection() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-primary" />
-                      <span>{formatTravelerSummary(trip.adults, trip.children)}</span>
+                      <span>
+                        {formatTravelerSummary(trip.adults, trip.children)}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Globe2 className="h-4 w-4 text-primary" />
-                      <span>
+                      <span className="break-words">
                         {trip.preferredLanguages.length > 0
                           ? trip.preferredLanguages.join(", ")
                           : "No language preference"}
@@ -138,22 +180,26 @@ export function MyTripsSection() {
                     </div>
                   </div>
 
-                  <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <MapPin className="mt-0.5 h-4 w-4 text-primary" />
-                    <span>{trip.notes || "No additional notes provided."}</span>
+                  <div className="flex min-w-0 items-start gap-2 text-sm text-muted-foreground">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                    <span className="min-w-0 break-words">
+                      {trip.notes || "No additional notes provided."}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 xl:shrink-0 xl:justify-end xl:self-start xl:pl-4">
                   <Button
                     variant="outline"
-                    onClick={() => router.push(`/profile/trips/${trip.id}`)}
+                    onClick={() => router.push(`/profile/trip/${trip.id}`)}
                   >
                     View details
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => router.push(`/trip-request?tripId=${trip.id}`)}
+                    onClick={() =>
+                      router.push(`/trip-request?tripId=${trip.id}`)
+                    }
                   >
                     <PencilLine className="mr-2 h-4 w-4" />
                     Edit
@@ -173,6 +219,23 @@ export function MyTripsSection() {
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="flex justify-center pt-2">
+        <Pagination
+          showControls
+          initialPage={1}
+          page={currentPage}
+          total={Math.max(1, totalPages)}
+          onChange={setCurrentPage}
+          isDisabled={totalPages <= 1 || myTripsQuery.isFetching}
+          classNames={{
+            item: "transition-colors hover:bg-primary/10 hover:text-primary",
+            prev: "transition-colors hover:bg-primary/10 hover:text-primary",
+            next: "transition-colors hover:bg-primary/10 hover:text-primary",
+            cursor: "bg-primary text-primary-foreground",
+          }}
+        />
       </div>
     </div>
   );

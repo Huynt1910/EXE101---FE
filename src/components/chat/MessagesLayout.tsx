@@ -1,21 +1,18 @@
-  "use client";
+"use client";
 
-  import { useCallback, useEffect, useMemo, useState } from "react";
-  import { useSearchParams } from "next/navigation";
-  import { toast } from "sonner";
-  import ConversationList, { type Conversation } from "./ConversationList";
-  import MessageContainer from "./MessageContainer";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import ConversationList, { type Conversation } from "./ConversationList";
+import MessageContainer from "./MessageContainer";
 import {
   useChatRoomMessages,
   useChatRooms,
-  } from "@/features/chat/hooks/useChat";
-  import { useChatSignalR } from "@/features/chat/hooks/useChatSignalR";
-  import type { ChatMessage, ChatRoom } from "@/features/chat/type";
-  import { useAuthStore } from "@/lib/store/authStore";
-  import { decodeJwtPayload, extractJwtUserId } from "@/lib/auth/decode-jwt";
-
-const GUID_PATTERN =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+} from "@/features/chat/hooks/useChat";
+import { useChatSignalR } from "@/features/chat/hooks/useChatSignalR";
+import type { ChatMessage, ChatRoom } from "@/features/chat/type";
+import { useAuthStore } from "@/lib/store/authStore";
+import { decodeJwtPayload, extractJwtUserId } from "@/lib/auth/decode-jwt";
 
 function formatRelativeLastMessageAt(value: string | null | undefined): string {
   if (!value) return "";
@@ -29,30 +26,26 @@ function formatRelativeLastMessageAt(value: string | null | undefined): string {
   const dayMs = 24 * hourMs;
   const weekMs = 7 * dayMs;
 
-  if (elapsedMs < minuteMs) {
-    return "now";
-  }
-
+  if (elapsedMs < minuteMs) return "now";
   if (elapsedMs < hourMs) {
     return `${Math.max(1, Math.floor(elapsedMs / minuteMs))}m`;
   }
-
-  if (elapsedMs < dayMs) {
-    return `${Math.floor(elapsedMs / hourMs)}h`;
-  }
-
-  if (elapsedMs < weekMs) {
-    return `${Math.floor(elapsedMs / dayMs)}d`;
-  }
+  if (elapsedMs < dayMs) return `${Math.floor(elapsedMs / hourMs)}h`;
+  if (elapsedMs < weekMs) return `${Math.floor(elapsedMs / dayMs)}d`;
 
   return `${Math.floor(elapsedMs / weekMs)}w`;
 }
 
 function mapRoomToConversation(room: ChatRoom): Conversation {
-  const shortTripRequestId = room.tripRequestId ? room.tripRequestId.slice(0, 8) : null;
+  const shortTripRequestId = room.tripRequestId
+    ? room.tripRequestId.slice(0, 8)
+    : null;
+
   const name =
     room.otherUserName ??
-    (shortTripRequestId ? `Trip Request ${shortTripRequestId}` : `Room ${room.id.slice(0, 8)}`);
+    (shortTripRequestId
+      ? `Trip Request ${shortTripRequestId}`
+      : `Room ${room.id.slice(0, 8)}`);
 
   return {
     id: room.id,
@@ -74,7 +67,7 @@ export default function MessagesLayout() {
   const [realtimeMessages, setRealtimeMessages] = useState<ChatMessage[]>([]);
   const [hasAppliedInitialRoom, setHasAppliedInitialRoom] = useState(false);
 
-  const requestedRoomId = searchParams.get('roomId');
+  const requestedRoomId = searchParams.get("roomId");
   const normalizedToken = (authState.token ?? "").trim();
 
   const roomsQuery = useChatRooms();
@@ -100,14 +93,12 @@ export default function MessagesLayout() {
     [selectedId],
   );
 
-  const {
-    sendRealtimeMessage,
-    connected: isRealtimeConnected,
-  } = useChatSignalR({
-    accessToken: normalizedToken,
-    roomId: selectedId ?? undefined,
-    onMessageCreated: handleMessageCreated,
-  });
+  const { sendRealtimeMessage, connected: isRealtimeConnected } =
+    useChatSignalR({
+      accessToken: normalizedToken,
+      roomId: selectedId ?? undefined,
+      onMessageCreated: handleMessageCreated,
+    });
 
   const conversations = useMemo(
     () => (roomsQuery.data?.data ?? []).map(mapRoomToConversation),
@@ -120,20 +111,6 @@ export default function MessagesLayout() {
   }, [messagesQuery.data?.data?.items, selectedId]);
 
   const messages = useMemo(() => realtimeMessages, [realtimeMessages]);
-
-  useEffect(() => {
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-
-    // Prevent page-level scroll; only chat panes should scroll.
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBodyOverflow;
-    };
-  }, []);
 
   useEffect(() => {
     if (conversations.length === 0) return;
@@ -158,16 +135,19 @@ export default function MessagesLayout() {
   const handleSend = async () => {
     const roomId = selectedId;
     const content = draft.trim();
+
     if (!roomId || !content || !isRealtimeConnected) {
       if (!isRealtimeConnected) {
-        toast.error("SignalR chưa connected, vui lòng đợi rồi gửi lại");
+        toast.error("Chat connection is still starting. Please try again.");
       }
       return;
     }
 
-    const hasRoomInList = conversations.some((conversation) => conversation.id === roomId);
+    const hasRoomInList = conversations.some(
+      (conversation) => conversation.id === roomId,
+    );
     if (!hasRoomInList) {
-      toast.error("Room không tồn tại trong danh sách hiện tại");
+      toast.error("This conversation is no longer available.");
       return;
     }
 
@@ -176,23 +156,24 @@ export default function MessagesLayout() {
       await sendRealtimeMessage(roomId, content);
       setDraft("");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Failed to send message";
+      const message =
+        error instanceof Error ? error.message : "Failed to send message";
       toast.error(message);
     } finally {
       setIsSendingRealtime(false);
     }
   };
 
-  const selectedConversation = conversations.find((c) => c.id === selectedId) ?? null;
+  const selectedConversation =
+    conversations.find((conversation) => conversation.id === selectedId) ?? null;
 
   return (
-    <div className="mx-4 flex h-full overflow-hidden border border-gray-200 bg-white shadow-sm md:mx-6 2xl:mx-16">
-      {/* Left sidebar — fixed width on desktop, hidden on mobile when conversation is open */}
+    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-[1.5rem] border border-border bg-card shadow-sm">
       <div
         className={`
-          w-full md:w-75 lg:w-85 shrink-0 min-h-0 min-w-0
-          ${selectedId ? 'hidden md:flex' : 'flex'}
-          flex-col border-r border-gray-200
+          w-full min-h-0 min-w-0 shrink-0 overflow-hidden border-r border-border/70 md:basis-[clamp(18rem,28vw,22rem)] md:max-w-[42%]
+          ${selectedId ? "hidden md:flex" : "flex"}
+          flex-col
         `}
       >
         <ConversationList
@@ -204,11 +185,10 @@ export default function MessagesLayout() {
         />
       </div>
 
-      {/* Right main area — takes remaining space */}
       <div
         className={`
-          flex-1 flex flex-col min-h-0 min-w-0
-          ${selectedId ? 'flex' : 'hidden md:flex'}
+          min-h-0 min-w-0 flex-1 overflow-hidden flex-col
+          ${selectedId ? "flex" : "hidden md:flex"}
         `}
       >
         <MessageContainer

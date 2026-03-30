@@ -6,6 +6,7 @@ export type MenuItem = {
   href: string;
   section?: string;
   badge?: number;
+  badgeKey?: "bookings" | "trips" | "messages" | "notifications";
 };
 
 export type CourseItem = {

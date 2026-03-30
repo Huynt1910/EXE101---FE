@@ -1,22 +1,61 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { List, PanelLeftClose, X } from "lucide-react";
-import { usePathname, useSearchParams } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { LogOut, MapPinned } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import { useMyTravelerBookingsQuery } from "@/features/booking/hooks/useCreateBookingOffer";
+import { useChatUnreadSummary } from "@/features/chat/hooks/useChat";
+import { useNotificationUnreadCount } from "@/features/notification/hooks/useNotifications";
+import { useMyTrips } from "@/features/trip/hooks/useTripRequest";
+import { useUserProfile } from "@/features/user/hooks/useUserProfile";
+import { authStore } from "@/lib/store/authStore";
 import { MENU_ITEMS } from "./profile-data";
 
-type ProfileSidebarProps = {
-  mobile?: boolean;
-};
+function getInitials(name?: string | null, email?: string | null) {
+  const source = name?.trim() || email?.split("@")[0] || "U";
 
-export function ProfileSidebar({ mobile = false }: ProfileSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  return source
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+export function ProfileSidebar() {
+  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const section = searchParams.get("section");
+  const profileQuery = useUserProfile();
+  const bookingsQuery = useMyTravelerBookingsQuery();
+  const tripsQuery = useMyTrips({ Page: 1, PageSize: 1 });
+  const chatUnreadQuery = useChatUnreadSummary();
+  const notificationUnreadQuery = useNotificationUnreadCount();
+
+  const profile = profileQuery.data?.data;
+
+  const badgeMap = {
+    bookings: bookingsQuery.data?.data.totalCount ?? undefined,
+    trips: tripsQuery.data?.data.totalCount ?? undefined,
+    messages: chatUnreadQuery.data?.data.totalUnread ?? undefined,
+    notifications: notificationUnreadQuery.data?.data.unreadCount ?? undefined,
+  } as const;
 
   const isItemActive = (href: string, itemSection?: string) => {
     if (itemSection) {
@@ -30,160 +69,104 @@ export function ProfileSidebar({ mobile = false }: ProfileSidebarProps) {
     return pathname === href;
   };
 
-  const menuItems = (
-    <nav className="mt-8 space-y-2">
-      {MENU_ITEMS.map((item) => {
-        const Icon = item.icon;
-        const active = isItemActive(item.href, item.section);
-
-        return (
-          <Link
-            key={item.label}
-            href={item.href}
-            onClick={() => {
-              if (mobile) setIsMobileOpen(false);
-            }}
-            className={cn(
-              "group relative flex w-full items-center rounded-2xl px-3 py-2.5 text-left transition",
-              isCollapsed ? "justify-center" : "gap-3",
-              active
-                ? "bg-background text-primary shadow-sm"
-                : "text-primary-foreground/90 hover:bg-primary-foreground/10",
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-
-            {!isCollapsed ? (
-              <span className="type-body-sm">{item.label}</span>
-            ) : (
-              <span className="pointer-events-none absolute left-full z-20 ml-2 whitespace-nowrap rounded-md bg-card px-2 py-1 text-xs text-primary opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
-                {item.label}
-              </span>
-            )}
-
-            {typeof item.badge === "number" && !isCollapsed ? (
-              <span
-                className={[
-                  "ml-auto rounded-full px-2 py-0.5 text-[11px] font-semibold",
-                  active
-                    ? "bg-primary/15 text-primary"
-                    : "bg-primary-foreground/20 text-primary-foreground",
-                ].join(" ")}
-              >
-                {item.badge}
-              </span>
-            ) : null}
-          </Link>
-        );
-      })}
-    </nav>
-  );
-
-  if (mobile) {
-    return (
-      <>
-        <button
-          type="button"
-          onClick={() => setIsMobileOpen(true)}
-          className="fixed left-4 top-4 z-40 grid h-10 w-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-lg xl:hidden"
-          aria-label="Open sidebar"
-        >
-          <List className="h-5 w-5" />
-        </button>
-
-        <div
-          className={cn(
-            "fixed inset-0 z-50 xl:hidden",
-            isMobileOpen ? "pointer-events-auto" : "pointer-events-none",
-          )}
-        >
-          <button
-            type="button"
-            onClick={() => setIsMobileOpen(false)}
-            className={cn(
-              "absolute inset-0 bg-black/40 transition-opacity",
-              isMobileOpen ? "opacity-100" : "opacity-0",
-            )}
-            aria-label="Close sidebar overlay"
-          />
-
-          <aside
-            className={cn(
-              "relative h-full w-[280px] bg-primary p-5 text-primary-foreground shadow-xl transition-transform duration-300",
-              isMobileOpen ? "translate-x-0" : "-translate-x-full",
-            )}
-          >
-            <div className="flex items-center justify-between">
-              <Link
-                href="/"
-                className="type-h3 font-semibold cursor-pointer"
-                onClick={() => setIsMobileOpen(false)}
-              >
-                Bonddy
-              </Link>
-              <button
-                type="button"
-                onClick={() => setIsMobileOpen(false)}
-                className="grid h-9 w-9 place-items-center rounded-lg text-primary-foreground/90 transition hover:bg-primary-foreground/10"
-                aria-label="Close sidebar"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {menuItems}
-          </aside>
-        </div>
-      </>
-    );
-  }
+  const handleLogout = () => {
+    authStore.logout();
+    router.push("/login");
+  };
 
   return (
-    <aside
-      className={cn(
-        "h-full rounded-br-4xl rounded-tr-4xl bg-primary text-primary-foreground shadow-sm transition-all duration-300",
-        isCollapsed ? "w-20 p-3" : "w-[250px] p-6",
-      )}
-    >
-      <div
-        className={cn(
-          "flex items-center",
-          isCollapsed ? "justify-center" : "justify-between",
-        )}
-      >
-        <Link
-          href="/"
-          className="type-h3 font-semibold cursor-pointer text-accent"
-        >
-          {isCollapsed ? null : "Bonddy"}
-        </Link>
+    <Sidebar collapsible="icon" variant="inset">
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild tooltip="Bonddy Traveler">
+              <Link href="/">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                  <MapPinned className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">Bonddy</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    Traveler workspace
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
 
-        {!isCollapsed ? (
-          <button
-            type="button"
-            onClick={() => setIsCollapsed(true)}
-            className="grid h-9 w-9 place-items-center rounded-lg text-primary-foreground/90 transition hover:bg-primary-foreground/10"
-            aria-label="Collapse sidebar"
-          >
-            <PanelLeftClose className="h-4 w-4" />
-          </button>
-        ) : null}
-      </div>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Customer profile</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {MENU_ITEMS.map((item) => {
+                const Icon = item.icon;
+                const active = isItemActive(item.href, item.section);
+                const badge =
+                  item.badgeKey !== undefined
+                    ? badgeMap[item.badgeKey]
+                    : item.badge;
 
-      {isCollapsed ? (
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() => setIsCollapsed(false)}
-            className="grid h-9 w-9 place-items-center rounded-lg text-primary-foreground/90 transition hover:bg-primary-foreground/10"
-            aria-label="Expand sidebar"
-          >
-            <List className="h-4 w-4" />
-          </button>
-        </div>
-      ) : null}
+                return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={active}
+                      tooltip={item.label}
+                    >
+                      <Link href={item.href}>
+                        <Icon />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                    {typeof badge === "number" && badge > 0 ? (
+                      <SidebarMenuBadge>{badge}</SidebarMenuBadge>
+                    ) : null}
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      {menuItems}
-    </aside>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" tooltip="Account" asChild>
+              <Link href="/profile?section=personal">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage
+                    src={profile?.profilePicture ?? undefined}
+                    alt={profile?.fullName ?? "Traveler"}
+                  />
+                  <AvatarFallback className="rounded-lg">
+                    {getInitials(profile?.fullName, profile?.email)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">
+                    {profile?.fullName ?? "Traveler"}
+                  </span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {profile?.email ?? "Account"}
+                  </span>
+                </div>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} tooltip="Log out">
+              <LogOut />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+      <SidebarRail />
+    </Sidebar>
   );
 }

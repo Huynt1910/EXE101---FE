@@ -33,6 +33,7 @@ export function useMyTrips(params?: GetTripsQuery, options?: ListQueryOptions) {
     queryKey: tripQueryKeys.myTrips(params),
     queryFn: () => tripApi.getMyTrips(params),
     enabled: options?.enabled ?? true,
+    placeholderData: (previousData) => previousData,
   });
 }
 

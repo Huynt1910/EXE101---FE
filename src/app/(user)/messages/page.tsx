@@ -2,8 +2,10 @@ import MessagesLayout from "@/components/chat/MessagesLayout";
 
 export default function MessagesPage() {
   return (
-    <section className="h-[calc(100dvh-80px)] overflow-hidden bg-[#fffbf8]">
-      <MessagesLayout />
-    </section>
+    <main className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden overscroll-none">
+      <section className="flex h-full min-h-0 max-h-full flex-1 overflow-hidden overscroll-none">
+        <MessagesLayout />
+      </section>
+    </main>
   );
 }

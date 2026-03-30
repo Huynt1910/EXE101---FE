@@ -1,9 +1,9 @@
+import { ProfileBookingsSection } from "./components/profile-bookings-section";
+import { ProfileNotificationsSection } from "./components/profile-notifications-section";
+import { ProfileOverviewSection } from "./components/profile-overview-section";
+import { ProfileSecuritySection } from "./components/profile-security-section";
 import { MyTripsSection } from "./components/my-trips-section";
-import { CoursesCard } from "./components/courses-card";
-import { PaymentCard } from "./components/payment-card";
 import { ProfileSummaryCard } from "./components/profile-summary-card";
-import { ProfileTopBar } from "./components/profile-top-bar";
-import { SubscriptionCard } from "./components/subscription-card";
 
 export default async function ProfilePage({
   searchParams,
@@ -12,27 +12,24 @@ export default async function ProfilePage({
 }) {
   const section = (await searchParams)?.section;
 
+  const content = (() => {
+    switch (section) {
+      case "personal":
+        return <ProfileSummaryCard />;
+      case "bookings":
+        return <ProfileBookingsSection />;
+      case "trips":
+        return <MyTripsSection />;
+      case "notifications":
+        return <ProfileNotificationsSection />;
+      case "security":
+        return <ProfileSecuritySection />;
+      default:
+        return <ProfileOverviewSection />;
+    }
+  })();
+
   return (
-    <main className="min-h-screen bg-background">
-      <div className="space-y-4">
-        <ProfileTopBar />
-
-        {section === "trips" ? (
-          <MyTripsSection />
-        ) : (
-          <>
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-              <ProfileSummaryCard />
-              <PaymentCard />
-            </div>
-
-            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_280px]">
-              <CoursesCard />
-              <SubscriptionCard />
-            </div>
-          </>
-        )}
-      </div>
-    </main>
+    <main className="space-y-4">{content}</main>
   );
 }

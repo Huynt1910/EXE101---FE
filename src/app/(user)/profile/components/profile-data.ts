@@ -1,50 +1,50 @@
 import {
+  Bell,
   BookOpen,
-  CalendarClock,
-  CalendarDays,
-  CheckCheck,
+  ClipboardList,
+  LockKeyhole,
   MessageCircle,
-  Trophy,
+  Sparkles,
   UserRound,
 } from "lucide-react";
 import type { CourseItem, MenuItem } from "./profile-types";
 
 export const MENU_ITEMS: MenuItem[] = [
-  { label: "Profile", icon: UserRound, href: "/profile" },
+  { label: "Overview", icon: Sparkles, href: "/profile" },
+  {
+    label: "Personal info",
+    icon: UserRound,
+    href: "/profile?section=personal",
+    section: "personal",
+  },
+  {
+    label: "My bookings",
+    icon: ClipboardList,
+    href: "/profile?section=bookings",
+    section: "bookings",
+    badgeKey: "bookings",
+  },
   {
     label: "My trips",
     icon: BookOpen,
     href: "/profile?section=trips",
     section: "trips",
-    badge: 0,
+    badgeKey: "trips",
   },
   {
-    label: "Completed",
-    icon: CheckCheck,
-    href: "/profile?section=completed",
-    section: "completed",
-    badge: 0,
-  },
-  {
-    label: "Events",
-    icon: CalendarDays,
-    href: "/profile?section=events",
-    section: "events",
-    badge: 2,
-  },
-  {
-    label: "Achievements",
-    icon: Trophy,
-    href: "/profile?section=achievements",
-    section: "achievements",
+    label: "Notifications",
+    icon: Bell,
+    href: "/profile?section=notifications",
+    section: "notifications",
+    badgeKey: "notifications",
   },
   {
     label: "Security",
-    icon: CalendarClock,
+    icon: LockKeyhole,
     href: "/profile?section=security",
     section: "security",
   },
-  { label: "Messages", icon: MessageCircle, href: "/inbox", badge: 1 },
+  { label: "Messages", icon: MessageCircle, href: "/messages", badgeKey: "messages" },
 ];
 
 export const COURSES: CourseItem[] = [

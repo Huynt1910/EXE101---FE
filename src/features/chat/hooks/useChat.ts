@@ -18,6 +18,14 @@ export function useChatRooms() {
   });
 }
 
+export function useChatUnreadSummary() {
+  return useQuery({
+    queryKey: chatQueryKeys.unreadSummary(),
+    queryFn: () => chatApi.getUnreadSummary(),
+    staleTime: 30 * 1000,
+  });
+}
+
 export function useChatRoomMessages(roomId?: string, params?: GetRoomMessagesQuery) {
   return useQuery({
     queryKey: chatQueryKeys.roomMessages(roomId ?? "", params),
@@ -39,6 +47,20 @@ export function useSendChatMessageMutation() {
         queryKey: [...chatQueryKeys.messages(), variables.roomId],
       });
       queryClient.invalidateQueries({ queryKey: chatQueryKeys.rooms() });
+    },
+  });
+}
+
+export function useMarkRoomReadMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (roomId: string) => chatApi.markRoomAsRead(roomId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.rooms() }),
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.unreadSummary() }),
+      ]);
     },
   });
 }

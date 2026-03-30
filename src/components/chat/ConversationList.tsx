@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -38,61 +39,71 @@ export default function ConversationList({
   );
 
   return (
-    <div className="flex flex-col h-full border-r border-gray-200 bg-white">
-      {/* Header */}
-      <div className="px-4 py-4 shrink-0">
-        <h1 className="text-base font-semibold text-gray-900">Chat</h1>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border-r border-border bg-card">
+      <div className="shrink-0 px-4 py-4">
+        <h1 className="text-base font-semibold text-foreground">Chat</h1>
       </div>
 
-      {conversations.length > 0 && (
-        <div className="shrink-0 border-b border-gray-100 px-3 py-3">
+      {conversations.length > 0 ? (
+        <div className="shrink-0 border-b border-border/70 px-3 py-3">
+          <label htmlFor="chat-search" className="sr-only">
+            Search conversations
+          </label>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
             <input
+              id="chat-search"
+              name="chat-search"
               type="text"
               value={searchQuery}
               onChange={(event) => onSearchChange(event.target.value)}
+              aria-label="Search conversations"
+              autoComplete="off"
               placeholder="Search messages..."
-              className="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 pl-8 pr-3 text-sm focus:border-transparent focus:outline-none focus:ring-2 focus:ring-rose-400"
+              className="w-full rounded-xl border border-border bg-muted/40 py-2 pl-8 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
             />
           </div>
         </div>
-      )}
+      ) : null}
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide">
         {filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
-            <p className="text-xs text-gray-400">No conversations found</p>
+            <p className="text-xs text-muted-foreground">No conversations found</p>
           </div>
         ) : (
-          <ul className="divide-y divide-gray-100">
+          <ul className="divide-y divide-border/60">
             {filtered.map((conversation) => (
               <li key={conversation.id}>
                 <button
+                  type="button"
                   onClick={() => onSelect(conversation.id)}
                   className={cn(
-                    'flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50',
-                    selectedId === conversation.id && 'bg-rose-50 hover:bg-rose-50',
+                    'flex w-full items-start gap-3 border-l-2 border-transparent px-4 py-3 text-left transition-colors hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-inset',
+                    selectedId === conversation.id &&
+                      'border-l-primary bg-primary/5 hover:bg-primary/5',
                   )}
                 >
                   <div className="relative shrink-0">
-                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-rose-100">
+                    <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full bg-primary/10">
                       {conversation.avatar ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <Image
                           src={conversation.avatar}
                           alt={conversation.name}
+                          width={40}
+                          height={40}
                           className="h-full w-full object-cover"
+                          unoptimized
                         />
                       ) : (
-                        <span className="text-sm font-semibold text-rose-500">
+                        <span className="text-sm font-semibold text-primary">
                           {conversation.name.charAt(0).toUpperCase()}
                         </span>
                       )}
                     </div>
-                    {conversation.isOnline && (
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500" />
-                    )}
+                    {conversation.isOnline ? (
+                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card bg-green-500" />
+                    ) : null}
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -101,8 +112,8 @@ export default function ConversationList({
                         className={cn(
                           'truncate text-sm',
                           conversation.unreadCount
-                            ? 'font-semibold text-gray-900'
-                            : 'font-medium text-gray-800',
+                            ? 'font-semibold text-foreground'
+                            : 'font-medium text-foreground/80',
                         )}
                       >
                         {conversation.name}
@@ -112,14 +123,18 @@ export default function ConversationList({
                       <p
                         className={cn(
                           'truncate text-xs',
-                          conversation.unreadCount ? 'font-medium text-gray-700' : 'text-gray-400',
+                          conversation.unreadCount
+                            ? 'font-medium text-foreground/75'
+                            : 'text-muted-foreground',
                         )}
                       >
                         {conversation.lastMessage}
-                        {conversation.lastMessageTime ? ` · ${conversation.lastMessageTime}` : ''}
+                        {conversation.lastMessageTime
+                          ? ` - ${conversation.lastMessageTime}`
+                          : ''}
                       </p>
                       {conversation.unreadCount ? (
-                        <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-rose-500 text-[10px] font-semibold text-white">
+                        <span className="flex h-4 min-w-4 shrink-0 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
                           {conversation.unreadCount}
                         </span>
                       ) : null}

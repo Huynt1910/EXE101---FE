@@ -9,5 +9,9 @@ export default function BuddyMessagesLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return children;
+  return (
+    <div className="flex h-[calc(100svh-4rem-2rem)] min-h-0 max-h-[calc(100svh-4rem-2rem)] flex-1 overflow-hidden overscroll-none md:h-[calc(100svh-4rem-3rem)] md:max-h-[calc(100svh-4rem-3rem)]">
+      {children}
+    </div>
+  );
 }

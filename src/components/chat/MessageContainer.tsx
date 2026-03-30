@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import MessagesEmptyState from './MessagesEmptyState';
 import { type Conversation } from './ConversationList';
@@ -58,7 +59,9 @@ type ParsedOffer = {
 };
 
 function parseOfferText(text: string): ParsedOffer | null {
-  if (!text.includes('New trip request from buddy') && !text.includes('Offer price:')) return null;
+  if (!text.includes('New trip request from buddy') && !text.includes('Offer price:')) {
+    return null;
+  }
 
   const location = text.match(/Trip:\s*([^\n]+?)\s+on\s/)?.[1]?.trim() ?? '';
   const date = text.match(/on\s+([\d-]+)/)?.[1]?.trim() ?? '';
@@ -67,121 +70,153 @@ function parseOfferText(text: string): ParsedOffer | null {
   const children = text.match(/(\d+)\s+children/)?.[1] ?? '0';
   const duration = text.match(/(\d+)\s+hours?/)?.[1] ?? '0';
   const price = text.match(/Offer price:\s*([^\n]+)/)?.[1]?.trim() ?? '';
-  const budMessage = text.match(/Message from buddy:[\r\n]+([\s\S]*?)(?:\n\n|$)/)?.[1]?.trim() ?? '';
+  const buddyMessage =
+    text.match(/Message from buddy:[\r\n]+([\s\S]*?)(?:\n\n|$)/)?.[1]?.trim() ??
+    '';
 
   if (!location && !price) return null;
 
-  return { location, date, time, adults, children, duration, price, buddyMessage: budMessage };
+  return { location, date, time, adults, children, duration, price, buddyMessage };
 }
 
 function IconMapPin() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+      <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
+
 function IconCalendar() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
   );
 }
+
 function IconClock() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }
+
 function IconUsers() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   );
 }
+
 function IconTag() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>
+      <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+      <line x1="7" y1="7" x2="7.01" y2="7" />
     </svg>
   );
 }
 
 function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMine: boolean }>) {
-  const headerClassName = isMine
-    ? 'bg-[#ffdb5b]'
-    : 'bg-[#f3f5f7]';
-  const headerSubtleTextClassName = 'text-black';
-  const headerMutedIconClassName = 'text-black';
-  const headerPriceClassName = 'text-black';
-
   return (
-    <div className={`w-72 sm:w-80 rounded-2xl overflow-hidden shadow-md border ${
-      isMine ? 'border-amber-200' : 'border-indigo-100'
-    }`}>
-      {/* Header */}
-      <div className={`px-4 pt-4 pb-3 ${headerClassName}`}>
+    <div
+      className={`w-72 overflow-hidden rounded-2xl border shadow-sm sm:w-80 ${
+        isMine ? 'border-amber-200' : 'border-border'
+      }`}
+    >
+      <div className={`px-4 pb-3 pt-4 ${isMine ? 'bg-amber-200/90' : 'bg-muted/50'}`}>
         <div className="mb-3">
-          <span className={`text-sm font-semibold tracking-wide uppercase ${headerSubtleTextClassName}`}>Trip Offer</span>
+          <span className="text-sm font-semibold uppercase tracking-wide text-foreground">
+            Trip offer
+          </span>
         </div>
         <div className="mb-0.5 flex items-baseline gap-2">
-          <p className={`text-xl font-bold uppercase tracking-wide ${headerSubtleTextClassName}`}>Price</p>
-          <span className={`text-xl font-bold ${headerPriceClassName}`}>{offer.price}</span>
+          <p className="text-xl font-bold uppercase tracking-wide text-foreground">
+            Price
+          </p>
+          <span className="text-xl font-bold text-foreground">{offer.price}</span>
         </div>
-        {offer.location && (
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <span className={headerMutedIconClassName}><IconMapPin /></span>
-            <p className={`text-xs ${headerSubtleTextClassName}`}>{offer.location}</p>
+        {offer.location ? (
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <span className="text-foreground">
+              <IconMapPin />
+            </span>
+            <p className="text-xs text-foreground">{offer.location}</p>
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Details */}
-      <div className="bg-white px-4 pt-3 pb-3 space-y-2.5">
-        {offer.date && (
-          <div className="flex items-center gap-2.5 text-xs text-gray-600">
-            <span className="text-gray-400"><IconCalendar /></span>
-            <span>{offer.date}{offer.time ? ` at ${offer.time}` : ''}</span>
-          </div>
-        )}
-        {offer.duration && offer.duration !== '0' && (
-          <div className="flex items-center gap-2.5 text-xs text-gray-600">
-            <span className="text-gray-400"><IconClock /></span>
-            <span>{offer.duration} hours</span>
-          </div>
-        )}
-        {(offer.adults || offer.children) && (
-          <div className="flex items-center gap-2.5 text-xs text-gray-600">
-            <span className="text-gray-400"><IconUsers /></span>
+      <div className="space-y-2.5 bg-card px-4 pb-3 pt-3">
+        {offer.date ? (
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <span className="text-muted-foreground">
+              <IconCalendar />
+            </span>
             <span>
-              {offer.adults} adult{Number(offer.adults) !== 1 ? 's' : ''}
-              {offer.children !== '0' && `, ${offer.children} child${Number(offer.children) !== 1 ? 'ren' : ''}`}
+              {offer.date}
+              {offer.time ? ` at ${offer.time}` : ''}
             </span>
           </div>
-        )}
+        ) : null}
+        {offer.duration && offer.duration !== '0' ? (
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <span className="text-muted-foreground">
+              <IconClock />
+            </span>
+            <span>{offer.duration} hours</span>
+          </div>
+        ) : null}
+        {offer.adults || offer.children ? (
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            <span className="text-muted-foreground">
+              <IconUsers />
+            </span>
+            <span>
+              {offer.adults} adult{Number(offer.adults) !== 1 ? 's' : ''}
+              {offer.children !== '0' &&
+                `, ${offer.children} child${Number(offer.children) !== 1 ? 'ren' : ''}`}
+            </span>
+          </div>
+        ) : null}
       </div>
 
-      {/* Buddy note */}
-      {offer.buddyMessage && (
-        <div className="mx-3 mb-3 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5">
-          <div className="flex items-center gap-1.5 mb-1">
-            <span className="text-gray-400"><IconTag /></span>
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide">Note from buddy</p>
+      {offer.buddyMessage ? (
+        <div className="mx-3 mb-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+          <div className="mb-1 flex items-center gap-1.5">
+            <span className="text-muted-foreground">
+              <IconTag />
+            </span>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+              Note from buddy
+            </p>
           </div>
-          <p className="text-xs text-gray-600 italic leading-relaxed">&ldquo;{offer.buddyMessage}&rdquo;</p>
+          <p className="text-xs italic leading-relaxed text-muted-foreground">
+            &ldquo;{offer.buddyMessage}&rdquo;
+          </p>
         </div>
-      )}
+      ) : null}
 
-      {/* Footer */}
-      <div className={`px-4 py-2.5 text-center text-[11px] font-medium ${
-        isMine
-          ? 'bg-amber-50 text-amber-700 border-t border-amber-100'
-          : 'bg-indigo-50 text-indigo-600 border-t border-indigo-100'
-      }`}>
-        {isMine ? 'Offer sent · Awaiting traveler review' : 'Reply to discuss or accept this offer'}
+      <div
+        className={`border-t px-4 py-2.5 text-center text-[11px] font-medium ${
+          isMine
+            ? 'border-amber-100 bg-amber-50 text-amber-700'
+            : 'border-border bg-muted/30 text-primary'
+        }`}
+      >
+        {isMine
+          ? 'Offer sent · Awaiting traveler review'
+          : 'Reply to discuss or accept this offer'}
       </div>
     </div>
   );
@@ -261,9 +296,11 @@ export default function MessageContainer({
         scrollToLatest('auto');
       });
     } else if (isNewLastMessage) {
-      const normalizedSenderUserId = lastMessage?.senderUserId.trim().toLowerCase() ?? '';
+      const normalizedSenderUserId =
+        lastMessage?.senderUserId.trim().toLowerCase() ?? '';
       const isOwnMessage =
-        Boolean(normalizedCurrentUserId) && normalizedSenderUserId === normalizedCurrentUserId;
+        Boolean(normalizedCurrentUserId) &&
+        normalizedSenderUserId === normalizedCurrentUserId;
 
       if (isOwnMessage) {
         requestAnimationFrame(() => {
@@ -278,7 +315,7 @@ export default function MessageContainer({
 
   if (!selectedConversation) {
     return (
-      <div className="flex h-full flex-1 items-center justify-center bg-white">
+      <div className="flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden bg-card">
         <MessagesEmptyState />
       </div>
     );
@@ -286,16 +323,20 @@ export default function MessageContainer({
 
   let messageBody: React.ReactNode;
   if (isLoadingMessages) {
-    messageBody = <p className="text-center text-xs text-gray-400 mt-6">Đang tải tin nhắn...</p>;
+    messageBody = (
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        Loading messages…
+      </p>
+    );
   } else if (displayMessages.length === 0) {
     messageBody = (
-      <p className="text-center text-xs text-gray-400 mt-6">
-        Bắt đầu cuộc trò chuyện với {selectedConversation.name}
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        Start the conversation with {selectedConversation.name}
       </p>
     );
   } else {
     messageBody = (
-      <div className="space-y-2">
+      <div className="space-y-3 pb-1">
         {displayMessages.map((message) => {
           const normalizedCurrentUserId = currentUserId?.trim().toLowerCase();
           const normalizedSenderUserId = message.senderUserId.trim().toLowerCase();
@@ -303,13 +344,18 @@ export default function MessageContainer({
             Boolean(normalizedCurrentUserId) &&
             normalizedSenderUserId === normalizedCurrentUserId;
           const senderInitial = selectedConversation.name.charAt(0).toUpperCase();
-          const isOfferCard = message.contentType !== 'BookingCard' && Boolean(parseOfferText(message.contentText));
+          const parsedOffer =
+            message.contentType !== 'BookingCard'
+              ? parseOfferText(message.contentText)
+              : null;
+
           let bubbleClassName = 'max-w-[90%]';
-          if (message.contentType !== 'BookingCard' && !isOfferCard) {
-            const toneClassName = isMine
-              ? 'bg-[#ffdb5b] text-black rounded-br-md'
-              : 'bg-[#f3f5f7] text-gray-800 rounded-bl-md';
-            bubbleClassName = `max-w-[80%] rounded-2xl px-3 py-2 text-sm ${toneClassName}`;
+          if (message.contentType !== 'BookingCard' && !parsedOffer) {
+            bubbleClassName = `max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+              isMine
+                ? 'rounded-br-md bg-amber-200 text-foreground'
+                : 'rounded-bl-md bg-muted text-foreground'
+            }`;
           }
 
           return (
@@ -318,13 +364,15 @@ export default function MessageContainer({
               className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
             >
               {isMine ? null : (
-                <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-rose-100">
+                <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-primary/10">
                   {selectedConversation.avatar ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={selectedConversation.avatar}
                       alt={selectedConversation.name}
+                      width={32}
+                      height={32}
                       className="h-full w-full object-cover"
+                      unoptimized
                     />
                   ) : (
                     <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-primary">
@@ -334,23 +382,22 @@ export default function MessageContainer({
                 </div>
               )}
 
-              <div
-                className={bubbleClassName}
-              >
+              <div className={bubbleClassName}>
                 {message.contentType === 'BookingCard' ? (
                   <BookingDetailCard
                     bookingId={message.bookingId}
                     currentUserId={currentUserId}
                     isMine={isMine}
                   />
-                ) : (() => {
-                  const parsed = parseOfferText(message.contentText);
-                  if (parsed) return <OfferMessageCard offer={parsed} isMine={isMine} />;
-                  return <p className="whitespace-pre-wrap wrap-break-word">{message.contentText}</p>;
-                })()}
+                ) : parsedOffer ? (
+                  <OfferMessageCard offer={parsedOffer} isMine={isMine} />
+                ) : (
+                  <p className="whitespace-pre-wrap break-words">{message.contentText}</p>
+                )}
                 <p
-                  className={`mt-1 text-[10px] ${isMine ? 'text-black' : 'text-gray-400'
-                    }`}
+                  className={`mt-1 text-[10px] ${
+                    isMine ? 'text-foreground/70' : 'text-muted-foreground'
+                  }`}
                 >
                   {formatTime(message.createdAt)}
                 </p>
@@ -363,16 +410,17 @@ export default function MessageContainer({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white h-full">
-      {/* Top bar */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 shrink-0">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+    <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden bg-card">
+      <div className="flex shrink-0 items-center gap-3 border-b border-border/70 px-4 py-3">
+        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/10">
           {selectedConversation.avatar ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={selectedConversation.avatar}
               alt={selectedConversation.name}
+              width={32}
+              height={32}
               className="h-full w-full rounded-full object-cover"
+              unoptimized
             />
           ) : (
             <span className="text-sm font-semibold text-primary">
@@ -380,17 +428,19 @@ export default function MessageContainer({
             </span>
           )}
         </div>
-        <div className="flex-1">
-          <p className="text-sm font-semibold text-gray-900">{selectedConversation.name}</p>
-          {selectedConversation.isOnline && (
-            <p className="text-xs text-green-500">Active now</p>
-          )}
+        <div className="flex-1 min-w-0">
+          <p className="truncate text-sm font-semibold text-foreground">
+            {selectedConversation.name}
+          </p>
+          {selectedConversation.isOnline ? (
+            <p className="text-xs text-green-600">Active now</p>
+          ) : null}
         </div>
         {canCreateOffer ? (
           <button
             type="button"
             onClick={() => setIsOfferModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary hover:bg-primary/90 active:scale-95 transition-all text-primary-foreground text-xs font-semibold shadow-sm shrink-0"
+            className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-[background-color,transform,box-shadow] hover:bg-primary/90 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -414,14 +464,20 @@ export default function MessageContainer({
         />
       ) : null}
 
-      {/* Messages area */}
-      <div ref={messagesViewportRef} className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4">
+      <div
+        ref={messagesViewportRef}
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 scrollbar-hide"
+      >
         {messageBody}
       </div>
 
-      {/* Input area */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-gray-200 shrink-0">
+      <div className="flex shrink-0 items-center gap-2 border-t border-border/70 px-4 py-3">
+        <label htmlFor="message-draft" className="sr-only">
+          Type your message
+        </label>
         <input
+          id="message-draft"
+          name="message-draft"
           type="text"
           value={draft}
           onChange={(event) => onDraftChange(event.target.value)}
@@ -431,17 +487,19 @@ export default function MessageContainer({
               handleSendMessage();
             }
           }}
-          placeholder="Type a message..."
-          className="flex-1 px-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+          aria-label="Type your message"
+          autoComplete="off"
+          placeholder="Type a message…"
+          className="flex-1 rounded-full border border-border bg-muted/40 px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
         />
         <button
           type="button"
           onClick={handleSendMessage}
           disabled={isSendDisabled}
-          className="shrink-0 px-4 py-2 bg-primary hover:bg-primary/90 disabled:opacity-50 transition-colors text-primary-foreground text-sm font-medium rounded-full cursor-pointer"
+          className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Send message"
         >
-          {isSending ? 'Sending...' : 'Send'}
+          {isSending ? 'Sending…' : 'Send'}
         </button>
       </div>
     </div>
