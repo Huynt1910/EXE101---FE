@@ -29,6 +29,14 @@ export function useBookingDetailQuery(bookingId?: string | null) {
   });
 }
 
+export function useMyTravelerBookingsQuery() {
+  return useQuery({
+    queryKey: ["booking", "traveler", "list"],
+    queryFn: () => bookingApi.getMyTravelerBookings(),
+    staleTime: 30 * 1000,
+  });
+}
+
 export function useCreateBookingMutation() {
   return useMutation({
     mutationFn: ({ payload }: CreateBookingVariables) =>

@@ -48,3 +48,8 @@ export interface VerifyEmailResponse {
   refreshToken: string;
   accessToken: string;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}

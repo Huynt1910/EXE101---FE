@@ -5,12 +5,14 @@ import type {
 } from "@/features/user/type";
 import { httpClient } from "@/lib/http/client";
 
-const USERS_BASE_PATH = "/Users";
+const SELF_SERVICE_GET_PROFILE_PATH = "/api/Users/get-profile";
+const SELF_SERVICE_UPDATE_PROFILE_PATH = "/api/Users/update-profile";
+const SELF_SERVICE_AVATAR_PATH = "/api/Users/upload-avatar";
 
 export const userApi = {
   async getProfile() {
     const res = await httpClient.get<ApiResponse<UserProfile>>(
-      `${USERS_BASE_PATH}/get-profile`,
+      SELF_SERVICE_GET_PROFILE_PATH,
     );
     return res.data;
   },
@@ -19,7 +21,7 @@ export const userApi = {
     const res = await httpClient.put<
       ApiResponse<UserProfile>,
       UpdateUserProfileRequest
-    >(`${USERS_BASE_PATH}/update-profile`, payload);
+    >(SELF_SERVICE_UPDATE_PROFILE_PATH, payload);
     return res.data;
   },
 
@@ -28,7 +30,7 @@ export const userApi = {
     formData.append("profilePicture", file);
 
     const res = await httpClient.post<ApiResponse<unknown>, FormData>(
-      `${USERS_BASE_PATH}/upload-avatar`,
+      SELF_SERVICE_AVATAR_PATH,
       formData,
     );
     return res.data;

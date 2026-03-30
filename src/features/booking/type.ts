@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/features/api-type";
+import type { ApiResponse, PaginatedResult } from "@/features/api-type";
 
 export interface CreateBookingOfferPayload {
 	bookedDate: string;
@@ -47,6 +47,8 @@ export interface BookingOffer {
 	updatedAt: string | null;
 }
 
+export interface TravelerBookingsList extends PaginatedResult<BookingOffer> {}
+
 export interface BookingOfferEnvelope {
 	success: boolean;
 	code: string | null;
@@ -75,3 +77,4 @@ export interface ConfirmBookingAndPayData {
 export type ConfirmBookingAndPayResponse = ApiResponse<ConfirmBookingAndPayData>;
 
 export type GetBookingDetailResponse = ApiResponse<BookingOffer>;
+export type GetTravelerBookingsResponse = ApiResponse<TravelerBookingsList>;

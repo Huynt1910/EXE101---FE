@@ -15,6 +15,17 @@ export interface ChatRoom {
 	lastMessageAt: string | null;
 }
 
+export interface ChatUnreadRoom {
+	roomId: string;
+	unreadCount: number;
+	lastReadAt: string;
+}
+
+export interface ChatUnreadSummary {
+	totalUnread: number;
+	rooms: ChatUnreadRoom[] | null;
+}
+
 export interface ChatMessage {
 	id: string;
 	roomId: string;

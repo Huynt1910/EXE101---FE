@@ -3,6 +3,7 @@ import type {
   ChatMessage,
   ChatMessageList,
   ChatRoomsList,
+  ChatUnreadSummary,
   GetRoomMessagesQuery,
   SendChatMessagePayload,
 } from "@/features/chat/type";
@@ -14,6 +15,13 @@ export const chatApi = {
   async getRooms() {
     const res = await httpClient.get<ApiResponse<ChatRoomsList>>(
       `${CHAT_BASE_PATH}/rooms`,
+    );
+    return res.data;
+  },
+
+  async getUnreadSummary() {
+    const res = await httpClient.get<ApiResponse<ChatUnreadSummary>>(
+      `${CHAT_BASE_PATH}/unread-summary`,
     );
     return res.data;
   },
@@ -30,6 +38,13 @@ export const chatApi = {
     const res = await httpClient.post<ApiResponse<ChatMessage>, SendChatMessagePayload>(
       `${CHAT_BASE_PATH}/rooms/${roomId}/messages`,
       payload,
+    );
+    return res.data;
+  },
+
+  async markRoomAsRead(roomId: string) {
+    const res = await httpClient.post<ApiResponse<null>>(
+      `${CHAT_BASE_PATH}/rooms/${roomId}/mark-read`,
     );
     return res.data;
   },

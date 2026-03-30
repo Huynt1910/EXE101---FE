@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useCreateBookingMutation } from '@/features/booking/hooks/useCreateBookingOffer';
@@ -45,6 +46,24 @@ function normalizeStartTime(value: string) {
   return value.length === 5 ? `${value}:00` : value;
 }
 
+function PreviewRow({
+  icon,
+  label,
+  value,
+}: Readonly<{
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}>) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="shrink-0 text-muted-foreground">{icon}</span>
+      <span className="w-14 shrink-0 text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs font-medium text-foreground">{value}</span>
+    </div>
+  );
+}
+
 export default function CreateOfferModal({
   open,
   onClose,
@@ -72,8 +91,7 @@ export default function CreateOfferModal({
   }
 
   async function handleSend() {
-    if (!isRequiredFilled) return;
-    if (isSending) return;
+    if (!isRequiredFilled || isSending) return;
 
     if (!tripRequestId && !chatRoomId) {
       toast.error('Cannot create booking offer because trip request and chat room are missing.');
@@ -137,24 +155,36 @@ export default function CreateOfferModal({
 
   const buddyInitial = buddyName.charAt(0).toUpperCase();
   const adultsLabel = `${form.bookedAdults} adult${form.bookedAdults === 1 ? '' : 's'}`;
-  let childrenLabel = '';
-  if (form.bookedChildren > 0) {
-    const childrenText = form.bookedChildren === 1 ? 'child' : 'children';
-    childrenLabel = `, ${form.bookedChildren} ${childrenText}`;
-  }
+  const childrenLabel =
+    form.bookedChildren > 0
+      ? `, ${form.bookedChildren} ${form.bookedChildren === 1 ? 'child' : 'children'}`
+      : '';
   const guestsSummary = `${adultsLabel}${childrenLabel}`;
+  const titleId = 'create-offer-modal-title';
+  const descriptionId = 'create-offer-modal-description';
+  const fieldClassName =
+    'rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20';
+  const stepperButtonClassName =
+    'flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.45)' }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center overscroll-contain bg-background/80 p-4 backdrop-blur-sm"
+      role="presentation"
+    >
       <div
-        className="relative w-full max-w-5xl rounded-2xl bg-white shadow-2xl flex flex-col"
-        style={{ maxHeight: '92vh' }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
       >
-        {/* Modal Header */}
-        <div className="flex items-start justify-between px-6 pt-6 pb-4 border-b border-gray-100 shrink-0">
+        <div className="flex shrink-0 items-start justify-between border-b border-border px-6 pb-4 pt-6">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">Create final booking offer</h2>
-            <p className="text-sm text-gray-500 mt-0.5">
+            <h2 id={titleId} className="text-xl font-bold text-foreground">
+              Create final booking offer
+            </h2>
+            <p id={descriptionId} className="mt-0.5 text-sm text-muted-foreground">
               This offer will be sent to the traveler in chat for review and payment.
             </p>
           </div>
@@ -162,7 +192,7 @@ export default function CreateOfferModal({
             type="button"
             onClick={handleClose}
             disabled={isSending}
-            className="ml-4 p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+            className="ml-4 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
             aria-label="Close"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -172,183 +202,239 @@ export default function CreateOfferModal({
           </button>
         </div>
 
-        {/* Success Banner */}
-        {sent && (
-          <div className="mx-6 mt-4 px-4 py-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center gap-3 text-emerald-700 text-sm font-medium shrink-0">
+        {sent ? (
+          <div className="mx-6 mt-4 flex shrink-0 items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="20 6 9 17 4 12" />
             </svg>
             Booking offer sent to traveler
           </div>
-        )}
+        ) : null}
 
-        {/* Body */}
-        <div className="flex flex-col md:flex-row gap-0 flex-1 overflow-hidden">
-          {/* Left: Form */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 scrollbar-hide">
-
-            {/* A. Schedule */}
-            <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Schedule</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5 scrollbar-hide">
+            <div className="space-y-3 rounded-xl border border-border bg-secondary/20 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Schedule
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-date" className="text-xs font-medium text-gray-600">Date <span className="text-primary">*</span></label>
+                  <label htmlFor="offer-booked-date" className="text-xs font-medium text-foreground">
+                    Date <span className="text-primary">*</span>
+                  </label>
                   <input
                     id="offer-booked-date"
+                    name="offer-booked-date"
                     type="date"
                     value={form.bookedDate}
                     onChange={(e) => handleChange('bookedDate', e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="off"
+                    className={fieldClassName}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-start-time" className="text-xs font-medium text-gray-600">Start time <span className="text-primary">*</span></label>
+                  <label htmlFor="offer-booked-start-time" className="text-xs font-medium text-foreground">
+                    Start time <span className="text-primary">*</span>
+                  </label>
                   <input
                     id="offer-booked-start-time"
+                    name="offer-booked-start-time"
                     type="time"
                     value={form.bookedStartTime}
                     onChange={(e) => handleChange('bookedStartTime', e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="off"
+                    className={fieldClassName}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-duration" className="text-xs font-medium text-gray-600">Duration <span className="text-primary">*</span></label>
+                  <label htmlFor="offer-booked-duration" className="text-xs font-medium text-foreground">
+                    Duration <span className="text-primary">*</span>
+                  </label>
                   <select
                     id="offer-booked-duration"
+                    name="offer-booked-duration"
                     value={form.bookedDurationHours}
                     onChange={(e) => handleChange('bookedDurationHours', e.target.value)}
-                    className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    autoComplete="off"
+                    className={fieldClassName}
                   >
                     <option value="">Select hours</option>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map((h) => (
-                      <option key={h} value={h}>{h} {h === 1 ? 'hour' : 'hours'}</option>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
+                      <option key={hour} value={hour}>
+                        {hour} {hour === 1 ? 'hour' : 'hours'}
+                      </option>
                     ))}
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* B. Guests */}
-            <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Guests</p>
+            <div className="space-y-3 rounded-xl border border-border bg-secondary/20 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Guests
+              </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-adults" className="text-xs font-medium text-gray-600">Adults <span className="text-primary">*</span></label>
+                  <label htmlFor="offer-booked-adults" className="text-xs font-medium text-foreground">
+                    Adults <span className="text-primary">*</span>
+                  </label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => handleChange('bookedAdults', Math.max(1, form.bookedAdults - 1))}
-                      className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors"
-                    >−</button>
-                    <span id="offer-booked-adults" className="w-8 text-center text-sm font-semibold text-gray-900">{form.bookedAdults}</span>
+                      className={stepperButtonClassName}
+                      aria-label="Decrease adult guests"
+                    >
+                      -
+                    </button>
+                    <span id="offer-booked-adults" className="w-8 text-center text-sm font-semibold text-foreground">
+                      {form.bookedAdults}
+                    </span>
                     <button
                       type="button"
                       onClick={() => handleChange('bookedAdults', form.bookedAdults + 1)}
-                      className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors"
-                    >+</button>
+                      className={stepperButtonClassName}
+                      aria-label="Increase adult guests"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-children" className="text-xs font-medium text-gray-600">Children</label>
+                  <label htmlFor="offer-booked-children" className="text-xs font-medium text-foreground">
+                    Children
+                  </label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
                       onClick={() => handleChange('bookedChildren', Math.max(0, form.bookedChildren - 1))}
-                      className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors"
-                    >−</button>
-                    <span id="offer-booked-children" className="w-8 text-center text-sm font-semibold text-gray-900">{form.bookedChildren}</span>
+                      className={stepperButtonClassName}
+                      aria-label="Decrease child guests"
+                    >
+                      -
+                    </button>
+                    <span id="offer-booked-children" className="w-8 text-center text-sm font-semibold text-foreground">
+                      {form.bookedChildren}
+                    </span>
                     <button
                       type="button"
                       onClick={() => handleChange('bookedChildren', form.bookedChildren + 1)}
-                      className="w-8 h-8 rounded-full border border-gray-200 bg-white flex items-center justify-center text-gray-500 hover:bg-primary/10 hover:border-primary/30 hover:text-primary transition-colors"
-                    >+</button>
+                      className={stepperButtonClassName}
+                      aria-label="Increase child guests"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* C. Price */}
-            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-2">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Total price</p>
+            <div className="space-y-2 rounded-xl border border-primary/20 bg-primary/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Total price
+              </p>
               <div className="flex items-center gap-2">
                 <input
                   id="offer-price"
+                  name="offer-price"
                   type="number"
                   min={0}
                   placeholder="0.00"
                   value={form.price}
                   onChange={(e) => handleChange('price', e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-xl border border-primary/20 bg-white text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent placeholder:text-gray-300"
+                  autoComplete="off"
+                  className="flex-1 rounded-xl border border-primary/20 bg-background px-4 py-3 text-2xl font-bold text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
                 <select
                   id="offer-currency"
+                  name="offer-currency"
                   value={form.currency}
                   onChange={(e) => handleChange('currency', e.target.value)}
-                  className="px-3 py-3 rounded-xl border border-primary/20 bg-white text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  autoComplete="off"
+                  className="rounded-xl border border-primary/20 bg-background px-3 py-3 text-sm font-semibold text-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 >
-                  {CURRENCIES.map((c) => (
-                    <option key={c} value={c}>{c}</option>
+                  {CURRENCIES.map((currency) => (
+                    <option key={currency} value={currency}>
+                      {currency}
+                    </option>
                   ))}
                 </select>
               </div>
-              <p className="text-xs text-primary/70">Required · This is the final agreed price</p>
+              <p className="text-xs text-primary/70">Required - This is the final agreed price</p>
             </div>
 
-            {/* D. Includes / Excludes */}
-            <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">What&apos;s included</p>
+            <div className="space-y-3 rounded-xl border border-border bg-secondary/20 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                What&apos;s included
+              </p>
               <div className="flex flex-col gap-1">
-                <label htmlFor="offer-includes" className="text-xs font-medium text-gray-600">Includes</label>
+                <label htmlFor="offer-includes" className="text-xs font-medium text-foreground">
+                  Includes
+                </label>
                 <textarea
                   id="offer-includes"
+                  name="offer-includes"
                   rows={3}
                   placeholder="e.g. Transportation, entrance fees, meal, guide…"
                   value={form.includes}
                   onChange={(e) => handleChange('includes', e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  autoComplete="off"
+                  className={`${fieldClassName} resize-none`}
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label htmlFor="offer-excludes" className="text-xs font-medium text-gray-600">Excludes</label>
+                <label htmlFor="offer-excludes" className="text-xs font-medium text-foreground">
+                  Excludes
+                </label>
                 <textarea
                   id="offer-excludes"
+                  name="offer-excludes"
                   rows={2}
                   placeholder="e.g. Personal shopping, tips, extra drinks…"
                   value={form.excludes}
                   onChange={(e) => handleChange('excludes', e.target.value)}
-                  className="px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                  autoComplete="off"
+                  className={`${fieldClassName} resize-none`}
                 />
               </div>
             </div>
 
-            {/* E. Message to traveler */}
-            <div className="rounded-xl border border-gray-100 bg-gray-50/60 p-4 space-y-2">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Message to traveler</p>
+            <div className="space-y-2 rounded-xl border border-border bg-secondary/20 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                Message to traveler
+              </p>
               <textarea
                 id="offer-note-for-customer"
+                name="offer-note-for-customer"
                 rows={3}
-                placeholder="Share a warm personal note about the plan, what to expect, and why they'll love it…"
+                placeholder="Share a warm personal note about the plan, what to expect, and why they will love it…"
                 value={form.noteForCustomer}
                 onChange={(e) => handleChange('noteForCustomer', e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                autoComplete="off"
+                className={`${fieldClassName} w-full resize-none`}
               />
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="hidden md:block w-px bg-gray-100 shrink-0" />
+          <div className="hidden w-px shrink-0 bg-border md:block" />
 
-          {/* Right: Live Preview */}
-          <div className="hidden md:flex w-80 xl:w-96 flex-col px-5 py-5 shrink-0 overflow-y-auto scrollbar-hide">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Live preview</p>
-            <div className="rounded-2xl border border-primary/20 bg-white shadow-lg overflow-hidden">
-              {/* Card header */}
-              <div className="bg-primary px-4 pt-4 pb-5">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center overflow-hidden shrink-0">
+          <div className="hidden w-80 shrink-0 flex-col overflow-y-auto px-5 py-5 scrollbar-hide md:flex xl:w-96">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+              Live preview
+            </p>
+            <div className="overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-lg">
+              <div className="bg-primary px-4 pb-5 pt-4">
+                <div className="mb-3 flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20">
                     {buddyAvatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={buddyAvatar} alt={buddyName} className="w-full h-full object-cover" />
+                      <Image
+                        src={buddyAvatar}
+                        alt={buddyName}
+                        width={36}
+                        height={36}
+                        className="h-full w-full object-cover"
+                        unoptimized
+                      />
                     ) : (
                       <span className="text-sm font-bold text-white">{buddyInitial}</span>
                     )}
@@ -357,7 +443,7 @@ export default function CreateOfferModal({
                     <p className="text-xs text-primary-foreground/70">From</p>
                     <p className="text-sm font-semibold text-primary-foreground">{buddyName}</p>
                   </div>
-                  <span className="ml-auto text-[10px] font-semibold bg-white/20 text-primary-foreground px-2.5 py-1 rounded-full">
+                  <span className="ml-auto rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-primary-foreground">
                     Final booking offer
                   </span>
                 </div>
@@ -366,8 +452,7 @@ export default function CreateOfferModal({
                 </p>
               </div>
 
-              {/* Card body */}
-              <div className="px-4 py-3 space-y-2.5 text-sm">
+              <div className="space-y-2.5 px-4 py-3 text-sm">
                 <PreviewRow
                   icon={
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -378,7 +463,7 @@ export default function CreateOfferModal({
                     </svg>
                   }
                   label="Date"
-                  value={form.bookedDate || '—'}
+                  value={form.bookedDate || 'Not set'}
                 />
                 <PreviewRow
                   icon={
@@ -388,7 +473,7 @@ export default function CreateOfferModal({
                     </svg>
                   }
                   label="Start"
-                  value={form.bookedStartTime || '—'}
+                  value={form.bookedStartTime || 'Not set'}
                 />
                 <PreviewRow
                   icon={
@@ -398,7 +483,7 @@ export default function CreateOfferModal({
                     </svg>
                   }
                   label="Duration"
-                  value={form.bookedDurationHours ? `${form.bookedDurationHours}h` : '—'}
+                  value={form.bookedDurationHours ? `${form.bookedDurationHours}h` : 'Not set'}
                 />
                 <PreviewRow
                   icon={
@@ -413,46 +498,52 @@ export default function CreateOfferModal({
                   value={guestsSummary}
                 />
 
-                {form.includes && (
-                  <div className="pt-1 border-t border-gray-100">
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Includes</p>
-                    <p className="text-xs text-gray-600 leading-relaxed">{form.includes}</p>
+                {form.includes ? (
+                  <div className="border-t border-border pt-1">
+                    <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Includes
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{form.includes}</p>
                   </div>
-                )}
-                {form.excludes && (
-                  <div className="pt-1 border-t border-gray-100">
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Excludes</p>
-                    <p className="text-xs text-gray-600 leading-relaxed">{form.excludes}</p>
+                ) : null}
+                {form.excludes ? (
+                  <div className="border-t border-border pt-1">
+                    <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Excludes
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{form.excludes}</p>
                   </div>
-                )}
-                {form.noteForCustomer && (
-                  <div className="pt-1 border-t border-gray-100">
-                    <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">Message</p>
-                    <p className="text-xs text-gray-600 leading-relaxed italic">&ldquo;{form.noteForCustomer}&rdquo;</p>
+                ) : null}
+                {form.noteForCustomer ? (
+                  <div className="border-t border-border pt-1">
+                    <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      Message
+                    </p>
+                    <p className="text-xs italic leading-relaxed text-muted-foreground">
+                      &ldquo;{form.noteForCustomer}&rdquo;
+                    </p>
                   </div>
-                )}
+                ) : null}
               </div>
 
-              {/* Card footer */}
-              <div className="px-4 py-3 bg-amber-50 border-t border-amber-100 flex items-center gap-2">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500 shrink-0">
+              <div className="flex items-center gap-2 border-t border-amber-100 bg-amber-50 px-4 py-3">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-amber-500">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
-                <p className="text-[11px] text-amber-600 font-medium">Awaiting traveler review</p>
+                <p className="text-[11px] font-medium text-amber-600">Awaiting traveler review</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
+        <div className="flex shrink-0 items-center justify-end gap-3 border-t border-border px-6 py-4">
           <button
             type="button"
             onClick={handleClose}
             disabled={isSending}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 transition-colors"
+            className="rounded-xl px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
           >
             Cancel
           </button>
@@ -460,30 +551,12 @@ export default function CreateOfferModal({
             type="button"
             onClick={handleSend}
             disabled={!isRequiredFilled || sent || isSending}
-            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-primary-foreground bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+            className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSending ? 'Sending...' : 'Send'}
+            {isSending ? 'Sending…' : 'Send'}
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function PreviewRow({
-  icon,
-  label,
-  value,
-}: Readonly<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}>) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-gray-400 shrink-0">{icon}</span>
-      <span className="text-gray-400 text-xs w-14 shrink-0">{label}</span>
-      <span className="text-gray-700 text-xs font-medium">{value}</span>
     </div>
   );
 }

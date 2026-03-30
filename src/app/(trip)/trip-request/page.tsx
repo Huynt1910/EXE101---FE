@@ -110,7 +110,12 @@ export default function TripRequestPage() {
           : "Trip created successfully.",
         { id: toastId },
       );
-      router.push(`/profile/trips/${request.id}`);
+      if (isEditMode) {
+        router.push(`/profile/trip/${request.id}`);
+        return;
+      }
+
+      router.push(`/trip-request/success?tripId=${encodeURIComponent(request.id)}`);
     } catch (error) {
       const message =
         typeof error === "object" &&

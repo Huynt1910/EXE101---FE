@@ -1,5 +1,6 @@
 import { httpClient } from "@/lib/http/client";
 import {
+  ChangePasswordRequest,
   LoginGoogleRequest,
   LoginRequest,
   LoginResponse,
@@ -49,6 +50,14 @@ export const authApi = {
   async requestOtp(payload: RequestOtpRequest) {
     const res = await httpClient.post<ApiResponse<null>, RequestOtpRequest>(
       `${AUTH_BASE_PATH}/request-otp`,
+      payload,
+    );
+    return res.data;
+  },
+
+  async changePassword(payload: ChangePasswordRequest) {
+    const res = await httpClient.post<ApiResponse<null>, ChangePasswordRequest>(
+      `${AUTH_BASE_PATH}/change-password`,
       payload,
     );
     return res.data;

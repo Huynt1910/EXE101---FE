@@ -271,7 +271,7 @@ export default function BookingDetailCard({ bookingId, currentUserId, isMine = f
             type="button"
             onClick={handleConfirmAndPay}
             disabled={confirmAndPayMutation.isPending}
-            className="w-full rounded-xl bg-[#1a2b4a] py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#243d6a] hover:shadow-md active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full rounded-xl bg-[#1a2b4a] py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] hover:bg-[#243d6a] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {confirmAndPayMutation.isPending ? (
               <span className="flex items-center justify-center gap-2">
