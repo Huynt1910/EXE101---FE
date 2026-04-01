@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { LogOut, MapPinned } from "lucide-react";
@@ -71,11 +72,22 @@ export function ProfileSidebar() {
 
   const handleLogout = () => {
     authStore.logout();
-    router.push("/login");
+    router.push("/");
   };
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar
+      collapsible="icon"
+      variant="inset"
+      style={
+        {
+          "--sidebar": "var(--card)",
+          "--sidebar-accent":
+            "color-mix(in srgb, var(--secondary) 70%, white)",
+          "--sidebar-border": "var(--border)",
+        } as CSSProperties
+      }
+    >
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

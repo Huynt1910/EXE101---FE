@@ -436,25 +436,29 @@ export function ProfileOverviewSection() {
               <div className="mt-4">
                 <div className="mt-4 space-y-3">
                   {trips.length > 0 ? (
-                    trips.map((trip) => (
-                      <div
-                        key={trip.id}
-                        className="rounded-2xl border border-border/70 bg-secondary/30 p-4"
-                      >
-                        <p className="font-medium text-foreground">
-                          {trip.city}
-                        </p>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          Starts {trip.startDate} at{" "}
-                          {trip.startTime.slice(0, 5)}
-                        </p>
-                        <p className="mt-2 text-xs text-muted-foreground">
-                          {trip.preferredLanguages.length > 0
-                            ? trip.preferredLanguages.join(", ")
-                            : "No language preference"}
-                        </p>
-                      </div>
-                    ))
+                    trips.map((trip) => {
+                      const preferredLanguages = trip.preferredLanguages ?? [];
+
+                      return (
+                        <div
+                          key={trip.id}
+                          className="rounded-2xl border border-border/70 bg-secondary/30 p-4"
+                        >
+                          <p className="font-medium text-foreground">
+                            {trip.city}
+                          </p>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Starts {trip.startDate} at{" "}
+                            {trip.startTime.slice(0, 5)}
+                          </p>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {preferredLanguages.length > 0
+                              ? preferredLanguages.join(", ")
+                              : "No language preference"}
+                          </p>
+                        </div>
+                      );
+                    })
                   ) : (
                     <p className="text-sm text-muted-foreground">
                       No trips created yet.
