@@ -37,7 +37,10 @@ export function MeetingNotesStep({
           placeholder="Tell us what you want to explore, any preferences, or important details for your buddy."
           value={formData.notes}
           onChange={(event) => onNotesChange(event.target.value)}
-          className={cn(errors.notes && "border-red-500")}
+          className={cn(
+            "border-input bg-background text-foreground",
+            errors.notes && "border-red-500",
+          )}
         />
         <FieldError message={errors.notes} />
       </Field>

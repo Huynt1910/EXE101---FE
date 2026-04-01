@@ -54,14 +54,14 @@ const plans: Plan[] = [
     name: "Founder",
     price: "150,000",
     description:
-      "Only 30 spots. Early adopter benefits for the first buddies joining Bonddy.",
+      "Only 30 slots. Early adopter benefits for the first buddies joining Bonddy.",
     features: [
       { label: "Everything included in Pro", included: true },
       { label: "0% commission and keep 100% income", included: true },
       { label: "Top placement in search", included: true },
       { label: "Direct support from the Bonddy team", included: true },
       { label: "Input on product direction", included: true },
-      { label: "Limited to 30 spots", included: true },
+      { label: "Limited to 30 slots", included: true },
     ],
     cta: "Choose Founder",
     href: "/buddy/apply",

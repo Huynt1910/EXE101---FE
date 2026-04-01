@@ -2,6 +2,7 @@ import type { ApiResponse } from "@/features/api-type";
 import type {
   ChatMessage,
   ChatMessageList,
+  ChatRoom,
   ChatRoomsList,
   ChatUnreadSummary,
   GetRoomMessagesQuery,
@@ -30,6 +31,13 @@ export const chatApi = {
     const res = await httpClient.get<ApiResponse<ChatMessageList>>(
       `${CHAT_BASE_PATH}/rooms/${roomId}/messages`,
       params,
+    );
+    return res.data;
+  },
+
+  async getOrCreateBuddyRoom(buddyUserId: string) {
+    const res = await httpClient.post<ApiResponse<ChatRoom>>(
+      `${CHAT_BASE_PATH}/buddies/${buddyUserId}/room`,
     );
     return res.data;
   },

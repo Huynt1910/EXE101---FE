@@ -11,6 +11,8 @@ import {
   ChevronDown,
   Globe,
   LoaderCircle,
+  Minus,
+  Plus,
   Sparkles,
   Wallet,
   X,
@@ -31,6 +33,7 @@ import { handleApiError } from "@/lib/error-handler";
 import { buildAuthUrl } from "@/lib/callback-url";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
+import { cn } from "@/lib/utils";
 
 const ACTIVITY_OPTIONS = [
   "Food",
@@ -73,7 +76,6 @@ function isDuplicate(values: string[], candidate: string) {
 
 type MultiSelectFieldProps = {
   label: string;
-  helper: string;
   placeholder: string;
   options: readonly string[];
   values: string[];
@@ -82,7 +84,6 @@ type MultiSelectFieldProps = {
 
 function MultiSelectField({
   label,
-  helper,
   placeholder,
   options,
   values,
@@ -90,6 +91,8 @@ function MultiSelectField({
 }: Readonly<MultiSelectFieldProps>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const unifiedFieldClass =
+    "border-input bg-background text-foreground hover:bg-primary";
 
   const normalizedQuery = normalizeTag(query);
   const filteredOptions = useMemo(() => {
@@ -139,95 +142,97 @@ function MultiSelectField({
     <div className="space-y-3">
       <div className="space-y-1">
         <label className="text-sm font-medium text-foreground">{label}</label>
-        <p className="text-sm text-muted-foreground">{helper}</p>
       </div>
 
-      <div className="rounded-[1.5rem] border border-border/70 bg-secondary/20 p-4">
-        <div className="flex min-h-12 flex-wrap gap-2">
-          {values.length > 0 ? (
-            values.map((value) => (
-              <Badge
-                key={value}
-                variant="secondary"
-                className="gap-1 rounded-full px-3 py-1.5 text-sm"
+      <div className="flex min-h-12 flex-wrap">
+        {values.length > 0 ? (
+          values.map((value) => (
+            <Badge
+              key={value}
+              variant="secondary"
+              className="gap-1 rounded-full px-3 py-1.5 text-sm"
+            >
+              <span>{value}</span>
+              <button
+                type="button"
+                onClick={() => removeValue(value)}
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10"
+                aria-label={`Remove ${value}`}
               >
-                <span>{value}</span>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))
+        ) : (
+          <p className="text-sm text-muted-foreground">{placeholder}</p>
+        )}
+      </div>
+
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            className={`mt-4 w-full justify-between rounded-xl ${unifiedFieldClass}`}
+          >
+            Select {label.toLowerCase()}
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent
+          align="start"
+          className="w-[22rem] rounded-2xl bg-popover p-4 text-popover-foreground"
+        >
+          <div className="space-y-3">
+            <Input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={`Search or add ${label.toLowerCase()}...`}
+              className="border-input bg-background text-foreground"
+            />
+
+            <div className="max-h-64 space-y-2 overflow-y-auto">
+              {filteredOptions.map((option) => {
+                const selected = isDuplicate(values, option);
+
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => toggleValue(option)}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                      selected
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary/40 text-foreground hover:bg-secondary",
+                    )}
+                  >
+                    <span>{option}</span>
+                    {selected ? <Check className="h-4 w-4" /> : null}
+                  </button>
+                );
+              })}
+
+              {filteredOptions.length === 0 && !canAddCustom ? (
+                <p className="rounded-xl bg-secondary/25 px-3 py-3 text-sm text-muted-foreground">
+                  No matching option.
+                </p>
+              ) : null}
+
+              {canAddCustom ? (
                 <button
                   type="button"
-                  onClick={() => removeValue(value)}
-                  className="inline-flex h-4 w-4 items-center justify-center rounded-full hover:bg-foreground/10"
-                  aria-label={`Remove ${value}`}
+                  onClick={addCustomValue}
+                  className="flex w-full items-center justify-between rounded-xl bg-accent px-3 py-2 text-left text-sm text-accent-foreground transition-colors hover:opacity-90"
                 >
-                  <X className="h-3 w-3" />
+                  <span>Add "{normalizedQuery}"</span>
+                  <Sparkles className="h-4 w-4" />
                 </button>
-              </Badge>
-            ))
-          ) : (
-            <p className="text-sm text-muted-foreground">{placeholder}</p>
-          )}
-        </div>
-
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className="mt-4 w-full justify-between rounded-xl"
-            >
-              Select {label.toLowerCase()}
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-
-          <PopoverContent align="start" className="w-[22rem] rounded-2xl p-4">
-            <div className="space-y-3">
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={`Search or add ${label.toLowerCase()}...`}
-              />
-
-              <div className="max-h-64 space-y-2 overflow-y-auto">
-                {filteredOptions.map((option) => {
-                  const selected = isDuplicate(values, option);
-
-                  return (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => toggleValue(option)}
-                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
-                        selected
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary/40 text-foreground hover:bg-secondary"
-                      }`}
-                    >
-                      <span>{option}</span>
-                      {selected ? <Check className="h-4 w-4" /> : null}
-                    </button>
-                  );
-                })}
-
-                {filteredOptions.length === 0 && !canAddCustom ? (
-                  <p className="rounded-xl bg-secondary/25 px-3 py-3 text-sm text-muted-foreground">
-                    No matching option.
-                  </p>
-                ) : null}
-
-                {canAddCustom ? (
-                  <button
-                    type="button"
-                    onClick={addCustomValue}
-                    className="flex w-full items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-left text-sm text-amber-700 transition-colors hover:bg-amber-100"
-                  >
-                    <span>Add "{normalizedQuery}"</span>
-                    <Sparkles className="h-4 w-4" />
-                  </button>
-                ) : null}
-              </div>
+              ) : null}
             </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -243,6 +248,9 @@ export default function BuddyApplyPage() {
   const [costPerHour, setCostPerHour] = useState("");
   const [bio, setBio] = useState("");
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const unifiedInputClass = "border-input bg-background text-foreground";
+  const stepperButtonClass =
+    "h-10 w-10 shrink-0 rounded-md border border-input bg-background text-foreground hover:bg-accent";
 
   const loginHref = useMemo(() => buildAuthUrl("/login", "/buddy/apply"), []);
 
@@ -258,8 +266,13 @@ export default function BuddyApplyPage() {
     }
 
     const parsedCost = Number(costPerHour);
-    if (!costPerHour || !Number.isFinite(parsedCost) || parsedCost <= 0) {
-      nextErrors.costPerHour = "Hourly rate must be greater than 0.";
+    if (
+      !costPerHour ||
+      !Number.isFinite(parsedCost) ||
+      parsedCost <= 0 ||
+      parsedCost > 100
+    ) {
+      nextErrors.costPerHour = "Hourly rate must be between 1 and 100.";
     }
 
     if (!bio.trim()) {
@@ -367,10 +380,6 @@ export default function BuddyApplyPage() {
               <h2 className="text-3xl font-semibold tracking-tight text-foreground">
                 Buddy registration
               </h2>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Pick common options from the dropdown, add custom values when
-                needed, and submit your public buddy profile.
-              </p>
             </div>
 
             {!isAuthenticated && isHydrated ? (
@@ -389,7 +398,6 @@ export default function BuddyApplyPage() {
 
             <MultiSelectField
               label="Activities"
-              helper="Choose the trip styles and experiences you usually guide."
               placeholder="No activity selected yet."
               options={ACTIVITY_OPTIONS}
               values={activities}
@@ -406,7 +414,6 @@ export default function BuddyApplyPage() {
 
             <MultiSelectField
               label="Languages"
-              helper="Select the languages you can comfortably use with travelers."
               placeholder="No language selected yet."
               options={LANGUAGE_OPTIONS}
               values={languages}
@@ -425,20 +432,66 @@ export default function BuddyApplyPage() {
               <label className="text-sm font-medium text-foreground">
                 Cost per hour
               </label>
-              <Input
-                type="number"
-                min="1"
-                step="1"
-                value={costPerHour}
-                onChange={(event) => {
-                  setCostPerHour(event.target.value);
-                  setErrors((current) => ({
-                    ...current,
-                    costPerHour: undefined,
-                  }));
-                }}
-                placeholder="10"
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={stepperButtonClass}
+                  onClick={() => {
+                    const nextValue = Math.max(
+                      1,
+                      (Number(costPerHour) || 1) - 1,
+                    );
+                    setCostPerHour(String(nextValue));
+                    setErrors((current) => ({
+                      ...current,
+                      costPerHour: undefined,
+                    }));
+                  }}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  type="number"
+                  min="1"
+                  max="100"
+                  step="1"
+                  value={costPerHour}
+                  onChange={(event) => {
+                    setCostPerHour(event.target.value);
+                    setErrors((current) => ({
+                      ...current,
+                      costPerHour: undefined,
+                    }));
+                  }}
+                  placeholder="Hourly rate in USD"
+                  className={cn(
+                    "text-center",
+                    unifiedInputClass,
+                    errors.costPerHour && "border-red-500",
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className={stepperButtonClass}
+                  onClick={() => {
+                    const nextValue = Math.min(
+                      100,
+                      (Number(costPerHour) || 0) + 1,
+                    );
+                    setCostPerHour(String(nextValue));
+                    setErrors((current) => ({
+                      ...current,
+                      costPerHour: undefined,
+                    }));
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
               {errors.costPerHour ? (
                 <p className="text-xs text-destructive">{errors.costPerHour}</p>
               ) : null}
@@ -453,33 +506,28 @@ export default function BuddyApplyPage() {
                   setErrors((current) => ({ ...current, bio: undefined }));
                 }}
                 placeholder="Tell travelers what kind of local support you provide and why exploring with you feels different."
-                className="min-h-36"
+                className={cn(
+                  "min-h-36 border-input bg-background text-foreground",
+                  errors.bio && "border-red-500",
+                )}
               />
               {errors.bio ? (
                 <p className="text-xs text-destructive">{errors.bio}</p>
               ) : null}
             </div>
-
-            <div className="rounded-[1.5rem] border border-border/70 bg-secondary/25 p-4 text-sm text-muted-foreground">
-              Submitted profile data will be sent exactly from your selected and
-              custom values for activities and languages.
-            </div>
-
-            <Button
-              onClick={handleSubmit}
-              disabled={registerMutation.isPending}
-              className="h-11 w-full rounded-xl"
-            >
-              {registerMutation.isPending ? (
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-              ) : (
-                <BadgeCheck className="h-4 w-4" />
-              )}
-              {registerMutation.isPending
-                ? "Submitting..."
-                : "Apply to be a buddy"}
-            </Button>
           </CardContent>
+          <Button
+            onClick={handleSubmit}
+            disabled={registerMutation.isPending}
+            className="h-11 w-1/2 rounded-xl mx-auto mb-8"
+          >
+            {registerMutation.isPending ? (
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+            ) : (
+              <BadgeCheck className="h-4 w-4" />
+            )}
+            {registerMutation.isPending ? "Submitting..." : "Apply now"}
+          </Button>
         </Card>
       </div>
     </section>

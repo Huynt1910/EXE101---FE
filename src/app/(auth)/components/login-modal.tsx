@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
@@ -16,12 +16,17 @@ import { handleApiError } from "@/lib/error-handler";
 
 export interface LoginModalProps {
   onClose: () => void;
+  onAuthenticated?: (callbackUrl: string) => void;
 }
 
-export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
+export default function LoginModal({
+  onClose,
+  onAuthenticated,
+}: Readonly<LoginModalProps>) {
   const router = useRouter();
   const sp = useSearchParams();
   const { sessionQuery, loginMutation, googleLoginMutation, user } = useAuth();
+  const hasHandledAuthRef = useRef(false);
   const normalizedCallbackUrl = normalizeCallbackUrl(
     sp.get("callbackUrl"),
     getDefaultAuthenticatedPath(user?.roles ?? []),
@@ -70,9 +75,17 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
 
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {
+      if (hasHandledAuthRef.current) return;
+      hasHandledAuthRef.current = true;
+
+      if (onAuthenticated) {
+        onAuthenticated(callbackUrl);
+        return;
+      }
+
       router.replace(callbackUrl, { scroll: false });
     }
-  }, [callbackUrl, router, sessionQuery.data?.accessToken]);
+  }, [callbackUrl, onAuthenticated, router, sessionQuery.data?.accessToken]);
 
   useEffect(() => {
     if (loginMutation.isError) {

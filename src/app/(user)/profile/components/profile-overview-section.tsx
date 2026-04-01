@@ -143,7 +143,7 @@ function getBookingStatusClasses(status?: string | null) {
   switch (status) {
     case "Confirmed":
     case "Completed":
-    case "InProgress":
+    case "In Progress":
       return "border-emerald-200 bg-emerald-50 text-emerald-700";
     case "PendingPayment":
     case "PendingCustomerConfirm":
@@ -302,7 +302,7 @@ export function ProfileOverviewSection() {
                 </div> */}
 
                 <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
-                  <div className="rounded-2xl border border-border/70 bg-secondary/30 p-4">
+                  <div className="p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/80">
                       Member since
                     </p>
@@ -310,7 +310,7 @@ export function ProfileOverviewSection() {
                       {formatDate(profile.createdAt)}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-border/70 bg-secondary/30 p-4">
+                  <div className="p-4">
                     <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground/80">
                       Last profile update
                     </p>
@@ -365,7 +365,7 @@ export function ProfileOverviewSection() {
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <Card className="rounded-[1.75rem] border-border/70 py-0">
+        <Card>
           <CardHeader className="border-b border-border/70">
             <div className="flex items-center justify-between gap-3">
               <div>
@@ -428,18 +428,18 @@ export function ProfileOverviewSection() {
               </div>
             )}
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-[1.5rem] border border-border/70 bg-card p-5">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <BookOpen className="h-4 w-4 text-primary" />
-                  Recent trips
-                </div>
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <BookOpen className="h-4 w-4 text-primary" />
+                Recent trips
+              </div>
+              <div className="mt-4">
                 <div className="mt-4 space-y-3">
                   {trips.length > 0 ? (
                     trips.map((trip) => (
                       <div
                         key={trip.id}
-                        className="rounded-2xl bg-secondary/30 p-4"
+                        className="rounded-2xl border border-border/70 bg-secondary/30 p-4"
                       >
                         <p className="font-medium text-foreground">
                           {trip.city}
@@ -462,43 +462,12 @@ export function ProfileOverviewSection() {
                   )}
                 </div>
               </div>
-
-              <div className="rounded-[1.5rem] border border-border/70 bg-card p-5">
-                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Planning snapshot
-                </div>
-                <div className="mt-4 space-y-3 text-sm text-muted-foreground">
-                  <div className="rounded-2xl bg-secondary/30 p-4">
-                    <p className="font-medium text-foreground">
-                      Profile freshness
-                    </p>
-                    <p className="mt-1">
-                      Updated{" "}
-                      {formatRelativeTime(
-                        profile.updatedAt ?? profile.createdAt,
-                      )}
-                      .
-                    </p>
-                  </div>
-                  <div className="rounded-2xl bg-secondary/30 p-4">
-                    <p className="font-medium text-foreground">
-                      Travel readiness
-                    </p>
-                    <p className="mt-1">
-                      {profile.phoneNumber?.trim()
-                        ? "Your traveler profile already has contact details."
-                        : "Add a phone number so buddies can trust the booking faster."}
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </CardContent>
         </Card>
 
         <div className="space-y-4">
-          <Card className="rounded-[1.75rem] border-border/70 py-0">
+          <Card>
             <CardHeader className="border-b border-border/70">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -507,17 +476,17 @@ export function ProfileOverviewSection() {
                     Quick pulse on active conversations with buddies.
                   </CardDescription>
                 </div>
-                <Badge className="rounded-full bg-primary/10 px-3 py-1 text-primary">
+                <Badge className="bg-primary/10 px-3 py-1 text-primary">
                   {unreadMessages} unread
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 p-6">
+            <CardContent>
               {rooms.length > 0 ? (
                 rooms.slice(0, 3).map((room) => (
                   <div
                     key={room.id}
-                    className="rounded-2xl border border-border/70 bg-secondary/20 p-4"
+                    className="border border-border/70 bg-secondary/20 p-4"
                   >
                     <p className="font-medium text-foreground">
                       {room.otherUserName || "Conversation"}
@@ -535,13 +504,17 @@ export function ProfileOverviewSection() {
                   No conversations yet.
                 </div>
               )}
-              <Button asChild variant="outline" className="w-full rounded-xl">
-                <Link href="/messages">Open inbox</Link>
-              </Button>
             </CardContent>
+            <Button
+              asChild
+              variant="outline"
+              className="rounded-xl w-1/2 mx-auto"
+            >
+              <Link href="/messages">Open inbox</Link>
+            </Button>
           </Card>
 
-          <Card className="rounded-[1.75rem] border-border/70 py-0">
+          <Card className="rounded-[1.75rem] border-border/70">
             <CardHeader className="border-b border-border/70">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -555,12 +528,12 @@ export function ProfileOverviewSection() {
                 </Badge>
               </div>
             </CardHeader>
-            <CardContent className="space-y-3 p-6">
+            <CardContent>
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className="rounded-2xl border border-border/70 bg-secondary/20 p-4"
+                    className="border border-border/70  bg-secondary/20 p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
@@ -586,12 +559,16 @@ export function ProfileOverviewSection() {
                   No notifications yet.
                 </div>
               )}
-              <Button asChild variant="outline" className="w-full rounded-xl">
-                <Link href="/profile?section=notifications">
-                  View notifications
-                </Link>
-              </Button>
             </CardContent>
+            <Button
+              asChild
+              variant="outline"
+              className="w-1/2 rounded-xl mx-auto"
+            >
+              <Link href="/profile?section=notifications">
+                View notifications
+              </Link>
+            </Button>
           </Card>
         </div>
       </div>

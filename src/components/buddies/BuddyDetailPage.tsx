@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Clock3,
   Languages,
+  LoaderCircle,
   MapPin,
   MessageSquareQuote,
   Sparkles,
@@ -17,14 +18,17 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDirectBuddyRoomMutation } from "@/features/chat/hooks/useChat";
 import { useBuddyDetailQuery, useBuddyReviewsQuery } from "@/features/buddy/hooks/useBuddy";
 import type { BuddyProfile, BuddyReview } from "@/features/buddy/type";
 import { buildAuthUrl } from "@/lib/callback-url";
+import { handleApiError } from "@/lib/error-handler";
 import { useAuthStore } from "@/lib/store/authStore";
 
 function getInitials(name?: string | null) {
@@ -94,16 +98,38 @@ function ReviewCard({ review }: Readonly<{ review: BuddyReview }>) {
 function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
-  const contactHref = `/trip-request?buddyId=${encodeURIComponent(
-    buddy.id,
-  )}&buddyName=${encodeURIComponent(buddy.fullName || "Buddy")}`;
+  const directBuddyRoomMutation = useDirectBuddyRoomMutation();
+  const profileHref = `/buddies/${encodeURIComponent(buddy.id)}`;
 
-  const handleContinue = () => {
-    if (!isAuthenticated) {
-      router.push(buildAuthUrl("/login", contactHref));
+  const handleContinue = async () => {
+    if (!buddy.userId) {
+      toast.error("This buddy cannot be contacted right now.");
       return;
     }
-    router.push(contactHref);
+
+    if (!isAuthenticated) {
+      router.push(buildAuthUrl("/login", profileHref));
+      return;
+    }
+
+    const toastId = toast.loading("Opening direct chat...");
+
+    try {
+      const response = await directBuddyRoomMutation.mutateAsync(buddy.userId);
+      const roomId = response.data?.id;
+
+      toast.success("Direct chat is ready.", { id: toastId });
+
+      if (roomId) {
+        router.push(`/messages?roomId=${encodeURIComponent(roomId)}`);
+        return;
+      }
+
+      router.push("/messages");
+    } catch (error) {
+      toast.dismiss(toastId);
+      handleApiError(error);
+    }
   };
 
   return (
@@ -117,7 +143,9 @@ function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <p className="text-sm text-primary-foreground/80">Book with</p>
+            <p className="text-sm text-primary-foreground/80">
+              Contact directly
+            </p>
             <h2 className="truncate text-2xl font-semibold">
               {buddy.fullName || "Local buddy"}
             </h2>
@@ -134,17 +162,17 @@ function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
       <CardContent className="space-y-4 p-6">
         <div className="rounded-[1.5rem] border border-border/70 bg-secondary/25 p-5">
           <p className="text-sm leading-6 text-muted-foreground">
-            Contact this buddy to continue planning your trip. We will pass the
-            selected <span className="font-medium text-foreground">buddy id</span>{" "}
-            into the next step so the flow stays tied to this profile.
+            Open a direct 1:1 chat room with this buddy right away. This flow
+            skips the trip request step and lets you start the conversation
+            first.
           </p>
         </div>
 
         <div className="space-y-3 rounded-[1.5rem] border border-border/70 bg-secondary/15 p-5">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-sm text-muted-foreground">Buddy id</span>
+            <span className="text-sm text-muted-foreground">Chat type</span>
             <span className="text-sm font-semibold text-foreground">
-              {buddy.id.slice(0, 8)}...
+              Direct 1:1 room
             </span>
           </div>
           <div className="flex items-center justify-between gap-3">
@@ -166,13 +194,26 @@ function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4 text-sm text-muted-foreground">
-          The detailed trip information will be completed in the next flow. This
-          action now only starts contact for the selected buddy.
+          We will create or reuse an existing direct room for this buddy and
+          open the chat immediately.
         </div>
 
-        <Button onClick={handleContinue} className="h-11 w-full rounded-xl">
-          Contact this buddy
-          <ArrowRight className="h-4 w-4" />
+        <Button
+          onClick={handleContinue}
+          disabled={directBuddyRoomMutation.isPending || !buddy.userId}
+          className="h-11 w-full rounded-xl"
+        >
+          {directBuddyRoomMutation.isPending ? (
+            <>
+              <LoaderCircle className="h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            <>
+              Contact this buddy
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </CardContent>
     </Card>
@@ -438,15 +479,15 @@ export default function BuddyDetailPage({
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-3 rounded-2xl bg-secondary/25 p-4">
                     <CalendarDays className="mt-0.5 h-4 w-4 text-primary" />
-                    Pick the buddy you want to continue with from this profile.
+                    Start from the buddy profile you already reviewed.
                   </div>
                   <div className="flex items-start gap-3 rounded-2xl bg-secondary/25 p-4">
                     <Clock3 className="mt-0.5 h-4 w-4 text-primary" />
-                    We pass this buddy into the next step so the request stays linked.
+                    We create or reopen the direct room linked to this buddy user.
                   </div>
                   <div className="flex items-start gap-3 rounded-2xl bg-secondary/25 p-4">
                     <MessageSquareQuote className="mt-0.5 h-4 w-4 text-primary" />
-                    Trip details and the rest of the conversation can be completed after contact starts.
+                    Trip details can be discussed inside chat instead of a separate request first.
                   </div>
                 </div>
               </CardContent>

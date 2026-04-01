@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, Sparkles, Users } from "lucide-react";
+import { Check, ChevronDown, Minus, Plus, Sparkles, Users } from "lucide-react";
 import { FieldError } from "@/app/(trip)/trip-request/components/shared";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -64,6 +64,8 @@ function MultiSelectField({
 }: Readonly<MultiSelectFieldProps>) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const unifiedFieldClass =
+    "border-input bg-background text-foreground hover:bg-primary";
 
   const normalizedQuery = normalizeTag(query);
   const filteredOptions = useMemo(() => {
@@ -102,13 +104,8 @@ function MultiSelectField({
   };
 
   return (
-    <div className="rounded-3xl border border-border bg-muted/30 p-4 sm:p-5">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold">{label}</h3>
-        <p className="mt-1 text-sm text-muted-foreground">{helper}</p>
-      </div>
-
-      <div className="mb-4 flex min-h-12 flex-wrap gap-2 rounded-2xl border border-border bg-background p-3">
+    <div className="space-y-3">
+      <div className="flex min-h-12 flex-wrap gap-2 p-3">
         {values.length > 0 ? (
           values.map((value) => (
             <button
@@ -133,7 +130,7 @@ function MultiSelectField({
               variant="outline"
               id={id}
               className={cn(
-                "w-full justify-between bg-background",
+                `w-full justify-between ${unifiedFieldClass}`,
                 error && "border-red-500",
               )}
             >
@@ -141,12 +138,16 @@ function MultiSelectField({
               <ChevronDown className="h-4 w-4" />
             </Button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[24rem] rounded-2xl p-4">
+          <PopoverContent
+            align="start"
+            className="w-[24rem] rounded-2xl bg-popover p-4 text-popover-foreground"
+          >
             <div className="space-y-3">
               <Input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={`Search or add ${label.toLowerCase()}...`}
+                className="border-input bg-background text-foreground"
               />
 
               <div className="max-h-64 space-y-2 overflow-y-auto">
@@ -181,7 +182,7 @@ function MultiSelectField({
                   <button
                     type="button"
                     onClick={addCustomValue}
-                    className="flex w-full items-center justify-between rounded-xl bg-amber-50 px-3 py-2 text-left text-sm text-amber-700 transition-colors hover:bg-amber-100"
+                    className="flex w-full items-center justify-between rounded-xl bg-accent px-3 py-2 text-left text-sm text-accent-foreground transition-colors hover:opacity-90"
                   >
                     <span>Add "{normalizedQuery}"</span>
                     <Sparkles className="h-4 w-4" />
@@ -205,6 +206,10 @@ export function GroupBudgetStep({
   onActivitiesChange,
   onPreferredLanguagesChange,
 }: GroupBudgetStepProps) {
+  const unifiedInputClass = "border-input bg-background text-foreground";
+  const counterButtonClass =
+    "h-10 w-10 shrink-0 rounded-md border border-input bg-background text-foreground hover:bg-accent";
+
   return (
     <div className="space-y-6">
       <div>
@@ -224,16 +229,40 @@ export function GroupBudgetStep({
               Adults
             </span>
           </FieldLabel>
-          <Input
-            id="trip-adults"
-            type="number"
-            min={1}
-            value={formData.adults}
-            onChange={(event) =>
-              onAdultsChange(Number(event.target.value) || 0)
-            }
-            className={cn(errors.adults && "border-red-500")}
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className={counterButtonClass}
+              onClick={() => onAdultsChange(Math.max(1, formData.adults - 1))}
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              id="trip-adults"
+              type="number"
+              min={1}
+              value={formData.adults}
+              onChange={(event) =>
+                onAdultsChange(Math.max(1, Number(event.target.value) || 1))
+              }
+              className={cn(
+                "text-center",
+                unifiedInputClass,
+                errors.adults && "border-red-500",
+              )}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className={counterButtonClass}
+              onClick={() => onAdultsChange(formData.adults + 1)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
           <FieldError message={errors.adults} />
         </Field>
 
@@ -244,16 +273,42 @@ export function GroupBudgetStep({
               Children
             </span>
           </FieldLabel>
-          <Input
-            id="trip-children"
-            type="number"
-            min={0}
-            value={formData.children}
-            onChange={(event) =>
-              onChildrenChange(Number(event.target.value) || 0)
-            }
-            className={cn(errors.children && "border-red-500")}
-          />
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className={counterButtonClass}
+              onClick={() =>
+                onChildrenChange(Math.max(0, formData.children - 1))
+              }
+            >
+              <Minus className="h-4 w-4" />
+            </Button>
+            <Input
+              id="trip-children"
+              type="number"
+              min={0}
+              value={formData.children}
+              onChange={(event) =>
+                onChildrenChange(Math.max(0, Number(event.target.value) || 0))
+              }
+              className={cn(
+                "text-center",
+                unifiedInputClass,
+                errors.children && "border-red-500",
+              )}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              className={counterButtonClass}
+              onClick={() => onChildrenChange(formData.children + 1)}
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
           <FieldError message={errors.children} />
         </Field>
       </FieldGroup>
@@ -262,7 +317,7 @@ export function GroupBudgetStep({
         id="trip-activities"
         label="Activities"
         helper="Pick the experiences you want the buddy to optimize for."
-        placeholder="No activity selected yet."
+        placeholder=""
         options={TRIP_REQUEST_ACTIVITY_OPTIONS}
         values={formData.activities}
         error={errors.activities}
@@ -273,7 +328,7 @@ export function GroupBudgetStep({
         id="trip-preferred-languages"
         label="Preferred languages"
         helper="Choose the languages you want to use comfortably during the trip."
-        placeholder="No language selected yet."
+        placeholder=""
         options={TRIP_REQUEST_LANGUAGE_OPTIONS}
         values={formData.preferredLanguages}
         error={errors.preferredLanguages}

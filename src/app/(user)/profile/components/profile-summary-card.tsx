@@ -25,7 +25,10 @@ import {
   useUserProfile,
   useUserProfileMutations,
 } from "@/features/user/hooks/useUserProfile";
-import type { UpdateUserProfileRequest, UserProfile } from "@/features/user/type";
+import type {
+  UpdateUserProfileRequest,
+  UserProfile,
+} from "@/features/user/type";
 
 const genderOptions = ["Male", "Female", "Other"] as const;
 const MAX_AVATAR_FILE_BYTES = 900 * 1024;
@@ -116,7 +119,8 @@ function toUpdatePayload(values: ProfileFormValues): UpdateUserProfileRequest {
 }
 
 function getInitials(profile?: UserProfile | null) {
-  const source = profile?.fullName?.trim() || profile?.email?.split("@")[0] || "U";
+  const source =
+    profile?.fullName?.trim() || profile?.email?.split("@")[0] || "U";
 
   return source
     .split(/\s+/)
@@ -133,7 +137,8 @@ async function loadImageElement(file: File) {
     const image = await new Promise<HTMLImageElement>((resolve, reject) => {
       const nextImage = new Image();
       nextImage.onload = () => resolve(nextImage);
-      nextImage.onerror = () => reject(new Error("Unable to read the selected image."));
+      nextImage.onerror = () =>
+        reject(new Error("Unable to read the selected image."));
       nextImage.src = objectUrl;
     });
 
@@ -193,7 +198,9 @@ async function optimizeAvatarFile(file: File) {
   }
 
   if (blob.size > MAX_AVATAR_FILE_BYTES) {
-    throw new Error("Image is still too large after compression. Please choose a smaller file.");
+    throw new Error(
+      "Image is still too large after compression. Please choose a smaller file.",
+    );
   }
 
   const fileBaseName = file.name.replace(/\.[^/.]+$/, "");
@@ -323,7 +330,9 @@ export function ProfileSummaryCard() {
     }
 
     if (file.size > MAX_AVATAR_SOURCE_BYTES) {
-      toast.error("Image is too large. Please choose a file smaller than 15MB.");
+      toast.error(
+        "Image is too large. Please choose a file smaller than 15MB.",
+      );
       event.target.value = "";
       return;
     }
@@ -431,9 +440,6 @@ export function ProfileSummaryCard() {
               )}
               {isUploadingAvatar ? "Uploading…" : "Change photo"}
             </Button>
-            <p className="text-xs text-muted-foreground">
-              Large images are automatically compressed before upload.
-            </p>
           </div>
 
           <div className="space-y-4 rounded-2xl border border-border/70 p-4">
@@ -445,13 +451,14 @@ export function ProfileSummaryCard() {
               <p className="text-sm text-muted-foreground">
                 {profile.email || "No email"}
               </p>
-              <p className="text-xs text-muted-foreground">
-                Email is managed by your account and cannot be changed here.
-              </p>
             </div>
 
             <div className="space-y-1 text-sm text-muted-foreground">
-              <p>{profile.isEmailVerified ? "Email verified" : "Email not verified"}</p>
+              <p>
+                {profile.isEmailVerified
+                  ? "Email verified"
+                  : "Email not verified"}
+              </p>
               <p>Joined {formatDateLabel(profile.createdAt)}</p>
               <p>Last update {formatDateLabel(profile.updatedAt)}</p>
             </div>
@@ -459,18 +466,20 @@ export function ProfileSummaryCard() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
+      <Card className="rounded-[1.75rem] border-border/70 py-2">
         <CardHeader className="border-b border-border/70 pb-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-2xl text-foreground">Profile details</CardTitle>
+              <CardTitle className="text-2xl text-foreground">
+                Profile details
+              </CardTitle>
               <p className="text-sm text-muted-foreground">
-                Review your self-service profile and save text changes separately
-                from the avatar upload.
+                Review your self-service profile and save text changes
+                separately from the avatar upload.
               </p>
             </div>
 
-            <Button
+            {/* <Button
               type="button"
               onClick={handleSave}
               disabled={!form.formState.isDirty || !form.formState.isValid || isSavingProfile}
@@ -482,7 +491,7 @@ export function ProfileSummaryCard() {
                 <Save className="h-4 w-4" />
               )}
               {isSavingProfile ? "Saving…" : "Save profile"}
-            </Button>
+            </Button> */}
           </div>
         </CardHeader>
 
@@ -552,7 +561,6 @@ export function ProfileSummaryCard() {
                 </label>
                 <Input type="date" {...form.register("dateOfBirth")} />
               </div>
-
             </div>
 
             <div className="space-y-2">
@@ -603,7 +611,11 @@ export function ProfileSummaryCard() {
             <div className="flex justify-end">
               <Button
                 type="submit"
-                disabled={!form.formState.isDirty || !form.formState.isValid || isSavingProfile}
+                disabled={
+                  !form.formState.isDirty ||
+                  !form.formState.isValid ||
+                  isSavingProfile
+                }
                 className="rounded-xl"
               >
                 {isSavingProfile ? (

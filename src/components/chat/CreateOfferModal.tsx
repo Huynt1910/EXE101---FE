@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { useCreateBookingMutation } from '@/features/booking/hooks/useCreateBookingOffer';
+import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useCreateBookingMutation } from "@/features/booking/hooks/useCreateBookingOffer";
 
 type OfferForm = {
   bookedDate: string;
@@ -27,18 +27,18 @@ type Props = {
   chatRoomId?: string | null;
 };
 
-const CURRENCIES = ['USD', 'VND', 'EUR', 'SGD', 'THB'];
+const CURRENCIES = ["USD", "VND", "EUR", "SGD", "THB"];
 const INITIAL_FORM: OfferForm = {
-  bookedDate: '',
-  bookedStartTime: '',
-  bookedDurationHours: '',
+  bookedDate: "",
+  bookedStartTime: "",
+  bookedDurationHours: "",
   bookedAdults: 1,
   bookedChildren: 0,
-  price: '',
-  currency: 'USD',
-  includes: '',
-  excludes: '',
-  noteForCustomer: '',
+  price: "",
+  currency: "USD",
+  includes: "",
+  excludes: "",
+  noteForCustomer: "",
 };
 
 function normalizeStartTime(value: string) {
@@ -58,7 +58,9 @@ function PreviewRow({
   return (
     <div className="flex items-center gap-2">
       <span className="shrink-0 text-muted-foreground">{icon}</span>
-      <span className="w-14 shrink-0 text-xs text-muted-foreground">{label}</span>
+      <span className="w-14 shrink-0 text-xs text-muted-foreground">
+        {label}
+      </span>
       <span className="text-xs font-medium text-foreground">{value}</span>
     </div>
   );
@@ -67,7 +69,7 @@ function PreviewRow({
 export default function CreateOfferModal({
   open,
   onClose,
-  buddyName = 'You',
+  buddyName = "You",
   buddyAvatar,
   tripRequestId,
   chatRoomId,
@@ -79,11 +81,11 @@ export default function CreateOfferModal({
   const isSending = createBookingMutation.isPending;
   const isRequiredFilled = Boolean(
     form.bookedDate &&
-      form.bookedStartTime &&
-      form.bookedDurationHours &&
-      form.bookedAdults >= 1 &&
-      form.price &&
-      form.currency,
+    form.bookedStartTime &&
+    form.bookedDurationHours &&
+    form.bookedAdults >= 1 &&
+    form.price &&
+    form.currency,
   );
 
   function handleChange(field: keyof OfferForm, value: string | number) {
@@ -94,7 +96,9 @@ export default function CreateOfferModal({
     if (!isRequiredFilled || isSending) return;
 
     if (!tripRequestId && !chatRoomId) {
-      toast.error('Cannot create booking offer because trip request and chat room are missing.');
+      toast.error(
+        "Cannot create booking offer because trip request and chat room are missing.",
+      );
       return;
     }
 
@@ -102,12 +106,12 @@ export default function CreateOfferModal({
     const price = Number(form.price);
 
     if (!Number.isFinite(bookedDurationHours) || bookedDurationHours <= 0) {
-      toast.error('Please select a valid booking duration.');
+      toast.error("Please select a valid booking duration.");
       return;
     }
 
     if (!Number.isFinite(price) || price < 0) {
-      toast.error('Please enter a valid total price.');
+      toast.error("Please enter a valid total price.");
       return;
     }
 
@@ -130,7 +134,11 @@ export default function CreateOfferModal({
       });
 
       setSent(true);
-      toast.success(response.data.message ?? response.message ?? 'Booking offer sent to traveler.');
+      toast.success(
+        response.data.message ??
+          response.message ??
+          "Booking offer sent to traveler.",
+      );
 
       setTimeout(() => {
         setSent(false);
@@ -139,9 +147,12 @@ export default function CreateOfferModal({
       }, 1200);
     } catch (error) {
       const message =
-        typeof error === 'object' && error !== null && 'message' in error
-          ? String((error as { message?: string }).message ?? 'Failed to create booking offer.')
-          : 'Failed to create booking offer.';
+        typeof error === "object" && error !== null && "message" in error
+          ? String(
+              (error as { message?: string }).message ??
+                "Failed to create booking offer.",
+            )
+          : "Failed to create booking offer.";
       toast.error(message);
     }
   }
@@ -154,18 +165,18 @@ export default function CreateOfferModal({
   if (!open) return null;
 
   const buddyInitial = buddyName.charAt(0).toUpperCase();
-  const adultsLabel = `${form.bookedAdults} adult${form.bookedAdults === 1 ? '' : 's'}`;
+  const adultsLabel = `${form.bookedAdults} adult${form.bookedAdults === 1 ? "" : "s"}`;
   const childrenLabel =
     form.bookedChildren > 0
-      ? `, ${form.bookedChildren} ${form.bookedChildren === 1 ? 'child' : 'children'}`
-      : '';
+      ? `, ${form.bookedChildren} ${form.bookedChildren === 1 ? "child" : "children"}`
+      : "";
   const guestsSummary = `${adultsLabel}${childrenLabel}`;
-  const titleId = 'create-offer-modal-title';
-  const descriptionId = 'create-offer-modal-description';
+  const titleId = "create-offer-modal-title";
+  const descriptionId = "create-offer-modal-description";
   const fieldClassName =
-    'rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20';
+    "rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20";
   const stepperButtonClassName =
-    'flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20';
+    "flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20";
 
   return (
     <div
@@ -184,8 +195,12 @@ export default function CreateOfferModal({
             <h2 id={titleId} className="text-xl font-bold text-foreground">
               Create final booking offer
             </h2>
-            <p id={descriptionId} className="mt-0.5 text-sm text-muted-foreground">
-              This offer will be sent to the traveler in chat for review and payment.
+            <p
+              id={descriptionId}
+              className="mt-0.5 text-sm text-muted-foreground"
+            >
+              This offer will be sent to the traveler in chat for review and
+              payment.
             </p>
           </div>
           <button
@@ -195,7 +210,16 @@ export default function CreateOfferModal({
             className="ml-4 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
             aria-label="Close"
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
@@ -204,7 +228,16 @@ export default function CreateOfferModal({
 
         {sent ? (
           <div className="mx-6 mt-4 flex shrink-0 items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="20 6 9 17 4 12" />
             </svg>
             Booking offer sent to traveler
@@ -219,7 +252,10 @@ export default function CreateOfferModal({
               </p>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-date" className="text-xs font-medium text-foreground">
+                  <label
+                    htmlFor="offer-booked-date"
+                    className="text-xs font-medium text-foreground"
+                  >
                     Date <span className="text-primary">*</span>
                   </label>
                   <input
@@ -227,13 +263,16 @@ export default function CreateOfferModal({
                     name="offer-booked-date"
                     type="date"
                     value={form.bookedDate}
-                    onChange={(e) => handleChange('bookedDate', e.target.value)}
+                    onChange={(e) => handleChange("bookedDate", e.target.value)}
                     autoComplete="off"
                     className={fieldClassName}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-start-time" className="text-xs font-medium text-foreground">
+                  <label
+                    htmlFor="offer-booked-start-time"
+                    className="text-xs font-medium text-foreground"
+                  >
                     Start time <span className="text-primary">*</span>
                   </label>
                   <input
@@ -241,27 +280,34 @@ export default function CreateOfferModal({
                     name="offer-booked-start-time"
                     type="time"
                     value={form.bookedStartTime}
-                    onChange={(e) => handleChange('bookedStartTime', e.target.value)}
+                    onChange={(e) =>
+                      handleChange("bookedStartTime", e.target.value)
+                    }
                     autoComplete="off"
                     className={fieldClassName}
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-duration" className="text-xs font-medium text-foreground">
+                  <label
+                    htmlFor="offer-booked-duration"
+                    className="text-xs font-medium text-foreground"
+                  >
                     Duration <span className="text-primary">*</span>
                   </label>
                   <select
                     id="offer-booked-duration"
                     name="offer-booked-duration"
                     value={form.bookedDurationHours}
-                    onChange={(e) => handleChange('bookedDurationHours', e.target.value)}
+                    onChange={(e) =>
+                      handleChange("bookedDurationHours", e.target.value)
+                    }
                     autoComplete="off"
                     className={fieldClassName}
                   >
                     <option value="">Select hours</option>
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((hour) => (
                       <option key={hour} value={hour}>
-                        {hour} {hour === 1 ? 'hour' : 'hours'}
+                        {hour} {hour === 1 ? "hour" : "hours"}
                       </option>
                     ))}
                   </select>
@@ -275,24 +321,37 @@ export default function CreateOfferModal({
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-adults" className="text-xs font-medium text-foreground">
+                  <label
+                    htmlFor="offer-booked-adults"
+                    className="text-xs font-medium text-foreground"
+                  >
                     Adults <span className="text-primary">*</span>
                   </label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => handleChange('bookedAdults', Math.max(1, form.bookedAdults - 1))}
+                      onClick={() =>
+                        handleChange(
+                          "bookedAdults",
+                          Math.max(1, form.bookedAdults - 1),
+                        )
+                      }
                       className={stepperButtonClassName}
                       aria-label="Decrease adult guests"
                     >
                       -
                     </button>
-                    <span id="offer-booked-adults" className="w-8 text-center text-sm font-semibold text-foreground">
+                    <span
+                      id="offer-booked-adults"
+                      className="w-8 text-center text-sm font-semibold text-foreground"
+                    >
                       {form.bookedAdults}
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleChange('bookedAdults', form.bookedAdults + 1)}
+                      onClick={() =>
+                        handleChange("bookedAdults", form.bookedAdults + 1)
+                      }
                       className={stepperButtonClassName}
                       aria-label="Increase adult guests"
                     >
@@ -301,24 +360,37 @@ export default function CreateOfferModal({
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label htmlFor="offer-booked-children" className="text-xs font-medium text-foreground">
+                  <label
+                    htmlFor="offer-booked-children"
+                    className="text-xs font-medium text-foreground"
+                  >
                     Children
                   </label>
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => handleChange('bookedChildren', Math.max(0, form.bookedChildren - 1))}
+                      onClick={() =>
+                        handleChange(
+                          "bookedChildren",
+                          Math.max(0, form.bookedChildren - 1),
+                        )
+                      }
                       className={stepperButtonClassName}
                       aria-label="Decrease child guests"
                     >
                       -
                     </button>
-                    <span id="offer-booked-children" className="w-8 text-center text-sm font-semibold text-foreground">
+                    <span
+                      id="offer-booked-children"
+                      className="w-8 text-center text-sm font-semibold text-foreground"
+                    >
                       {form.bookedChildren}
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleChange('bookedChildren', form.bookedChildren + 1)}
+                      onClick={() =>
+                        handleChange("bookedChildren", form.bookedChildren + 1)
+                      }
                       className={stepperButtonClassName}
                       aria-label="Increase child guests"
                     >
@@ -341,7 +413,7 @@ export default function CreateOfferModal({
                   min={0}
                   placeholder="0.00"
                   value={form.price}
-                  onChange={(e) => handleChange('price', e.target.value)}
+                  onChange={(e) => handleChange("price", e.target.value)}
                   autoComplete="off"
                   className="flex-1 rounded-xl border border-primary/20 bg-background px-4 py-3 text-2xl font-bold text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
@@ -349,7 +421,7 @@ export default function CreateOfferModal({
                   id="offer-currency"
                   name="offer-currency"
                   value={form.currency}
-                  onChange={(e) => handleChange('currency', e.target.value)}
+                  onChange={(e) => handleChange("currency", e.target.value)}
                   autoComplete="off"
                   className="rounded-xl border border-primary/20 bg-background px-3 py-3 text-sm font-semibold text-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 >
@@ -360,7 +432,9 @@ export default function CreateOfferModal({
                   ))}
                 </select>
               </div>
-              <p className="text-xs text-primary/70">Required - This is the final agreed price</p>
+              <p className="text-xs text-primary/70">
+                Required - This is the final agreed price
+              </p>
             </div>
 
             <div className="space-y-3 rounded-xl border border-border bg-secondary/20 p-4">
@@ -368,7 +442,10 @@ export default function CreateOfferModal({
                 What&apos;s included
               </p>
               <div className="flex flex-col gap-1">
-                <label htmlFor="offer-includes" className="text-xs font-medium text-foreground">
+                <label
+                  htmlFor="offer-includes"
+                  className="text-xs font-medium text-foreground"
+                >
                   Includes
                 </label>
                 <textarea
@@ -377,13 +454,16 @@ export default function CreateOfferModal({
                   rows={3}
                   placeholder="e.g. Transportation, entrance fees, meal, guide…"
                   value={form.includes}
-                  onChange={(e) => handleChange('includes', e.target.value)}
+                  onChange={(e) => handleChange("includes", e.target.value)}
                   autoComplete="off"
                   className={`${fieldClassName} resize-none`}
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label htmlFor="offer-excludes" className="text-xs font-medium text-foreground">
+                <label
+                  htmlFor="offer-excludes"
+                  className="text-xs font-medium text-foreground"
+                >
                   Excludes
                 </label>
                 <textarea
@@ -392,7 +472,7 @@ export default function CreateOfferModal({
                   rows={2}
                   placeholder="e.g. Personal shopping, tips, extra drinks…"
                   value={form.excludes}
-                  onChange={(e) => handleChange('excludes', e.target.value)}
+                  onChange={(e) => handleChange("excludes", e.target.value)}
                   autoComplete="off"
                   className={`${fieldClassName} resize-none`}
                 />
@@ -409,7 +489,9 @@ export default function CreateOfferModal({
                 rows={3}
                 placeholder="Share a warm personal note about the plan, what to expect, and why they will love it…"
                 value={form.noteForCustomer}
-                onChange={(e) => handleChange('noteForCustomer', e.target.value)}
+                onChange={(e) =>
+                  handleChange("noteForCustomer", e.target.value)
+                }
                 autoComplete="off"
                 className={`${fieldClassName} w-full resize-none`}
               />
@@ -436,26 +518,43 @@ export default function CreateOfferModal({
                         unoptimized
                       />
                     ) : (
-                      <span className="text-sm font-bold text-white">{buddyInitial}</span>
+                      <span className="text-sm font-bold text-white">
+                        {buddyInitial}
+                      </span>
                     )}
                   </div>
                   <div>
                     <p className="text-xs text-primary-foreground/70">From</p>
-                    <p className="text-sm font-semibold text-primary-foreground">{buddyName}</p>
+                    <p className="text-sm font-semibold text-primary-foreground">
+                      {buddyName}
+                    </p>
                   </div>
                   <span className="ml-auto rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold text-primary-foreground">
                     Final booking offer
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-primary-foreground">
-                  {form.price ? `${Number(form.price).toLocaleString()} ${form.currency}` : <span className="opacity-40">Price TBD</span>}
+                  {form.price ? (
+                    `${Number(form.price).toLocaleString()} ${form.currency}`
+                  ) : (
+                    <span className="opacity-40">Price TBD</span>
+                  )}
                 </p>
               </div>
 
               <div className="space-y-2.5 px-4 py-3 text-sm">
                 <PreviewRow
                   icon={
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
                       <line x1="16" y1="2" x2="16" y2="6" />
                       <line x1="8" y1="2" x2="8" y2="6" />
@@ -463,31 +562,62 @@ export default function CreateOfferModal({
                     </svg>
                   }
                   label="Date"
-                  value={form.bookedDate || 'Not set'}
+                  value={form.bookedDate || "Not set"}
                 />
                 <PreviewRow
                   icon={
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                   }
                   label="Start"
-                  value={form.bookedStartTime || 'Not set'}
+                  value={form.bookedStartTime || "Not set"}
                 />
                 <PreviewRow
                   icon={
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                   }
                   label="Duration"
-                  value={form.bookedDurationHours ? `${form.bookedDurationHours}h` : 'Not set'}
+                  value={
+                    form.bookedDurationHours
+                      ? `${form.bookedDurationHours}h`
+                      : "Not set"
+                  }
                 />
                 <PreviewRow
                   icon={
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                       <circle cx="9" cy="7" r="4" />
                       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -503,7 +633,9 @@ export default function CreateOfferModal({
                     <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Includes
                     </p>
-                    <p className="text-xs leading-relaxed text-muted-foreground">{form.includes}</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      {form.includes}
+                    </p>
                   </div>
                 ) : null}
                 {form.excludes ? (
@@ -511,7 +643,9 @@ export default function CreateOfferModal({
                     <p className="mb-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Excludes
                     </p>
-                    <p className="text-xs leading-relaxed text-muted-foreground">{form.excludes}</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      {form.excludes}
+                    </p>
                   </div>
                 ) : null}
                 {form.noteForCustomer ? (
@@ -527,12 +661,24 @@ export default function CreateOfferModal({
               </div>
 
               <div className="flex items-center gap-2 border-t border-amber-100 bg-amber-50 px-4 py-3">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-amber-500">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="shrink-0 text-amber-500"
+                >
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
-                <p className="text-[11px] font-medium text-amber-600">Awaiting traveler review</p>
+                <p className="text-[11px] font-medium text-amber-600">
+                  Awaiting traveler review
+                </p>
               </div>
             </div>
           </div>
@@ -553,7 +699,7 @@ export default function CreateOfferModal({
             disabled={!isRequiredFilled || sent || isSending}
             className="rounded-xl bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isSending ? 'Sending…' : 'Send'}
+            {isSending ? "Sending…" : "Send"}
           </button>
         </div>
       </div>
