@@ -17,8 +17,9 @@ export default function AppProviders({
     httpClient.setOnUnauthorized(() => {
       authStore.logout();
 
-      if (typeof window !== "undefined" && window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      if (globalThis.window !== undefined && globalThis.location.pathname !== "/login") {
+        const currentPath = globalThis.location.pathname + globalThis.location.search;
+        globalThis.location.href = `/login?callbackUrl=${encodeURIComponent(currentPath)}`;
       }
     });
 
