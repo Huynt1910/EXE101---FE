@@ -4,11 +4,14 @@ export interface JwtPayload {
   userId?: string;
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"?: string;
   "http://schemas.microsoft.com/ws/2008/06/identity/claims/primarysid"?: string;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"?: string | string[];
   email?: string;
   fullName?: string;
   name?: string;
   unique_name?: string;
-  role?: string | number;
+  role?: string | string[] | number;
+  roles?: string | string[];
   exp?: number;
   iat?: number;
   [key: string]: unknown;
@@ -18,6 +21,20 @@ export interface AuthUser {
   email: string;
   fullName: string;
   roles: string[];
+}
+
+function normalizeRoleClaims(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((role): role is string => typeof role === "string" && role.trim() !== "")
+      .map((role) => role.trim());
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    return [value.trim()];
+  }
+
+  return [] as string[];
 }
 
 function decodeBase64Url(input: string) {
@@ -67,6 +84,21 @@ export function extractJwtUserId(payload: JwtPayload | null): string | undefined
   return undefined;
 }
 
+export function extractJwtRoles(payload: JwtPayload | null) {
+  if (!payload) return [] as string[];
+
+  return [
+    ...normalizeRoleClaims(payload.role),
+    ...normalizeRoleClaims(payload.roles),
+    ...normalizeRoleClaims(
+      payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+    ),
+    ...normalizeRoleClaims(
+      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"],
+    ),
+  ].filter((role, index, roles) => roles.indexOf(role) === index);
+}
+
 export function mapJwtPayloadToUser(payload: JwtPayload | null): AuthUser | null {
   if (!payload) return null;
 
@@ -91,6 +123,6 @@ export function mapJwtPayloadToUser(payload: JwtPayload | null): AuthUser | null
   return {
     email,
     fullName,
-    roles: [],
+    roles: extractJwtRoles(payload),
   };
 }

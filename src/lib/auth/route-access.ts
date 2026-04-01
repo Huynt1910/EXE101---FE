@@ -3,28 +3,22 @@ export function hasRole(roles: readonly string[], role: string) {
 }
 
 export function getDefaultAuthenticatedPath(roles: readonly string[]) {
-  if (hasRole(roles, "Admin")) {
-    return "/admin";
-  }
-
   if (hasRole(roles, "Buddy")) {
     return "/buddy";
+  }
+
+  if (hasRole(roles, "Admin")) {
+    return "/admin";
   }
 
   return "/";
 }
 
 export function resolveAuthenticatedRedirectPath(
-  callbackUrl: string,
+  _callbackUrl: string,
   roles: readonly string[],
 ) {
-  const defaultPath = getDefaultAuthenticatedPath(roles);
-
-  if (callbackUrl === "/" && defaultPath !== "/") {
-    return defaultPath;
-  }
-
-  return callbackUrl;
+  return getDefaultAuthenticatedPath(roles);
 }
 
 export function isBuddyDashboardPath(pathname: string) {

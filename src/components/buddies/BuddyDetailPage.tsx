@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -18,7 +17,6 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +24,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBuddyDetailQuery, useBuddyReviewsQuery } from "@/features/buddy/hooks/useBuddy";
 import type { BuddyProfile, BuddyReview } from "@/features/buddy/type";
-import { saveTripRequestDraft, validateTripRequest } from "@/lib/trip-request";
+import { buildAuthUrl } from "@/lib/callback-url";
+import { useAuthStore } from "@/lib/store/authStore";
 
 function getInitials(name?: string | null) {
   const source = name?.trim() || "Buddy";
@@ -69,15 +68,6 @@ function renderStars(rating: number) {
   ));
 }
 
-function buildTripNotes(buddy: BuddyProfile, note: string) {
-  const parts = [
-    `Preferred buddy: ${buddy.fullName || "Local buddy"}`,
-    note.trim(),
-  ].filter(Boolean);
-
-  return parts.join("\n\n");
-}
-
 function ReviewCard({ review }: Readonly<{ review: BuddyReview }>) {
   return (
     <div className="rounded-[1.75rem] border border-border/70 bg-secondary/25 p-5">
@@ -103,42 +93,17 @@ function ReviewCard({ review }: Readonly<{ review: BuddyReview }>) {
 
 function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
   const router = useRouter();
-  const [meetingArea, setMeetingArea] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [durationHours, setDurationHours] = useState("3");
-  const [adults, setAdults] = useState("1");
-  const [children, setChildren] = useState("0");
-  const [note, setNote] = useState("");
-  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const { isAuthenticated } = useAuthStore();
+  const contactHref = `/trip-request?buddyId=${encodeURIComponent(
+    buddy.id,
+  )}&buddyName=${encodeURIComponent(buddy.fullName || "Buddy")}`;
 
   const handleContinue = () => {
-    const tripDraft = {
-      city: meetingArea.trim(),
-      startTime: date && time ? `${date}T${time}` : "",
-      durationHours: Number(durationHours),
-      adults: Number(adults),
-      children: Number(children),
-      preferredLanguage:
-        buddy.languages.length > 0 ? buddy.languages.join(", ") : "English",
-      notes: buildTripNotes(buddy, note),
-    };
-
-    const validationErrors = validateTripRequest(tripDraft);
-    setErrors(validationErrors);
-
-    if (Object.keys(validationErrors).length > 0) {
-      toast.error("Please complete the booking details before continuing.");
+    if (!isAuthenticated) {
+      router.push(buildAuthUrl("/login", contactHref));
       return;
     }
-
-    saveTripRequestDraft(tripDraft);
-    toast.success("Booking details saved. Continue to create your trip request.");
-    router.push(
-      `/trip-request?buddyId=${encodeURIComponent(buddy.id)}&buddyName=${encodeURIComponent(
-        buddy.fullName || "Buddy",
-      )}`,
-    );
+    router.push(contactHref);
   };
 
   return (
@@ -167,120 +132,46 @@ function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
       </div>
 
       <CardContent className="space-y-4 p-6">
-        <div className="space-y-2">
-          <label htmlFor="meeting-area" className="text-sm font-medium text-foreground">
-            Meeting area
-          </label>
-          <input
-            id="meeting-area"
-            value={meetingArea}
-            onChange={(event) => setMeetingArea(event.target.value)}
-            placeholder="District 1, Ben Thanh, Thu Duc..."
-            className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-          />
-          {errors.city ? <p className="text-xs text-destructive">{errors.city}</p> : null}
+        <div className="rounded-[1.5rem] border border-border/70 bg-secondary/25 p-5">
+          <p className="text-sm leading-6 text-muted-foreground">
+            Contact this buddy to continue planning your trip. We will pass the
+            selected <span className="font-medium text-foreground">buddy id</span>{" "}
+            into the next step so the flow stays tied to this profile.
+          </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2">
-            <label htmlFor="booking-date" className="text-sm font-medium text-foreground">
-              Date
-            </label>
-            <input
-              id="booking-date"
-              type="date"
-              value={date}
-              onChange={(event) => setDate(event.target.value)}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            />
+        <div className="space-y-3 rounded-[1.5rem] border border-border/70 bg-secondary/15 p-5">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">Buddy id</span>
+            <span className="text-sm font-semibold text-foreground">
+              {buddy.id.slice(0, 8)}...
+            </span>
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="booking-time" className="text-sm font-medium text-foreground">
-              Start time
-            </label>
-            <input
-              id="booking-time"
-              type="time"
-              value={time}
-              onChange={(event) => setTime(event.target.value)}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            />
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm text-muted-foreground">Languages</span>
+            <span className="text-right text-sm font-medium text-foreground">
+              {buddy.languages.length > 0
+                ? buddy.languages.join(", ")
+                : "To be updated"}
+            </span>
           </div>
-        </div>
-        {errors.startTime ? <p className="text-xs text-destructive">{errors.startTime}</p> : null}
-
-        <div className="grid gap-4 sm:grid-cols-3">
-          <div className="space-y-2">
-            <label htmlFor="duration-hours" className="text-sm font-medium text-foreground">
-              Hours
-            </label>
-            <input
-              id="duration-hours"
-              type="number"
-              min="1"
-              value={durationHours}
-              onChange={(event) => setDurationHours(event.target.value)}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            />
-            {errors.durationHours ? (
-              <p className="text-xs text-destructive">{errors.durationHours}</p>
-            ) : null}
+          <div className="flex items-start justify-between gap-3">
+            <span className="text-sm text-muted-foreground">Activities</span>
+            <span className="text-right text-sm font-medium text-foreground">
+              {buddy.activities.length > 0
+                ? buddy.activities.join(", ")
+                : "Flexible plans"}
+            </span>
           </div>
-
-          <div className="space-y-2">
-            <label htmlFor="adults" className="text-sm font-medium text-foreground">
-              Adults
-            </label>
-            <input
-              id="adults"
-              type="number"
-              min="1"
-              value={adults}
-              onChange={(event) => setAdults(event.target.value)}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            />
-            {errors.adults ? <p className="text-xs text-destructive">{errors.adults}</p> : null}
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="children" className="text-sm font-medium text-foreground">
-              Children
-            </label>
-            <input
-              id="children"
-              type="number"
-              min="0"
-              value={children}
-              onChange={(event) => setChildren(event.target.value)}
-              className="h-11 w-full rounded-xl border border-border bg-background px-4 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-            />
-            {errors.children ? (
-              <p className="text-xs text-destructive">{errors.children}</p>
-            ) : null}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <label htmlFor="booking-note" className="text-sm font-medium text-foreground">
-            Notes for the buddy
-          </label>
-          <textarea
-            id="booking-note"
-            value={note}
-            onChange={(event) => setNote(event.target.value)}
-            placeholder="What kind of trip do you want, places to visit, vibe, food, shopping..."
-            className="min-h-28 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-          />
         </div>
 
         <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4 text-sm text-muted-foreground">
-          This saves your booking intent and continues into the existing trip request flow, where the rest
-          of the booking can be completed.
+          The detailed trip information will be completed in the next flow. This
+          action now only starts contact for the selected buddy.
         </div>
 
         <Button onClick={handleContinue} className="h-11 w-full rounded-xl">
-          Continue to booking
+          Contact this buddy
           <ArrowRight className="h-4 w-4" />
         </Button>
       </CardContent>
@@ -542,20 +433,20 @@ export default function BuddyDetailPage({
               <CardContent className="space-y-4 p-6">
                 <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
                   <Users className="h-5 w-5 text-primary" />
-                  Booking checklist
+                  Contact flow
                 </div>
                 <div className="space-y-3 text-sm text-muted-foreground">
                   <div className="flex items-start gap-3 rounded-2xl bg-secondary/25 p-4">
                     <CalendarDays className="mt-0.5 h-4 w-4 text-primary" />
-                    Pick your date and preferred meeting area.
+                    Pick the buddy you want to continue with from this profile.
                   </div>
                   <div className="flex items-start gap-3 rounded-2xl bg-secondary/25 p-4">
                     <Clock3 className="mt-0.5 h-4 w-4 text-primary" />
-                    Set the hours so the buddy can estimate the trip properly.
+                    We pass this buddy into the next step so the request stays linked.
                   </div>
                   <div className="flex items-start gap-3 rounded-2xl bg-secondary/25 p-4">
                     <MessageSquareQuote className="mt-0.5 h-4 w-4 text-primary" />
-                    Add notes about your travel style, expectations, and must-see spots.
+                    Trip details and the rest of the conversation can be completed after contact starts.
                   </div>
                 </div>
               </CardContent>

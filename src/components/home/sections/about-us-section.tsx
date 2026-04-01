@@ -106,8 +106,8 @@ export function AboutUsSection() {
               }}
               className="col-span-12 lg:col-span-6 flex items-center justify-center"
             >
-              <div className="w-full rounded-[28px] bg-white/0 shadow-[0_18px_50px_-20px_rgba(0,0,0,0.45)] ring-1 ring-black/5">
-                <div className="w-full max-w-full aspect-[16/10] rounded-3xl overflow-hidden bg-black">
+              <div className="w-full">
+                <div className="w-full max-w-full rounded-3xl overflow-hidden bg-black">
                   <video
                     src={t.videoSrc}
                     autoPlay
@@ -125,4 +125,3 @@ export function AboutUsSection() {
     </section>
   );
 }
-

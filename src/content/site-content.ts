@@ -45,7 +45,7 @@ export const homePageContent = {
     description:
       "Bonddy combines personalized planning, quick communication, and profile verification so you can explore with confidence.",
     stats: [
-      { icon: "users", value: "50+", label: "Verified buddies" },
+      { icon: "users", value: "30+", label: "Verified buddies" },
       { icon: "shield", value: "100%", label: "Buddy screening" },
       { icon: "flask", value: "2h", label: "Avg response time" },
       { icon: "leaf", value: "6+", label: "Locations in Hồ Chí Minh" },
@@ -142,7 +142,7 @@ export const homePageContent = {
         cta: "Create trip request",
       },
       {
-        name: "Verified local buddies",
+        name: "Local buddies",
         description:
           "Choose buddies by city and language. Profiles are reviewed to keep the community safe and high-quality.",
         image: "/verified.png",

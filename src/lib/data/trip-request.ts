@@ -28,13 +28,40 @@ export const TRIP_REQUEST_CITIES = [
 
 export const location = TRIP_REQUEST_CITIES;
 
+export const TRIP_REQUEST_ACTIVITY_OPTIONS = [
+  "Food",
+  "Shopping",
+  "Nightlife",
+  "Street food",
+  "Coffee",
+  "History",
+  "Museums",
+  "Culture",
+  "Photography",
+  "Walking tour",
+  "Hidden gems",
+  "Markets",
+] as const;
+
+export const TRIP_REQUEST_LANGUAGE_OPTIONS = [
+  "English",
+  "Vietnamese",
+  "Japanese",
+  "Korean",
+  "Chinese",
+  "French",
+  "German",
+  "Spanish",
+] as const;
+
 export const defaultTripRequestFormData: TripRequestFormData = {
   city: "",
   startTime: "",
   durationHours: 3,
   adults: 1,
   children: 0,
-  preferredLanguage: "English",
+  activities: [],
+  preferredLanguages: ["English"],
   notes: "",
 };
 
@@ -50,7 +77,10 @@ export const tripRequestFormSchema = z
     durationHours: z.number().finite(),
     adults: z.number().finite(),
     children: z.number().finite(),
-    preferredLanguage: z.string().trim(),
+    activities: z.array(z.string().trim()).min(1, "Choose at least one activity."),
+    preferredLanguages: z
+      .array(z.string().trim())
+      .min(1, "Choose at least one preferred language."),
     notes: z.string(),
   })
   .superRefine((formData, ctx) => {

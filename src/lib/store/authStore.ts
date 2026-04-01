@@ -42,11 +42,17 @@ function getTokenMaxAge(token: string) {
 }
 
 function normalizeRoles(roles: unknown): string[] {
-	if (!Array.isArray(roles)) return [];
+	if (Array.isArray(roles)) {
+		return roles
+			.filter((role): role is string => typeof role === "string" && role.trim() !== "")
+			.map((role) => role.trim());
+	}
 
-	return roles
-		.filter((role): role is string => typeof role === "string" && role.trim() !== "")
-		.map((role) => role.trim());
+	if (typeof roles === "string" && roles.trim() !== "") {
+		return [roles.trim()];
+	}
+
+	return [];
 }
 
 function getStoredRoles(): string[] {
@@ -60,15 +66,17 @@ function getStoredRoles(): string[] {
 	}
 }
 
-function setAuthFromToken(token: string, roles: string[] = [], writeCookie = true) {
+function setAuthFromToken(token: string, roles: unknown = [], writeCookie = true) {
 	const payload = decodeJwtPayload(token);
 	const baseUser = mapJwtPayloadToUser(payload);
 	const normalizedRoles = normalizeRoles(roles);
+	const effectiveRoles =
+		normalizedRoles.length > 0 ? normalizedRoles : (baseUser?.roles ?? []);
 
 	const user: AuthUser | null = baseUser
 		? {
 				...baseUser,
-				roles: normalizedRoles,
+				roles: effectiveRoles,
 			}
 		: null;
 
@@ -82,7 +90,7 @@ function setAuthFromToken(token: string, roles: string[] = [], writeCookie = tru
 			maxAge: getTokenMaxAge(token),
 		});
 
-		setCookie(cookieConfig.authRoles.name, JSON.stringify(normalizedRoles), {
+		setCookie(cookieConfig.authRoles.name, JSON.stringify(effectiveRoles), {
 			...cookieConfig.authRoles.options,
 			maxAge: getTokenMaxAge(token),
 		});
@@ -168,7 +176,7 @@ function restoreAuth() {
 	}
 }
 
-function setAuthToken(token: string, roles: string[] = []) {
+function setAuthToken(token: string, roles: unknown = []) {
 	const isValid = setAuthFromToken(token, roles, true);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");

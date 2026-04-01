@@ -13,7 +13,8 @@ export type TripRequestFormData = {
   durationHours: number;
   adults: number;
   children: number;
-  preferredLanguage: string;
+  activities: string[];
+  preferredLanguages: string[];
   notes: string;
 };
 
@@ -39,8 +40,6 @@ function isValidDateString(value: string) {
   if (!value) return false;
   return !Number.isNaN(new Date(value).getTime());
 }
-
-const normalize = (value: string) => value.trim().toLowerCase();
 
 export { defaultTripRequestFormData, validateTripRequest };
 
@@ -68,41 +67,6 @@ export function formatTravelerSummary(adults: number, children: number) {
   return parts.join(", ");
 }
 
-function mapPreferredLanguageToApiCodes(preferredLanguage: string) {
-  const tokens = preferredLanguage
-    .split(",")
-    .map((token) => token.trim())
-    .filter(Boolean);
-
-  if (tokens.length === 0) return [];
-
-  return tokens.map((token) => {
-    const normalized = normalize(token);
-
-    if (normalized.includes("vietnam")) return "VN";
-    if (normalized.includes("english")) return "EN";
-    if (normalized.includes("korean")) return "KR";
-    if (normalized.includes("japanese")) return "JP";
-
-    return token.slice(0, 2).toUpperCase();
-  });
-}
-
-function mapApiLanguageCodeToLabel(code?: string) {
-  switch ((code ?? "").toUpperCase()) {
-    case "VN":
-      return "Vietnamese";
-    case "KR":
-      return "Korean";
-    case "JP":
-      return "Japanese";
-    case "EN":
-      return "English";
-    default:
-      return code?.toUpperCase() || "English";
-  }
-}
-
 export function mapTripFormDataToCreateTripRequest(
   formData: TripRequestFormData,
 ): CreateTripRequest {
@@ -115,7 +79,10 @@ export function mapTripFormDataToCreateTripRequest(
     durationHours: Math.max(1, formData.durationHours),
     adults: Math.max(1, formData.adults),
     children: Math.max(0, formData.children),
-    preferredLanguages: mapPreferredLanguageToApiCodes(formData.preferredLanguage),
+    activities: formData.activities.map((activity) => activity.trim()).filter(Boolean),
+    preferredLanguages: formData.preferredLanguages
+      .map((language) => language.trim())
+      .filter(Boolean),
     notes: formData.notes.trim(),
   };
 }
@@ -132,9 +99,10 @@ export function mapTripDtoToStoredTripRequest(
     durationHours: Math.max(1, trip.durationHours),
     adults: Math.max(1, trip.adults),
     children: Math.max(0, trip.children),
-    preferredLanguage: trip.preferredLanguages
-      .map((languageCode) => mapApiLanguageCodeToLabel(languageCode))
-      .join(", "),
+    activities: Array.isArray(trip.activities) ? trip.activities : [],
+    preferredLanguages: Array.isArray(trip.preferredLanguages)
+      ? trip.preferredLanguages
+      : [],
     notes: trip.notes || "",
     createdAt: trip.createdAt,
     status: trip.status,
