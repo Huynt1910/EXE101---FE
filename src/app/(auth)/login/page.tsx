@@ -4,6 +4,10 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import {
+  getDefaultAuthenticatedPath,
+  resolveAuthenticatedRedirectPath,
+} from "@/lib/auth/route-access";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
 import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
@@ -11,9 +15,13 @@ import { handleApiError } from "@/lib/error-handler";
 export default function LoginPage() {
   const router = useRouter();
   const sp = useSearchParams();
-  const { sessionQuery, loginMutation, googleLoginMutation } = useAuth();
+  const { sessionQuery, loginMutation, googleLoginMutation, user } = useAuth();
 
-  const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
+  const normalizedCallbackUrl = normalizeCallbackUrl(
+    sp.get("callbackUrl"),
+    getDefaultAuthenticatedPath(user?.roles ?? []),
+  );
+  const callbackUrl = resolveAuthenticatedRedirectPath(normalizedCallbackUrl, user?.roles ?? []);
 
   const handleSubmit = (email: string, password: string) => {
     loginMutation.mutate({ email, password });

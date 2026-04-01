@@ -101,11 +101,12 @@ export function Hero() {
             </Button>
 
             <Button
+              asChild
               size="lg"
               variant="outline"
               className="rounded-full cursor-pointer px-8 py-6 text-primary-foreground border-background/30 hover:bg-background/10 bg-transparent backdrop-blur-sm"
             >
-              {t.secondaryCta}
+              <Link href="/how-it-works">{t.secondaryCta}</Link>
             </Button>
           </div>
         </div>

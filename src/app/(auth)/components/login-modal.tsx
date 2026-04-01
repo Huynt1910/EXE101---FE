@@ -6,6 +6,10 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import LoginForm from "@/app/(auth)/components/login-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
+import {
+  getDefaultAuthenticatedPath,
+  resolveAuthenticatedRedirectPath,
+} from "@/lib/auth/route-access";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
 import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
@@ -17,8 +21,12 @@ export interface LoginModalProps {
 export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   const router = useRouter();
   const sp = useSearchParams();
-  const { sessionQuery, loginMutation, googleLoginMutation } = useAuth();
-  const callbackUrl = normalizeCallbackUrl(sp.get("callbackUrl"), "/");
+  const { sessionQuery, loginMutation, googleLoginMutation, user } = useAuth();
+  const normalizedCallbackUrl = normalizeCallbackUrl(
+    sp.get("callbackUrl"),
+    getDefaultAuthenticatedPath(user?.roles ?? []),
+  );
+  const callbackUrl = resolveAuthenticatedRedirectPath(normalizedCallbackUrl, user?.roles ?? []);
 
   useEffect(() => {
     const previousHtmlOverflow = document.documentElement.style.overflow;
@@ -57,9 +65,10 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
 
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {
+      router.replace(callbackUrl, { scroll: false });
       onClose();
     }
-  }, [sessionQuery.data?.accessToken, onClose]);
+  }, [callbackUrl, onClose, router, sessionQuery.data?.accessToken]);
 
   useEffect(() => {
     if (loginMutation.isError) {

@@ -168,7 +168,7 @@ export default function MessagesLayout() {
     conversations.find((conversation) => conversation.id === selectedId) ?? null;
 
   return (
-    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-[1.5rem] border border-border bg-card shadow-sm">
+    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-[1.5rem] border border-border bg-secondary shadow-sm">
       <div
         className={`
           w-full min-h-0 min-w-0 shrink-0 overflow-hidden border-r border-border/70 md:basis-[clamp(18rem,28vw,22rem)] md:max-w-[42%]

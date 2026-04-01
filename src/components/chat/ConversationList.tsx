@@ -39,7 +39,7 @@ export default function ConversationList({
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden border-r border-border bg-card">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden border-r border-border bg-secondary">
       <div className="shrink-0 px-4 py-4">
         <h1 className="text-base font-semibold text-foreground">Chat</h1>
       </div>

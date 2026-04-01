@@ -177,7 +177,7 @@ export default function CreateOfferModal({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl"
+        className="relative flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl border border-border bg-secondary shadow-2xl"
       >
         <div className="flex shrink-0 items-start justify-between border-b border-border px-6 pb-4 pt-6">
           <div>
@@ -422,7 +422,7 @@ export default function CreateOfferModal({
             <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               Live preview
             </p>
-            <div className="overflow-hidden rounded-2xl border border-primary/20 bg-card shadow-lg">
+            <div className="overflow-hidden rounded-2xl border border-primary/20 bg-secondary shadow-lg">
               <div className="bg-primary px-4 pb-5 pt-4">
                 <div className="mb-3 flex items-center gap-2.5">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20">

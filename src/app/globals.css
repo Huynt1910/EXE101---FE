@@ -300,8 +300,17 @@
 
   .booking-layout {
     background:
-      radial-gradient(circle at top left, rgb(255 255 255 / 0.35), transparent 30%),
-      linear-gradient(180deg, var(--background) 0%, color-mix(in srgb, var(--background) 72%, white) 48%, var(--card) 100%);
+      radial-gradient(
+        circle at top left,
+        rgb(255 255 255 / 0.35),
+        transparent 30%
+      ),
+      linear-gradient(
+        180deg,
+        var(--background) 0%,
+        color-mix(in srgb, var(--background) 72%, white) 48%,
+        var(--card) 100%
+      );
   }
 
   .booking-page {
