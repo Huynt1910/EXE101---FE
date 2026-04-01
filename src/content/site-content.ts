@@ -41,14 +41,14 @@ export const homePageContent = {
   },
   proof: {
     eyebrow: "Our approach",
-    title: "A reliable foundation for your trip",
+    title: "A reliable foundation",
     description:
       "Bonddy combines personalized planning, quick communication, and profile verification so you can explore with confidence.",
     stats: [
       { icon: "users", value: "50+", label: "Verified buddies" },
       { icon: "shield", value: "100%", label: "Buddy screening" },
       { icon: "flask", value: "2h", label: "Avg response time" },
-      { icon: "leaf", value: "6+", label: "Cities covered" },
+      { icon: "leaf", value: "6+", label: "Locations in Hồ Chí Minh" },
     ],
     principles: [
       {
@@ -87,7 +87,7 @@ export const homePageContent = {
   },
   testimonials: {
     eyebrow: "Testimonials",
-    title: "What travelers say about Bonddy",
+    title: "Travelers love our buddies",
     items: [
       {
         quote:
@@ -133,10 +133,10 @@ export const homePageContent = {
       "Personalized planning, verified buddies, and real-time support so you can explore with confidence.",
     highlights: [
       {
-        name: "Personalized itinerary",
+        name: "Your perfect trip",
         description:
-          "Share your dates, interests, and pace. A local buddy designs a trip plan that matches your style without generic tours.",
-        image: "/placeholder.svg",
+          "Share your dates, interests, and pace — a local buddy will design a trip for you.",
+        image: "/trip.png",
         tag: "Personalized",
         href: "/trip-request",
         cta: "Create trip request",
@@ -145,16 +145,16 @@ export const homePageContent = {
         name: "Verified local buddies",
         description:
           "Choose buddies by city and language. Profiles are reviewed to keep the community safe and high-quality.",
-        image: "/placeholder.svg",
+        image: "/verified.png",
         tag: "Verified",
         href: "/buddies",
         cta: "Browse buddies",
       },
       {
-        name: "Chat and real-time support",
+        name: "Chat and support",
         description:
           "Refine your plan in chat, ask local questions, and get practical tips before and during the trip.",
-        image: "/placeholder.svg",
+        image: "/chat.png",
         tag: "In chat",
         href: "/how-it-works",
         cta: "How it works",
@@ -170,7 +170,7 @@ export const homePageContent = {
     paragraph2:
       "We review every profile to keep the community safe and high-quality. Set your availability, choose your cities and languages, and start receiving matching trip requests.",
     meta: "Flexible schedule - Earn per booking - Meet travelers worldwide",
-    primaryCta: "Apply to be a Buddy",
+    primaryCta: "Apply now",
     primaryHref: "/buddy/apply",
     secondaryCta: "How it works",
     secondaryHref: "/how-it-works",
@@ -210,8 +210,8 @@ export const footerContent = {
   companyName: "Bonddy",
   tagline: "Your local expert for Vietnam trips",
   description: "Bonddy is your trusted partner for authentic local journeys.",
-  email: "info@bonddy.com",
-  phone: "+84 123 456 789",
+  email: "bonddy.contact@gmail.com",
+  phone: "098 986 12 70",
   sections: [
     {
       title: "Bonddy",

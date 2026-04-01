@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  getDefaultAuthenticatedPath,
+  hasRole,
+  isAdminDashboardPath,
+  isBuddyDashboardPath,
+} from "@/lib/auth/route-access";
 
 const AUTH_TOKEN_COOKIE = "bonddy_auth_token";
 const AUTH_ROLES_COOKIE = "bonddy_auth_roles";
@@ -93,10 +99,6 @@ function parseRolesFromCookie(raw?: string) {
   }
 }
 
-function hasRole(roles: string[], role: string) {
-  return roles.some((item) => item.toLowerCase() === role.toLowerCase());
-}
-
 function isAuthPath(pathname: string) {
   return AUTH_PATHS.some((path) => pathname.startsWith(path));
 }
@@ -115,14 +117,16 @@ export function middleware(request: NextRequest) {
   const rolesFromToken = extractRolesFromToken(payload);
   const roles = rolesFromToken.length > 0 ? rolesFromToken : rolesFromCookie;
 
-  const isBuddyPath = pathname.startsWith("/buddy");
-  const isAdminPath = pathname.startsWith("/admin") || pathname.startsWith("/host-dashboard");
+  const isBuddyPath = isBuddyDashboardPath(pathname);
+  const isAdminPath = isAdminDashboardPath(pathname);
 
   if ((isBuddyPath || isAdminPath) && !hasValidToken) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = "/login";
-    loginUrl.searchParams.set("callbackUrl", `${pathname}${search}`);
-    const redirect = NextResponse.redirect(loginUrl);
+    const deniedUrl = request.nextUrl.clone();
+    deniedUrl.pathname = "/not-authorized";
+    deniedUrl.search = "";
+    deniedUrl.searchParams.set("from", `${pathname}${search}`);
+    deniedUrl.searchParams.set("reason", "signin");
+    const redirect = NextResponse.redirect(deniedUrl);
     redirect.cookies.set(AUTH_TOKEN_COOKIE, "", { path: "/", maxAge: 0 });
     redirect.cookies.set(AUTH_ROLES_COOKIE, "", { path: "/", maxAge: 0 });
     return redirect;
@@ -130,23 +134,25 @@ export function middleware(request: NextRequest) {
 
   if (isBuddyPath && hasValidToken && !hasRole(roles, "Buddy") && !hasRole(roles, "Admin")) {
     const deniedUrl = request.nextUrl.clone();
-    deniedUrl.pathname = "/";
-    deniedUrl.search = "";
+    deniedUrl.pathname = "/not-authorized";
+    deniedUrl.searchParams.set("from", pathname);
+    deniedUrl.searchParams.set("reason", "role");
     return NextResponse.redirect(deniedUrl);
   }
 
   if (isAdminPath && hasValidToken && !hasRole(roles, "Admin")) {
     const deniedUrl = request.nextUrl.clone();
-    deniedUrl.pathname = "/";
-    deniedUrl.search = "";
+    deniedUrl.pathname = "/not-authorized";
+    deniedUrl.searchParams.set("from", pathname);
+    deniedUrl.searchParams.set("reason", "role");
     return NextResponse.redirect(deniedUrl);
   }
 
   if (isAuthPath(pathname) && hasValidToken) {
-    const homeUrl = request.nextUrl.clone();
-    homeUrl.pathname = "/";
-    homeUrl.search = "";
-    return NextResponse.redirect(homeUrl);
+    const authenticatedUrl = request.nextUrl.clone();
+    authenticatedUrl.pathname = getDefaultAuthenticatedPath(roles);
+    authenticatedUrl.search = "";
+    return NextResponse.redirect(authenticatedUrl);
   }
 
   // Thêm pathname vào header để layout có thể detect
