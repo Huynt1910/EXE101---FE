@@ -4,29 +4,131 @@ import type {
   TripRequestValidationErrors,
 } from "@/lib/trip-request";
 
-export const TRIP_REQUEST_CITIES = [
-  "District 1",
-  "District 2",
-  "District 3",
-  "District 4",
-  "District 5",
-  "District 6",
-  "District 7",
-  "District 8",
-  "District 9",
-  "District 10",
-  "District 11",
-  "District 12",
-  "Phu Nhuan District",
-  "Tan Binh District",
-  "Binh Thanh District",
-  "Go Vap District",
-  "Nha Be District",
-  "Cu Chi District",
-  "Hoc Mon District",
+export const TRIP_REQUEST_LOCATION_GROUPS = [
+  {
+    district: "Quận 1",
+    wards: ["Sài Gòn", "Tân Định", "Bến Thành", "Cầu Ông Lãnh"],
+  },
+  {
+    district: "Quận 3",
+    wards: ["Bàn Cờ", "Xuân Hòa", "Nhiêu Lộc"],
+  },
+  {
+    district: "Quận 4",
+    wards: ["Xóm Chiếu", "Khánh Hội", "Vĩnh Hội"],
+  },
+  {
+    district: "Quận 5",
+    wards: ["Chợ Quán", "An Đông", "Chợ Lớn"],
+  },
+  {
+    district: "Quận 6",
+    wards: ["Bình Tây", "Bình Tiên", "Bình Phú", "Phú Lâm"],
+  },
+  {
+    district: "Quận 7",
+    wards: ["Phú Thuận", "Tân Mỹ", "Tân Hưng", "Tân Thuận"],
+  },
+  {
+    district: "Quận 8",
+    wards: ["Chánh Hưng", "Phú Định", "Bình Đông"],
+  },
+  {
+    district: "Quận 10",
+    wards: ["Diên Hồng", "Vườn Lài", "Hòa Hưng"],
+  },
+  {
+    district: "Quận 11",
+    wards: ["Minh Phụng", "Bình Thới", "Hòa Bình", "Phú Thọ"],
+  },
+  {
+    district: "Quận 12",
+    wards: ["Đông Hưng Thuận", "Trung Mỹ Tây", "Tân Thới Hiệp", "Thới An"],
+  },
+  {
+    district: "Bình Tân",
+    wards: ["An Lạc", "Bình Tân", "Tân Tạo", "Bình Trị Đông", "Bình Hưng Hòa"],
+  },
+  {
+    district: "Bình Thạnh",
+    wards: ["Gia Định", "Bình Thạnh", "Bình Lợi Trung", "Thạnh Mỹ Tây", "Bình Quới"],
+  },
+  {
+    district: "Gò Vấp",
+    wards: ["Hạnh Thông", "An Nhơn", "Gò Vấp", "An Hội Đông", "Thông Tây Hội", "An Hội Tây"],
+  },
+  {
+    district: "Phú Nhuận",
+    wards: ["Đức Nhuận", "Cầu Kiệu", "Phú Nhuận"],
+  },
+  {
+    district: "Tân Bình",
+    wards: ["Tân Sơn Hòa", "Tân Sơn Nhất", "Tân Hòa", "Bảy Hiền", "Tân Bình", "Tân Sơn"],
+  },
+  {
+    district: "Tân Phú",
+    wards: ["Tây Thạnh", "Tân Sơn Nhì", "Phú Thọ Hòa", "Tân Phú", "Phú Thạnh"],
+  },
+  {
+    district: "TP. Thủ Đức",
+    wards: [
+      "Hiệp Bình",
+      "Thủ Đức",
+      "Tam Bình",
+      "Linh Xuân",
+      "Tăng Nhơn Phú",
+      "Long Bình",
+      "Long Phước",
+      "Long Trường",
+      "Cát Lái",
+      "Bình Trưng",
+      "Phước Long",
+      "An Khánh",
+    ],
+  },
+  {
+    district: "Huyện Bình Chánh",
+    wards: [
+      "Xã Vĩnh Lộc",
+      "Xã Tân Vĩnh Lộc",
+      "Xã Tân Nhựt",
+      "Xã Bình Chánh",
+      "Xã Hưng Long",
+      "Xã Bình Hưng",
+      "Xã Bình Lợi",
+    ],
+  },
+  {
+    district: "Huyện Củ Chi",
+    wards: [
+      "Xã An Nhơn Tây",
+      "Xã Thái Mỹ",
+      "Xã Nhuận Đức",
+      "Xã Tân An Hội",
+      "Xã Phú Hòa Đông",
+      "Xã Bình Mỹ",
+      "Xã Củ Chi",
+    ],
+  },
+  {
+    district: "Huyện Cần Giờ",
+    wards: ["Xã Bình Khánh", "Xã Cần Giờ", "Xã An Thới Đông", "Xã Thạnh An"],
+  },
+  {
+    district: "Huyện Hóc Môn",
+    wards: ["Xã Hóc Môn", "Xã Bà Điểm", "Xã Xuân Thới Sơn", "Xã Đông Thạnh"],
+  },
+  {
+    district: "Huyện Nhà Bè",
+    wards: ["Xã Nhà Bè", "Xã Hiệp Phước"],
+  },
 ] as const;
 
-export const location = TRIP_REQUEST_CITIES;
+export const TRIP_REQUEST_LOCATION_OPTIONS = TRIP_REQUEST_LOCATION_GROUPS.flatMap(
+  (group) => group.wards.map((ward) => `${ward}, ${group.district}`),
+);
+
+export const TRIP_REQUEST_DURATION_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8] as const;
 
 export const TRIP_REQUEST_ACTIVITY_OPTIONS = [
   "Food",

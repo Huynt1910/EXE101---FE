@@ -169,24 +169,24 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                           </Link>
                         </DropdownMenu.Item>
 
-                      {hasBuddyRole ? (
-                        <>
+                        {hasBuddyRole ? (
+                          <>
+                            <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                            <DropdownMenu.Item asChild>
+                              <Link
+                                href="/buddy/trip-requests"
+                                className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
+                              >
+                                Switch to buddy
+                              </Link>
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                          </>
+                        ) : (
                           <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
-                          <DropdownMenu.Item asChild>
-                            <Link
-                              href="/buddy/trip-requests"
-                              className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
-                            >
-                              Switch to buddy
-                            </Link>
-                          </DropdownMenu.Item>
-                          <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
-                        </>
-                      ) : (
-                        <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
-                      )}
+                        )}
 
-                      <DropdownMenu.Item asChild>
+                        {/* <DropdownMenu.Item asChild>
                         <Link
                           href="/"
                           className="block rounded-xl px-4 py-3 text-[18  px] leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
@@ -214,7 +214,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                               <ChevronRight className="h-4 w-4" />
                             </span>
                           </Link>
-                        </DropdownMenu.Item>
+                        </DropdownMenu.Item> */}
 
                         {/* <DropdownMenu.Separator className="my-2 h-px bg-black/12" /> */}
 

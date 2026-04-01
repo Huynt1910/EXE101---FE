@@ -74,11 +74,9 @@ function BuddyCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
           unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/20 to-transparent" />
+        {/* <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/20 to-transparent" /> */}
         <div className="absolute left-5 right-5 top-5 flex items-start justify-between gap-3">
-          <Badge className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-white backdrop-blur-md">
-            <BadgeCheck className="h-3.5 w-3.5" />
-          </Badge>
+          <BadgeCheck className="text-green-500" />
           <div className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-medium text-white backdrop-blur-md">
             {formatCurrencyPerHour(buddy.costPerHour)}
           </div>
@@ -121,7 +119,7 @@ function BuddyCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
         </p>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4">
+          <div className="p-4">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Languages className="h-4 w-4 text-primary" />
               Languages
@@ -132,7 +130,7 @@ function BuddyCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
                 : "Language details coming soon"}
             </p>
           </div>
-          <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4">
+          <div className="p-4">
             <div className="flex items-center gap-2 text-sm font-medium text-foreground">
               <Sparkles className="h-4 w-4 text-primary" />
               Activities

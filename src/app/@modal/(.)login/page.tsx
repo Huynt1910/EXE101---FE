@@ -7,6 +7,17 @@ export default function LoginModalRoute() {
   const router = useRouter();
 
   const closeModal = () => router.back();
+  const handleAuthenticated = (callbackUrl: string) => {
+    router.back();
+    requestAnimationFrame(() => {
+      router.replace(callbackUrl, { scroll: false });
+    });
+  };
 
-  return <LoginModal onClose={closeModal} />;
+  return (
+    <LoginModal
+      onClose={closeModal}
+      onAuthenticated={handleAuthenticated}
+    />
+  );
 }

@@ -51,6 +51,20 @@ export function useSendChatMessageMutation() {
   });
 }
 
+export function useDirectBuddyRoomMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (buddyUserId: string) => chatApi.getOrCreateBuddyRoom(buddyUserId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.rooms() }),
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.unreadSummary() }),
+      ]);
+    },
+  });
+}
+
 export function useMarkRoomReadMutation() {
   const queryClient = useQueryClient();
 

@@ -9,6 +9,7 @@ import {
   useChatRoomMessages,
   useChatRooms,
 } from "@/features/chat/hooks/useChat";
+import { useIsMobile } from "@/features/use-mobile";
 import { useChatSignalR } from "@/features/chat/hooks/useChatSignalR";
 import type { ChatMessage, ChatRoom } from "@/features/chat/type";
 import { useAuthStore } from "@/lib/store/authStore";
@@ -60,6 +61,7 @@ function mapRoomToConversation(room: ChatRoom): Conversation {
 export default function MessagesLayout() {
   const searchParams = useSearchParams();
   const authState = useAuthStore();
+  const isMobile = useIsMobile();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [draft, setDraft] = useState("");
@@ -127,10 +129,16 @@ export default function MessagesLayout() {
       }
     }
 
-    if (!selectedId) {
+    if (!selectedId && !isMobile) {
       setSelectedId(conversations[0].id);
     }
-  }, [conversations, hasAppliedInitialRoom, requestedRoomId, selectedId]);
+  }, [
+    conversations,
+    hasAppliedInitialRoom,
+    isMobile,
+    requestedRoomId,
+    selectedId,
+  ]);
 
   const handleSend = async () => {
     const roomId = selectedId;
@@ -168,10 +176,10 @@ export default function MessagesLayout() {
     conversations.find((conversation) => conversation.id === selectedId) ?? null;
 
   return (
-    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-[1.5rem] border border-border bg-secondary shadow-sm">
+    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-none border-y border-border bg-secondary shadow-sm md:rounded-[1.5rem] md:border">
       <div
         className={`
-          w-full min-h-0 min-w-0 shrink-0 overflow-hidden border-r border-border/70 md:basis-[clamp(18rem,28vw,22rem)] md:max-w-[42%]
+          w-full min-h-0 min-w-0 shrink-0 overflow-hidden md:basis-[clamp(18rem,28vw,22rem)] md:max-w-[42%] md:border-r md:border-border/70
           ${selectedId ? "hidden md:flex" : "flex"}
           flex-col
         `}
@@ -201,6 +209,8 @@ export default function MessagesLayout() {
           onSend={handleSend}
           isSending={isSendingRealtime}
           isLoadingMessages={messagesQuery.isLoading || roomsQuery.isLoading}
+          showMobileBack={isMobile}
+          onBackToList={() => setSelectedId(null)}
         />
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { TripRequestActions } from "@/app/(trip)/trip-request/components/trip-request-action";
 import { TripRequestHeader } from "@/app/(trip)/trip-request/components/trip-request-header";
@@ -21,13 +21,18 @@ import {
   defaultTripRequestFormData,
   mapTripDtoToStoredTripRequest,
   mapTripFormDataToCreateTripRequest,
+  saveTripRequestDraft,
   saveLatestTripRequest,
 } from "@/lib/trip-request";
+import { buildAuthUrl } from "@/lib/callback-url";
+import { useAuthStore } from "@/lib/store/authStore";
 import { TRIP_REQUEST_STEPS } from "./trip-request.config";
 
 export default function TripRequestPage() {
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuthStore();
   const tripId = searchParams.get("tripId");
   const buddyId = searchParams.get("buddyId");
   const buddyName = searchParams.get("buddyName");
@@ -92,6 +97,15 @@ export default function TripRequestPage() {
   };
 
   const handleSubmit = async () => {
+    if (!isAuthenticated) {
+      const query = searchParams.toString();
+      const callbackUrl = query ? `${pathname}?${query}` : pathname;
+      saveTripRequestDraft(formData);
+      toast.info("Your trip draft has been saved. Please sign in to continue.");
+      router.push(buildAuthUrl("/login", callbackUrl));
+      return;
+    }
+
     if (!validateBeforeSubmit()) {
       toast.error("Trip request is incomplete. Please review your details.");
       return;
@@ -142,7 +156,9 @@ export default function TripRequestPage() {
         return;
       }
 
-      router.push(`/trip-request/success?tripId=${encodeURIComponent(request.id)}`);
+      router.push(
+        `/trip-request/success?tripId=${encodeURIComponent(request.id)}`,
+      );
     } catch (error) {
       const message =
         typeof error === "object" &&

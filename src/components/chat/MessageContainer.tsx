@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft } from "lucide-react";
 import MessagesEmptyState from "./MessagesEmptyState";
 import { type Conversation } from "./ConversationList";
 import type { ChatMessage } from "@/features/chat/type";
@@ -28,6 +29,8 @@ type Props = {
   onSend: () => void;
   isSending?: boolean;
   isLoadingMessages?: boolean;
+  showMobileBack?: boolean;
+  onBackToList?: () => void;
 };
 
 function formatTime(value: string) {
@@ -296,6 +299,8 @@ export default function MessageContainer({
   onSend,
   isSending = false,
   isLoadingMessages = false,
+  showMobileBack = false,
+  onBackToList,
 }: Readonly<Props>) {
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const { user } = useAuthStore();
@@ -347,7 +352,6 @@ export default function MessageContainer({
       return;
     }
 
-    const normalizedCurrentUserId = currentUserId?.trim().toLowerCase() ?? "";
     const conversationId = selectedConversation.id;
     const lastMessage = displayMessages.at(-1);
     const lastMessageId = lastMessage?.id ?? null;
@@ -363,17 +367,9 @@ export default function MessageContainer({
         scrollToLatest("auto");
       });
     } else if (isNewLastMessage) {
-      const normalizedSenderUserId =
-        lastMessage?.senderUserId.trim().toLowerCase() ?? "";
-      const isOwnMessage =
-        Boolean(normalizedCurrentUserId) &&
-        normalizedSenderUserId === normalizedCurrentUserId;
-
-      if (isOwnMessage) {
-        requestAnimationFrame(() => {
-          scrollToLatest("smooth");
-        });
-      }
+      requestAnimationFrame(() => {
+        scrollToLatest("smooth");
+      });
     }
 
     previousConversationIdRef.current = conversationId;
@@ -424,7 +420,7 @@ export default function MessageContainer({
           if (message.contentType !== "BookingCard" && !parsedOffer) {
             bubbleClassName = `max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
               isMine
-                ? "rounded-br-md bg-amber-200 text-foreground"
+                ? "rounded-br-md bg-primary/90 text-primary-foreground"
                 : "rounded-bl-md bg-muted text-foreground"
             }`;
           }
@@ -469,7 +465,7 @@ export default function MessageContainer({
                 )}
                 <p
                   className={`mt-1 text-[10px] ${
-                    isMine ? "text-foreground/70" : "text-muted-foreground"
+                    isMine ? "text-primary-foreground" : "text-muted-foreground"
                   }`}
                 >
                   {formatTime(message.createdAt)}
@@ -485,6 +481,16 @@ export default function MessageContainer({
   return (
     <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden bg-">
       <div className="flex shrink-0 items-center gap-3 border-b border-border/70 px-4 py-3">
+        {showMobileBack ? (
+          <button
+            type="button"
+            onClick={onBackToList}
+            className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-accent md:hidden"
+            aria-label="Back to conversations"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        ) : null}
         <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/10">
           {selectedConversation.avatar ? (
             <Image
@@ -501,7 +507,7 @@ export default function MessageContainer({
             </span>
           )}
         </div>
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">
             {selectedConversation.name}
           </p>
