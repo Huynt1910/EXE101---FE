@@ -89,7 +89,7 @@ function BottomNavigation({
   const defaultNavItems: NavItem[] = [
     {
       icon: LayoutDashboardIcon,
-      label: 'Tổng quan',
+      label: 'Overview',
       href: '/buddy',
       active: isActiveNavItem('/buddy'),
     },
@@ -101,13 +101,13 @@ function BottomNavigation({
     },
     {
       icon: MessageSquare,
-      label: 'Tin nhắn',
+      label: 'Messages',
       href: '/buddy/messages',
       active: isActiveNavItem('/buddy/messages'),
     },
     {
       icon: Menu,
-      label: 'Tài khoản',
+      label: 'Account',
       href: '#',
       active: false,
       isAccount: true,
@@ -156,7 +156,7 @@ function BottomNavigation({
                       <DropdownMenuItem asChild>
                         <Link href="/buddy/messages" className="cursor-pointer">
                           <MessageSquare className="mr-2 h-4 w-4" />
-                          Tin nhắn
+                          Messages
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -168,7 +168,7 @@ function BottomNavigation({
                       <DropdownMenuItem asChild>
                         <Link href="/profile" className="cursor-pointer">
                           <UserCircleIcon className="mr-1 h-5 w-5" />
-                          <span className="text-sm font-medium">Hồ sơ</span>
+                          <span className="text-sm font-medium">My account</span>
                         </Link>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -178,14 +178,14 @@ function BottomNavigation({
                     <DropdownMenuGroup className="p-2 space-y-2">
                       <DropdownMenuItem className="cursor-pointer">
                         <Link href="/" className="cursor-pointer">
-                          <span className="text-sm font-medium">Chuyển sang trang người dùng</span>
+                          <span className="text-sm font-medium">Switch to User</span>
                         </Link>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
                     <DropdownMenuGroup className="p-2 space-y-2">
                       <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
-                        <span className="text-sm font-medium">Đăng xuất</span>
+                        <span className="text-sm font-medium">Logout</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                   </DropdownMenuContent>
@@ -315,7 +315,7 @@ export default function HeaderHosting() {
                         <DropdownMenuItem asChild>
                           <Link href="/profile" className="cursor-pointer">
                             <UserCircleIcon className="mr-1 h-5 w-5" />
-                            <span className="text-sm font-medium">Profile</span>
+                            <span className="text-sm font-medium">My account</span>
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -334,21 +334,7 @@ export default function HeaderHosting() {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-              ) : (
-                <div className="flex items-center gap-2 py-1">
-                  <Button asChild variant="ghost" size="default" className="max-md:hidden">
-                    <Link href="/login?callbackUrl=%2Fbuddy">Đăng nhập</Link>
-                  </Button>
-                  <Button
-                    asChild
-                    variant="default"
-                    size="default"
-                    className="bg-red-500 hover:bg-red-600"
-                  >
-                    <Link href="/login?callbackUrl=%2Fbuddy%2Ftrip-requests">Bắt đầu</Link>
-                  </Button>
-                </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
