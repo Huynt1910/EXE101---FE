@@ -337,7 +337,7 @@ export default function HeaderHosting() {
               ) : (
                 <div className="flex items-center gap-2 py-1">
                   <Button asChild variant="ghost" size="default" className="max-md:hidden">
-                    <Link href="/login?redirect=/buddy">Đăng nhập</Link>
+                    <Link href="/login?callbackUrl=%2Fbuddy">Đăng nhập</Link>
                   </Button>
                   <Button
                     asChild
@@ -345,7 +345,7 @@ export default function HeaderHosting() {
                     size="default"
                     className="bg-red-500 hover:bg-red-600"
                   >
-                    <Link href="/login?redirect=/buddy/trip-requests">Bắt đầu</Link>
+                    <Link href="/login?callbackUrl=%2Fbuddy%2Ftrip-requests">Bắt đầu</Link>
                   </Button>
                 </div>
               )}
