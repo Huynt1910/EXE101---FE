@@ -190,7 +190,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                               href="/buddy/trip-requests"
                               className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                             >
-                              Become a buddy
+                              Switch to buddy
                             </Link>
                           </DropdownMenu.Item>
                           <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
