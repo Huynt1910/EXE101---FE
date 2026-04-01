@@ -26,7 +26,10 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
     sp.get("callbackUrl"),
     getDefaultAuthenticatedPath(user?.roles ?? []),
   );
-  const callbackUrl = resolveAuthenticatedRedirectPath(normalizedCallbackUrl, user?.roles ?? []);
+  const callbackUrl = resolveAuthenticatedRedirectPath(
+    normalizedCallbackUrl,
+    user?.roles ?? [],
+  );
 
   useEffect(() => {
     const previousHtmlOverflow = document.documentElement.style.overflow;
@@ -51,7 +54,9 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   };
 
   const handleForgotPassword = () => {
-    router.push(buildAuthUrl("/forgot-password", callbackUrl), { scroll: false });
+    router.push(buildAuthUrl("/forgot-password", callbackUrl), {
+      scroll: false,
+    });
   };
 
   const handleGoogleSignIn = async () => {
@@ -66,9 +71,8 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {
       router.replace(callbackUrl, { scroll: false });
-      onClose();
     }
-  }, [callbackUrl, onClose, router, sessionQuery.data?.accessToken]);
+  }, [callbackUrl, router, sessionQuery.data?.accessToken]);
 
   useEffect(() => {
     if (loginMutation.isError) {
@@ -112,7 +116,13 @@ export default function LoginModal({ onClose }: Readonly<LoginModalProps>) {
           </button>
 
           <div className="flex justify-center">
-            <Image src="/logo_bonddy.png" alt="Bonddy logo" width={68} height={68} priority />
+            <Image
+              src="/logo_bonddy.png"
+              alt="Bonddy logo"
+              width={68}
+              height={68}
+              priority
+            />
           </div>
 
           <h2 className="mt-2 text-lg sm:text-2xl font-extrabold text-primary">

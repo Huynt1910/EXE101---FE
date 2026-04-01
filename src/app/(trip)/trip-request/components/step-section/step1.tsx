@@ -30,13 +30,12 @@ import { TRIP_REQUEST_CITIES } from "@/lib/data/trip-request";
 type DestinationTimingStepProps = {
   selectedDate: string;
   selectedStartTime: Dayjs | null;
-  selectedEndTime: Dayjs | null;
   formData: TripRequestFormData;
   errors: TripRequestValidationErrors;
   onCityChange: (city: string) => void;
   onPreferredDateChange: (date: Dayjs | null) => void;
   onPreferredStartTimeChange: (time: Dayjs | null) => void;
-  onPreferredEndTimeChange: (time: Dayjs | null) => void;
+  onDurationHoursChange: (durationHours: number) => void;
 };
 
 function formatTimeValue(value: Dayjs | null) {
@@ -60,13 +59,12 @@ function parseTimeToDayjs(timeValue: string, baseDate?: Dayjs | null) {
 export function DestinationTimingStep({
   selectedDate,
   selectedStartTime,
-  selectedEndTime,
   formData,
   errors,
   onCityChange,
   onPreferredDateChange,
   onPreferredStartTimeChange,
-  onPreferredEndTimeChange,
+  onDurationHoursChange,
 }: DestinationTimingStepProps) {
   const [open, setOpen] = React.useState(false);
   const selectedDateObject = selectedDate ? new Date(selectedDate) : undefined;
@@ -74,15 +72,19 @@ export function DestinationTimingStep({
   return (
     <div className="space-y-6">
       <Field>
-        <FieldLabel htmlFor="trip-city">Destination</FieldLabel>
+        <FieldLabel htmlFor="trip-city">City</FieldLabel>
         <Combobox
           items={TRIP_REQUEST_CITIES}
           value={formData.city}
           onValueChange={(value) => onCityChange(value ?? "")}
         >
-          <ComboboxInput placeholder="Choose destination" id="trip-city" />
-          <ComboboxContent>
-            <ComboboxEmpty>No destination found.</ComboboxEmpty>
+          <ComboboxInput
+            placeholder="Choose city"
+            id="trip-city"
+            className="border-border/80 bg-popover text-popover-foreground [&_[data-slot=input-group-addon]]:text-popover-foreground/70 [&_[data-slot=input-group-control]]:text-popover-foreground [&_[data-slot=input-group-control]]:placeholder:text-popover-foreground/60"
+          />
+          <ComboboxContent className="bg-popover text-popover-foreground">
+            <ComboboxEmpty>No city found.</ComboboxEmpty>
             <ComboboxList>
               {(item) => (
                 <ComboboxItem key={item} value={item}>
@@ -114,7 +116,10 @@ export function DestinationTimingStep({
               </Button>
             </PopoverTrigger>
 
-            <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+            <PopoverContent
+              className="w-auto overflow-hidden p-0"
+              align="start"
+            >
               <Calendar
                 mode="single"
                 selected={selectedDateObject}
@@ -152,20 +157,17 @@ export function DestinationTimingStep({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor="trip-end-time">End time</FieldLabel>
+          <FieldLabel htmlFor="trip-duration-hours">Duration (hours)</FieldLabel>
           <Input
-            id="trip-end-time"
-            type="time"
-            step="60"
-            value={formatTimeValue(selectedEndTime)}
+            id="trip-duration-hours"
+            type="number"
+            min={1}
+            step="1"
+            value={formData.durationHours}
             onChange={(event) => {
-              const nextValue = parseTimeToDayjs(
-                event.target.value,
-                selectedEndTime ?? selectedStartTime,
-              );
-              onPreferredEndTimeChange(nextValue);
+              onDurationHoursChange(Number(event.target.value) || 0);
             }}
-            className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+            className="bg-background"
           />
           {errors.durationHours ? (
             <p className="mt-1 text-sm text-destructive">

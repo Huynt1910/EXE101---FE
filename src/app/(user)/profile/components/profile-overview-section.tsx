@@ -25,7 +25,10 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyTravelerBookingsQuery } from "@/features/booking/hooks/useCreateBookingOffer";
-import { useChatRooms, useChatUnreadSummary } from "@/features/chat/hooks/useChat";
+import {
+  useChatRooms,
+  useChatUnreadSummary,
+} from "@/features/chat/hooks/useChat";
 import {
   useNotificationUnreadCount,
   useNotifications,
@@ -94,7 +97,10 @@ function OverviewSkeleton() {
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
           {Array.from({ length: 4 }).map((_, index) => (
-            <Card key={index} className="rounded-[1.75rem] border-border/70 py-0">
+            <Card
+              key={index}
+              className="rounded-[1.75rem] border-border/70 py-0"
+            >
               <CardContent className="space-y-3 p-5">
                 <Skeleton className="h-10 w-10 rounded-2xl" />
                 <Skeleton className="h-8 w-16" />
@@ -235,13 +241,13 @@ export function ProfileOverviewSection() {
               <div className="min-w-0 flex-1 space-y-4">
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge className="rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-primary">
+                    {/* <Badge className="rounded-full border border-primary/15 bg-primary/10 px-3 py-1 text-primary">
                       Traveler profile
-                    </Badge>
+                    </Badge> */}
                     {profile.isEmailVerified ? (
                       <Badge className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-emerald-700">
                         <CheckCircle2 className="mr-1 h-3.5 w-3.5" />
-                        Verified email
+                        Verified
                       </Badge>
                     ) : null}
                   </div>
@@ -255,10 +261,10 @@ export function ProfileOverviewSection() {
                         <Mail className="h-4 w-4 text-primary" />
                         {profile.email || "No email"}
                       </span>
-                      <span className="inline-flex items-center gap-2">
+                      {/* <span className="inline-flex items-center gap-2">
                         <MapPin className="h-4 w-4 text-primary" />
                         {profile.address?.trim() || "Add your location"}
-                      </span>
+                      </span> */}
                     </div>
                   </div>
 
@@ -269,19 +275,21 @@ export function ProfileOverviewSection() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {(profile.roles?.length ? profile.roles : ["User"]).map((role) => (
-                    <Badge
-                      key={role}
-                      variant="secondary"
-                      className="rounded-full border border-border/60 bg-secondary/50 px-3 py-1"
-                    >
-                      <ShieldCheck className="mr-1 h-3.5 w-3.5 text-primary" />
-                      {role}
-                    </Badge>
-                  ))}
+                  {(profile.roles?.length ? profile.roles : ["User"]).map(
+                    (role) => (
+                      <Badge
+                        key={role}
+                        variant="secondary"
+                        className="rounded-full border border-border/60 bg-secondary/50 px-3 py-1"
+                      >
+                        <ShieldCheck className="mr-1 h-3.5 w-3.5 text-primary" />
+                        {role}
+                      </Badge>
+                    ),
+                  )}
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                {/* <div className="flex flex-wrap gap-3">
                   <Button asChild className="rounded-xl">
                     <Link href="/profile?section=personal">
                       Edit personal info
@@ -291,7 +299,7 @@ export function ProfileOverviewSection() {
                   <Button asChild variant="outline" className="rounded-xl">
                     <Link href="/profile?section=bookings">View bookings</Link>
                   </Button>
-                </div>
+                </div> */}
 
                 <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                   <div className="rounded-2xl border border-border/70 bg-secondary/30 p-4">
@@ -321,19 +329,33 @@ export function ProfileOverviewSection() {
             const Icon = card.icon;
 
             return (
-              <Card key={card.label} className="rounded-[1.75rem] border-border/70 py-0">
+              <Card
+                key={card.label}
+                className="rounded-[1.75rem] border-border/70 py-0"
+              >
                 <CardContent className="flex h-full flex-col justify-between gap-4 p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <span className={`grid h-11 w-11 place-items-center rounded-2xl ${card.tone}`}>
+                    <span
+                      className={`grid h-11 w-11 place-items-center rounded-2xl ${card.tone}`}
+                    >
                       <Icon className="h-5 w-5" />
                     </span>
-                    <Button asChild size="sm" variant="ghost" className="rounded-xl px-2 text-primary">
+                    <Button
+                      asChild
+                      size="sm"
+                      variant="ghost"
+                      className="rounded-xl px-2 text-primary"
+                    >
                       <Link href={card.href}>Open</Link>
                     </Button>
                   </div>
                   <div>
-                    <p className="text-3xl font-semibold text-foreground">{card.value}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{card.label}</p>
+                    <p className="text-3xl font-semibold text-foreground">
+                      {card.value}
+                    </p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {card.label}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -349,7 +371,8 @@ export function ProfileOverviewSection() {
               <div>
                 <CardTitle className="text-xl">Travel activity</CardTitle>
                 <CardDescription>
-                  Keep an eye on recent bookings and trip requests from one place.
+                  Keep an eye on recent bookings and trip requests from one
+                  place.
                 </CardDescription>
               </div>
               <Button asChild variant="outline" className="rounded-xl">
@@ -383,7 +406,8 @@ export function ProfileOverviewSection() {
                         {booking.buddyName || "Local buddy booking"}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {booking.bookedDate} at {booking.bookedStartTime?.slice(0, 5)}
+                        {booking.bookedDate} at{" "}
+                        {booking.bookedStartTime?.slice(0, 5)}
                         {" · "}
                         {booking.bookedDurationHours}h
                       </p>
@@ -399,8 +423,8 @@ export function ProfileOverviewSection() {
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-border/70 bg-secondary/20 p-6 text-sm text-muted-foreground">
-                You do not have any bookings yet. Once you confirm a local buddy,
-                the trip agreement and payment status will appear here.
+                You do not have any bookings yet. Once you confirm a local
+                buddy, the trip agreement and payment status will appear here.
               </div>
             )}
 
@@ -413,10 +437,16 @@ export function ProfileOverviewSection() {
                 <div className="mt-4 space-y-3">
                   {trips.length > 0 ? (
                     trips.map((trip) => (
-                      <div key={trip.id} className="rounded-2xl bg-secondary/30 p-4">
-                        <p className="font-medium text-foreground">{trip.city}</p>
+                      <div
+                        key={trip.id}
+                        className="rounded-2xl bg-secondary/30 p-4"
+                      >
+                        <p className="font-medium text-foreground">
+                          {trip.city}
+                        </p>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          Starts {trip.startDate} at {trip.startTime.slice(0, 5)}
+                          Starts {trip.startDate} at{" "}
+                          {trip.startTime.slice(0, 5)}
                         </p>
                         <p className="mt-2 text-xs text-muted-foreground">
                           {trip.preferredLanguages.length > 0
@@ -440,13 +470,21 @@ export function ProfileOverviewSection() {
                 </div>
                 <div className="mt-4 space-y-3 text-sm text-muted-foreground">
                   <div className="rounded-2xl bg-secondary/30 p-4">
-                    <p className="font-medium text-foreground">Profile freshness</p>
+                    <p className="font-medium text-foreground">
+                      Profile freshness
+                    </p>
                     <p className="mt-1">
-                      Updated {formatRelativeTime(profile.updatedAt ?? profile.createdAt)}.
+                      Updated{" "}
+                      {formatRelativeTime(
+                        profile.updatedAt ?? profile.createdAt,
+                      )}
+                      .
                     </p>
                   </div>
                   <div className="rounded-2xl bg-secondary/30 p-4">
-                    <p className="font-medium text-foreground">Travel readiness</p>
+                    <p className="font-medium text-foreground">
+                      Travel readiness
+                    </p>
                     <p className="mt-1">
                       {profile.phoneNumber?.trim()
                         ? "Your traveler profile already has contact details."
@@ -549,7 +587,9 @@ export function ProfileOverviewSection() {
                 </div>
               )}
               <Button asChild variant="outline" className="w-full rounded-xl">
-                <Link href="/profile?section=notifications">View notifications</Link>
+                <Link href="/profile?section=notifications">
+                  View notifications
+                </Link>
               </Button>
             </CardContent>
           </Card>

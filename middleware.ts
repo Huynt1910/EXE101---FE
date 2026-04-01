@@ -21,8 +21,24 @@ const AUTH_PATHS = [
 type MiddlewareJwtPayload = {
   exp?: number;
   role?: string | string[];
-  roles?: string[];
+  roles?: string | string[];
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"?: string | string[];
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"?: string | string[];
 };
+
+function normalizeRoleClaims(value: unknown) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((role): role is string => typeof role === "string" && role.trim() !== "")
+      .map((role) => role.trim());
+  }
+
+  if (typeof value === "string" && value.trim() !== "") {
+    return [value.trim()];
+  }
+
+  return [] as string[];
+}
 
 function decodeBase64Url(input: string) {
   const base64 = input.replaceAll("-", "+").replaceAll("_", "/");
@@ -54,21 +70,16 @@ function decodeJwtPayload(token?: string) {
 function extractRolesFromToken(payload: MiddlewareJwtPayload | null) {
   if (!payload) return [] as string[];
 
-  const roleClaim = payload.role;
-  const rolesClaim = payload.roles;
-
-  let fromRole: string[] = [];
-  if (Array.isArray(roleClaim)) {
-    fromRole = roleClaim;
-  } else if (typeof roleClaim === "string") {
-    fromRole = [roleClaim];
-  }
-
-  const fromRoles = Array.isArray(rolesClaim) ? rolesClaim : [];
-
-  return [...fromRole, ...fromRoles]
-    .filter((role): role is string => typeof role === "string" && role.trim() !== "")
-    .map((role) => role.trim());
+  return [
+    ...normalizeRoleClaims(payload.role),
+    ...normalizeRoleClaims(payload.roles),
+    ...normalizeRoleClaims(
+      payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+    ),
+    ...normalizeRoleClaims(
+      payload["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/role"],
+    ),
+  ].filter((role, index, roles) => roles.indexOf(role) === index);
 }
 
 function isTokenExpired(payload: MiddlewareJwtPayload | null) {

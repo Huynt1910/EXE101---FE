@@ -12,7 +12,10 @@ import { MeetingNotesStep } from "@/app/(trip)/trip-request/components/step-sect
 import { Card } from "@/components/ui/card";
 import { useTripRequestForm } from "@/features/trip/hooks/useTripRequestForm";
 import { useTripMutations } from "@/features/trip/hooks/useTripMutation";
-import { useTripDetail } from "../../../features/trip/hooks/useTripRequest";
+import {
+  useTripDetail,
+  useTripRequest,
+} from "../../../features/trip/hooks/useTripRequest";
 import {
   clearTripRequestDraft,
   defaultTripRequestFormData,
@@ -26,10 +29,14 @@ export default function TripRequestPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tripId = searchParams.get("tripId");
+  const buddyId = searchParams.get("buddyId");
+  const buddyName = searchParams.get("buddyName");
   const isEditMode = Boolean(tripId);
+  const isBuddyContactMode = !isEditMode && Boolean(buddyId);
   const hydratedTripIdRef = useRef<string | null>(null);
   const tripDetailQuery = useTripDetail(tripId ?? "");
   const { createTripMutation, updateTripMutation } = useTripMutations();
+  const { startTripChatMutation } = useTripRequest({ enableOpenTrips: false });
   const {
     step,
     draftSaved,
@@ -40,7 +47,6 @@ export default function TripRequestPage() {
     progressPercent,
     selectedDate,
     selectedStartTime,
-    selectedEndTime,
     updateField,
     setSubmitError,
     goToStep,
@@ -50,7 +56,6 @@ export default function TripRequestPage() {
     validateBeforeSubmit,
     handlePreferredDateChange,
     handlePreferredStartTimeChange,
-    handlePreferredEndTimeChange,
     replaceFormData,
   } = useTripRequestForm();
 
@@ -69,7 +74,8 @@ export default function TripRequestPage() {
       durationHours: storedTrip.durationHours,
       adults: storedTrip.adults,
       children: storedTrip.children,
-      preferredLanguage: storedTrip.preferredLanguage,
+      activities: storedTrip.activities,
+      preferredLanguages: storedTrip.preferredLanguages,
       notes: storedTrip.notes,
     });
     hydratedTripIdRef.current = tripId;
@@ -93,7 +99,11 @@ export default function TripRequestPage() {
 
     try {
       const toastId = toast.loading(
-        isEditMode ? "Updating your trip..." : "Creating your trip request...",
+        isEditMode
+          ? "Updating your trip..."
+          : isBuddyContactMode
+            ? "Creating your trip and opening chat..."
+            : "Creating your trip request...",
       );
       const payload = mapTripFormDataToCreateTripRequest(formData);
       const response =
@@ -112,6 +122,23 @@ export default function TripRequestPage() {
       );
       if (isEditMode) {
         router.push(`/profile/trip/${request.id}`);
+        return;
+      }
+
+      if (isBuddyContactMode) {
+        const startChatResponse = await startTripChatMutation.mutateAsync({
+          tripRequestId: request.id,
+        });
+        const roomId = startChatResponse.data?.chatRoomId;
+
+        toast.success("Chat room is ready.", { id: toastId });
+
+        if (roomId) {
+          router.push(`/messages?roomId=${encodeURIComponent(roomId)}`);
+          return;
+        }
+
+        router.push("/messages");
         return;
       }
 
@@ -145,7 +172,11 @@ export default function TripRequestPage() {
               <TripRequestHeader
                 step={step}
                 totalSteps={TRIP_REQUEST_STEPS.length}
-                intro={currentStep.intro}
+                intro={
+                  isBuddyContactMode
+                    ? `Plan your request for ${buddyName || "this buddy"}`
+                    : currentStep.intro
+                }
                 progressPercent={progressPercent}
               />
 
@@ -156,13 +187,14 @@ export default function TripRequestPage() {
                   <DestinationTimingStep
                     selectedDate={selectedDate}
                     selectedStartTime={selectedStartTime}
-                    selectedEndTime={selectedEndTime}
                     formData={formData}
                     errors={errors}
                     onCityChange={(city) => updateField("city", city)}
                     onPreferredDateChange={handlePreferredDateChange}
                     onPreferredStartTimeChange={handlePreferredStartTimeChange}
-                    onPreferredEndTimeChange={handlePreferredEndTimeChange}
+                    onDurationHoursChange={(value) =>
+                      updateField("durationHours", value)
+                    }
                   />
                 ) : null}
 
@@ -172,8 +204,11 @@ export default function TripRequestPage() {
                     errors={errors}
                     onAdultsChange={(value) => updateField("adults", value)}
                     onChildrenChange={(value) => updateField("children", value)}
-                    onLanguageChange={(value) =>
-                      updateField("preferredLanguage", value)
+                    onActivitiesChange={(value) =>
+                      updateField("activities", value)
+                    }
+                    onPreferredLanguagesChange={(value) =>
+                      updateField("preferredLanguages", value)
                     }
                   />
                 ) : null}
@@ -197,10 +232,18 @@ export default function TripRequestPage() {
                 step={step}
                 totalSteps={TRIP_REQUEST_STEPS.length}
                 nextLabel={currentStep.cta}
-                submitLabel={isEditMode ? "Update trip" : "Create my trip"}
+                submitLabel={
+                  isEditMode
+                    ? "Update trip"
+                    : isBuddyContactMode
+                      ? `Create trip and chat with ${buddyName || "buddy"}`
+                      : "Create my trip"
+                }
                 draftSaved={draftSaved}
                 isSubmitting={
-                  createTripMutation.isPending || updateTripMutation.isPending
+                  createTripMutation.isPending ||
+                  updateTripMutation.isPending ||
+                  startTripChatMutation.isPending
                 }
                 onSave={handleSaveDraft}
                 onBack={goToPreviousStep}

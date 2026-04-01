@@ -80,7 +80,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
     : "max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-4xl shadow-lg";
 
   const navInnerClassName =
-    "flex items-center shadow-md justify-between h-20 px-6 lg:px-8";
+    "flex items-center justify-between h-20 px-6 lg:px-8";
 
   const mobilePanelClassName = isUserHeader
     ? "md:hidden border-t border-border/50 px-6 py-4 lg:px-8"
@@ -120,32 +120,6 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
             <div className="hidden md:flex items-center gap-3 pointer-events-auto">
               {canUseAuthenticatedView ? (
                 <>
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="rounded-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
-                  >
-                    <Link
-                      href={chatHref}
-                      className="inline-flex items-center gap-2"
-                    >
-                      Chat
-                    </Link>
-                  </Button>
-
-                  <Button
-                    asChild
-                    variant="ghost"
-                    className="rounded-full bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground"
-                  >
-                    <Link
-                      href="/trip-request"
-                      className="inline-flex items-center gap-2"
-                    >
-                      Create a trip
-                    </Link>
-                  </Button>
-
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger asChild>
                       <button
@@ -206,14 +180,14 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                                 Buddy dashboard
                               </Link>
                             </DropdownMenu.Item>
-                            <DropdownMenu.Item asChild>
+                            {/* <DropdownMenu.Item asChild>
                               <Link
                                 href="/buddy/apply"
                                 className="block rounded-xl px-4 py-3  leading-none outline-none transition-colors hover:bg-foreground/20 hover:text-foreground"
                               >
                                 Update buddy profile
                               </Link>
-                            </DropdownMenu.Item>
+                            </DropdownMenu.Item> */}
                             <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
                           </>
                         ) : (
@@ -230,7 +204,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                             <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
                           </>
                         )}
-
+                        {/* 
                         <DropdownMenu.Item asChild>
                           <Link
                             href="/"
@@ -259,9 +233,9 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                               <ChevronRight className="h-4 w-4" />
                             </span>
                           </Link>
-                        </DropdownMenu.Item>
+                        </DropdownMenu.Item> */}
 
-                        <DropdownMenu.Separator className="my-2 h-px bg-black/12" />
+                        {/* <DropdownMenu.Separator className="my-2 h-px bg-black/12" /> */}
 
                         <DropdownMenu.Item
                           onSelect={handleLogout}
@@ -377,13 +351,13 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                             >
                               Buddy dashboard
                             </Link>
-                            <Link
+                            {/* <Link
                               href="/buddy/apply"
                               className="text-base font-semibold text-foreground"
                               onClick={() => setIsOpen(false)}
                             >
                               Update buddy profile
-                            </Link>
+                            </Link> */}
                           </>
                         ) : (
                           <Link

@@ -49,20 +49,6 @@ export function useTripRequestForm() {
     return dayjs(formData.startTime);
   }, [formData.startTime]);
 
-  const selectedEndTime = useMemo(() => {
-    if (!formData.startTime) return null;
-    return dayjs(formData.startTime).add(
-      formData.durationHours || 3,
-      "hour",
-    );
-  }, [formData.durationHours, formData.startTime]);
-
-  const effectiveEndTime = useMemo(() => {
-    if (!selectedStartTime || !selectedEndTime) return selectedEndTime;
-    if (selectedEndTime.isAfter(selectedStartTime)) return selectedEndTime;
-    return selectedStartTime.add(60, "minute");
-  }, [selectedEndTime, selectedStartTime]);
-
   const updateField = <K extends keyof TripRequestFormData>(
     key: K,
     value: TripRequestFormData[K],
@@ -86,15 +72,6 @@ export function useTripRequestForm() {
       .millisecond(0);
 
     updateField("startTime", combined.format("YYYY-MM-DDTHH:mm"));
-  };
-
-  const syncDuration = (start: Dayjs | null, end: Dayjs | null) => {
-    if (!start || !end) return;
-
-    const diff = end.diff(start, "hour");
-    if (diff > 0) {
-      updateField("durationHours", diff);
-    }
   };
 
   const validateStep = (stepToValidate: number) => {
@@ -175,11 +152,6 @@ export function useTripRequestForm() {
   const handlePreferredStartTimeChange = (time: Dayjs | null) => {
     const activeDate = selectedDate || dayjs().format("YYYY-MM-DD");
     syncStartTime(activeDate, time);
-    syncDuration(time, effectiveEndTime);
-  };
-
-  const handlePreferredEndTimeChange = (time: Dayjs | null) => {
-    syncDuration(selectedStartTime, time);
   };
 
   const replaceFormData = (nextFormData: TripRequestFormData) => {
@@ -200,7 +172,6 @@ export function useTripRequestForm() {
     progressPercent,
     selectedDate,
     selectedStartTime,
-    selectedEndTime: effectiveEndTime,
     updateField,
     setSubmitError,
     goToStep,
@@ -210,7 +181,6 @@ export function useTripRequestForm() {
     validateBeforeSubmit,
     handlePreferredDateChange,
     handlePreferredStartTimeChange,
-    handlePreferredEndTimeChange,
     replaceFormData,
   };
 }
