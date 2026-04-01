@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   AlertTriangle,
   BookOpen,
@@ -26,7 +26,12 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useAdminBuddies, useAdminIncidents, useAdminTrips, useAdminUsers } from "@/features/admin/hooks/useAdmin";
+import {
+  useAdminBuddies,
+  useAdminIncidents,
+  useAdminTrips,
+  useAdminUsers,
+} from "@/features/admin/hooks/useAdmin";
 import { useAuthStore } from "@/lib/store/authStore";
 import { authStore } from "@/lib/store/authStore";
 
@@ -88,10 +93,10 @@ function getInitials(name?: string | null) {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const currentTab = searchParams.get("tab") ?? "overview";
   const { user } = useAuthStore();
   const [isHydrated, setIsHydrated] = useState(false);
-
   const usersQuery = useAdminUsers({ Page: 1, PageSize: 1 });
   const buddiesQuery = useAdminBuddies();
   const tripsQuery = useAdminTrips({ Page: 1, PageSize: 1 });
@@ -106,15 +111,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleLogout = () => {
     authStore.logout();
-    window.location.href = "/";
+    router.push("/");
   };
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
 
-  const displayName = isHydrated ? user?.fullName ?? "Admin" : "Admin";
-  const displayEmail = isHydrated ? user?.email ?? "Administrator" : "Administrator";
+  const displayName = isHydrated ? (user?.fullName ?? "Admin") : "Admin";
+  const displayEmail = isHydrated
+    ? (user?.email ?? "Administrator")
+    : "Administrator";
   const displayInitials = getInitials(displayName);
 
   return (
@@ -155,7 +162,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isActive} tooltip={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.title}
+                    >
                       <Link href={item.href}>
                         <Icon />
                         <span>{item.title}</span>

@@ -38,8 +38,6 @@ function BottomNavigation({
   fullName: string;
 }>) {
   const [isAccountOpen, setIsAccountOpen] = React.useState(false);
-  const [isNavVisible, setIsNavVisible] = React.useState(true);
-  const [lastScrollY, setLastScrollY] = React.useState(0);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -47,24 +45,6 @@ function BottomNavigation({
     authStore.logout();
     router.push('/');
   };
-
-  // Update navigation visibility based on scroll direction
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      if (currentY <= 10) {
-        setIsNavVisible(true);
-      } else if (currentY > lastScrollY) {
-        setIsNavVisible(false);
-      } else {
-        setIsNavVisible(true);
-      }
-      setLastScrollY(currentY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
 
   // Define navigation item type
   type NavItem = {
@@ -120,8 +100,8 @@ function BottomNavigation({
         className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-t border-gray-200 md:hidden shadow-lg"
         initial={{ y: 0, opacity: 1 }}
         animate={{
-          y: isNavVisible ? 0 : 120,
-          opacity: isNavVisible ? 1 : 0.8,
+          y: 0,
+          opacity: 1,
         }}
         transition={{
           type: 'spring',
