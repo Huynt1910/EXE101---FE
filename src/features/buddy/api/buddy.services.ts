@@ -8,6 +8,9 @@ import type {
   GetBuddiesResponse,
   RegisterAsBuddyRequest,
   RegisterAsBuddyResponse,
+  GetBuddyMeResponse,
+  GetMyBuddyBookingsResponse,
+  GetMyTripRequestsResponse,
 } from "@/features/buddy/type";
 import { httpClient } from "@/lib/http/client";
 
@@ -163,6 +166,33 @@ export const buddyApi = {
     return {
       ...res.data,
       data: normalizeBuddy(res.data.data),
+    };
+  },
+
+  async getBuddyMe() {
+    const res = await httpClient.get<GetBuddyMeResponse>(`${BUDDY_BASE_PATH}/me`);
+
+    return {
+      ...res.data,
+      data: normalizeBuddy(res.data.data),
+    };
+  },
+
+  async getMyBuddyBookings() {
+    const res = await httpClient.get<GetMyBuddyBookingsResponse>("/api/Bookings/my/buddy");
+
+    return {
+      ...res.data,
+      data: Array.isArray(res.data.data) ? res.data.data : [],
+    };
+  },
+
+  async getMyTripRequests() {
+    const res = await httpClient.get<GetMyTripRequestsResponse>("/api/TripRequests/my");
+
+    return {
+      ...res.data,
+      data: Array.isArray(res.data.data) ? res.data.data : [],
     };
   },
 };

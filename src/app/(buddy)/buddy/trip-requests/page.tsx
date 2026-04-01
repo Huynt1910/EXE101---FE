@@ -13,6 +13,7 @@ import type {
 } from "./components/types";
 import { useTripRequest } from "@/features/trip/hooks/useTripRequest";
 import type { ContactOfferPayload } from "./components/ContactOfferModal";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function isWeekend(date: Date) {
   const day = date.getDay();
@@ -193,8 +194,28 @@ export default function BuddyTripRequestsPage() {
     return (
       <main className="min-h-[calc(100vh-84px)] bg-[linear-gradient(180deg,#f4f7f6_0%,#f7f7f8_55%,#f8f6f2_100%)]">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-6 md:px-6 md:py-8">
-          <section className="rounded-2xl border border-slate-200 bg-white/90 p-6 text-sm text-slate-600 shadow-sm">
-            Loading trip requests...
+          <Skeleton className="h-9 w-48 rounded-xl" />
+          <Skeleton className="h-12 w-full rounded-2xl" />
+          <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+                <Skeleton className="h-52 w-full rounded-none" />
+                <div className="flex flex-col gap-2.5 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-4 w-16" />
+                  </div>
+                  <Skeleton className="h-3 w-28" />
+                  <Skeleton className="h-3 w-24" />
+                  <Skeleton className="h-8 w-full" />
+                  <div className="flex gap-1.5">
+                    <Skeleton className="h-5 w-14 rounded-full" />
+                    <Skeleton className="h-5 w-14 rounded-full" />
+                  </div>
+                  <Skeleton className="mt-1 h-10 w-full rounded-xl" />
+                </div>
+              </div>
+            ))}
           </section>
         </div>
       </main>
