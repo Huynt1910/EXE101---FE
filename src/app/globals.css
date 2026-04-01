@@ -14,12 +14,12 @@
   --secondary-foreground: #0d3b66;
 
   /* Muted color*/
-  --muted: oklch(0.92 0.01 45);
+  --muted: oklch(1 0 0);
   --muted-foreground: oklch(0.5 0.02 45);
 
   /* Accent color */
   --accent: oklch(0.65 0.2 35);
-  --accent-foreground: #f1f7ee;
+  --accent-foreground: oklch(1 0 0);
 
   /* Neutrals */
   --background: oklch(1 0 0);
@@ -338,11 +338,7 @@
   }
 
   .booking-banner {
-    background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--primary) 10%, var(--card)) 0%,
-      color-mix(in srgb, var(--card) 92%, white) 100%
-    );
+    background: var(--card);
     @apply rounded-[28px] border border-border shadow-sm;
   }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { authStore } from "@/lib/store/authStore";
@@ -14,8 +13,6 @@ export function ProfileTopBar({
   title = "Profile",
   description = "Manage your account, upcoming plans, and travel activity.",
 }: Readonly<ProfileTopBarProps>) {
-  const router = useRouter();
-
   return (
     <header className="rounded-[1.75rem] border border-border/60 bg-card/90 p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -30,7 +27,7 @@ export function ProfileTopBar({
             variant="destructive"
             onClick={() => {
               authStore.logout();
-              router.push("/login");
+              window.location.replace("/login");
             }}
           >
             <LogOut className="h-4 w-4" />

@@ -72,12 +72,12 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
   const isUserHeader = variant === "user";
 
   const wrapperClassName = isUserHeader
-    ? "fixed top-0 left-0 right-0 z-50 border-b border-border bg-white"
+    ? "fixed top-0 left-0 right-0 z-50 border-b border-border"
     : "fixed top-0 left-0 right-0 z-50 p-6";
 
   const navClassName = isUserHeader
     ? "w-full"
-    : "max-w-7xl mx-auto bg-card backdrop-blur-md border border-border/50 rounded-4xl shadow-lg";
+    : "mx-auto max-w-7xl overflow-x-clip rounded-4xl border border-border/50 bg-card shadow-lg backdrop-blur-md";
 
   const navInnerClassName =
     "flex items-center justify-between h-20 px-6 lg:px-8";
@@ -123,7 +123,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                   <DropdownMenu.Root>
                     <DropdownMenu.Trigger asChild>
                       <button
-                        className="inline-flex items-center gap-2 rounded-full  px-2 py-1.5 transition-colors hover:bg-transparent"
+                        className="inline-flex max-w-[min(18rem,calc(100vw-7rem))] items-center gap-2 overflow-hidden rounded-full px-2 py-1.5 transition-colors hover:bg-transparent"
                         aria-label="Open account menu"
                       >
                         <span className="inline-flex h-8 w-8 items-center justify-center bg-foreground text-xs font-semibold text-white rounded-sm">
@@ -139,8 +139,9 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                     <DropdownMenu.Portal>
                       <DropdownMenu.Content
                         align="end"
-                        sideOffset={24}
-                        className="z-50 w-[200px] rounded-2xl border text-md border-black/5 bg-[#efefef] p-3 text-[#5f5f5f] shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
+                        collisionPadding={16}
+                        sideOffset={12}
+                        className="z-50 w-[200px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-black/5 bg-[#efefef] p-3 text-md text-[#5f5f5f] shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
                       >
                         <DropdownMenu.Item asChild>
                           <Link
