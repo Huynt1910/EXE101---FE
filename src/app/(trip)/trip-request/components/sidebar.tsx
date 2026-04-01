@@ -90,9 +90,19 @@ export function TripPreviewCard({
         </div>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-border p-4">
+            <p className="text-sm text-muted-foreground">Activities</p>
+            <p className="mt-2 font-medium">
+              {formData.activities.length > 0
+                ? formData.activities.join(", ")
+                : "Add activities"}
+            </p>
+          </div>
+          <div className="rounded-2xl border border-border p-4">
             <p className="text-sm text-muted-foreground">Languages</p>
             <p className="mt-2 font-medium">
-              {formData.preferredLanguage || "Add preferred languages"}
+              {formData.preferredLanguages.length > 0
+                ? formData.preferredLanguages.join(", ")
+                : "Add preferred languages"}
             </p>
           </div>
           <div className="rounded-2xl border border-border p-4">

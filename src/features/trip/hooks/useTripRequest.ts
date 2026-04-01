@@ -74,6 +74,10 @@ type SubmitTripRequestOfferVariables = {
   payload: SubmitTripRequestOfferPayload;
 };
 
+type StartTripChatVariables = {
+  tripRequestId: string;
+};
+
 export function useTripRequest(options: UseTripRequestOptions = {}) {
   const queryClient = useQueryClient();
   const { createTripMutation, updateTripMutation, patchTripMutation } =
@@ -108,6 +112,11 @@ export function useTripRequest(options: UseTripRequestOptions = {}) {
     },
   });
 
+  const startTripChatMutation = useMutation({
+    mutationFn: ({ tripRequestId }: StartTripChatVariables) =>
+      tripRequestApi.startChat(tripRequestId),
+  });
+
   return {
     tripDetailQuery,
     myTripsQuery,
@@ -117,5 +126,6 @@ export function useTripRequest(options: UseTripRequestOptions = {}) {
     updateTripMutation,
     patchTripMutation,
     submitOfferMutation,
+    startTripChatMutation,
   };
 }

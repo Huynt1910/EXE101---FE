@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import MessagesEmptyState from './MessagesEmptyState';
-import { type Conversation } from './ConversationList';
-import type { ChatMessage } from '@/features/chat/type';
-import CreateOfferModal from './CreateOfferModal';
-import BookingDetailCard from './BookingDetailCard';
-import { useAuthStore } from '@/lib/store/authStore';
+import Image from "next/image";
+import { useCallback, useEffect, useRef, useState } from "react";
+import MessagesEmptyState from "./MessagesEmptyState";
+import { type Conversation } from "./ConversationList";
+import type { ChatMessage } from "@/features/chat/type";
+import CreateOfferModal from "./CreateOfferModal";
+import BookingDetailCard from "./BookingDetailCard";
+import { useAuthStore } from "@/lib/store/authStore";
 
 type MessageUI = {
   id: string;
   senderUserId: string;
   bookingId: string | null;
-  contentType: ChatMessage['contentType'];
+  contentType: ChatMessage["contentType"];
   contentText: string;
   createdAt: string;
 };
@@ -32,19 +32,19 @@ type Props = {
 
 function formatTime(value: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleTimeString('en-GB', {
-    hour: '2-digit',
-    minute: '2-digit',
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleTimeString("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
-function getFallbackContentText(contentType: ChatMessage['contentType']) {
-  if (contentType === 'BookingCard') return '[Booking card]';
-  if (contentType === 'Image') return '[Image]';
-  if (contentType === 'File') return '[File]';
-  if (contentType === 'System') return '[System message]';
-  return '';
+function getFallbackContentText(contentType: ChatMessage["contentType"]) {
+  if (contentType === "BookingCard") return "[Booking card]";
+  if (contentType === "Image") return "[Image]";
+  if (contentType === "File") return "[File]";
+  if (contentType === "System") return "[System message]";
+  return "";
 }
 
 type ParsedOffer = {
@@ -59,29 +59,50 @@ type ParsedOffer = {
 };
 
 function parseOfferText(text: string): ParsedOffer | null {
-  if (!text.includes('New trip request from buddy') && !text.includes('Offer price:')) {
+  if (
+    !text.includes("New trip request from buddy") &&
+    !text.includes("Offer price:")
+  ) {
     return null;
   }
 
-  const location = text.match(/Trip:\s*([^\n]+?)\s+on\s/)?.[1]?.trim() ?? '';
-  const date = text.match(/on\s+([\d-]+)/)?.[1]?.trim() ?? '';
-  const time = text.match(/at\s+([\d:]+)/)?.[1]?.trim() ?? '';
-  const adults = text.match(/(\d+)\s+adults?/)?.[1] ?? '0';
-  const children = text.match(/(\d+)\s+children/)?.[1] ?? '0';
-  const duration = text.match(/(\d+)\s+hours?/)?.[1] ?? '0';
-  const price = text.match(/Offer price:\s*([^\n]+)/)?.[1]?.trim() ?? '';
+  const location = text.match(/Trip:\s*([^\n]+?)\s+on\s/)?.[1]?.trim() ?? "";
+  const date = text.match(/on\s+([\d-]+)/)?.[1]?.trim() ?? "";
+  const time = text.match(/at\s+([\d:]+)/)?.[1]?.trim() ?? "";
+  const adults = text.match(/(\d+)\s+adults?/)?.[1] ?? "0";
+  const children = text.match(/(\d+)\s+children/)?.[1] ?? "0";
+  const duration = text.match(/(\d+)\s+hours?/)?.[1] ?? "0";
+  const price = text.match(/Offer price:\s*([^\n]+)/)?.[1]?.trim() ?? "";
   const buddyMessage =
     text.match(/Message from buddy:[\r\n]+([\s\S]*?)(?:\n\n|$)/)?.[1]?.trim() ??
-    '';
+    "";
 
   if (!location && !price) return null;
 
-  return { location, date, time, adults, children, duration, price, buddyMessage };
+  return {
+    location,
+    date,
+    time,
+    adults,
+    children,
+    duration,
+    price,
+    buddyMessage,
+  };
 }
 
 function IconMapPin() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
@@ -90,7 +111,16 @@ function IconMapPin() {
 
 function IconCalendar() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
@@ -101,7 +131,16 @@ function IconCalendar() {
 
 function IconClock() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>
@@ -110,7 +149,16 @@ function IconClock() {
 
 function IconUsers() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
       <circle cx="9" cy="7" r="4" />
       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -121,21 +169,35 @@ function IconUsers() {
 
 function IconTag() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
       <line x1="7" y1="7" x2="7.01" y2="7" />
     </svg>
   );
 }
 
-function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMine: boolean }>) {
+function OfferMessageCard({
+  offer,
+  isMine,
+}: Readonly<{ offer: ParsedOffer; isMine: boolean }>) {
   return (
     <div
       className={`w-72 overflow-hidden rounded-2xl border shadow-sm sm:w-80 ${
-        isMine ? 'border-amber-200' : 'border-border'
+        isMine ? "border-amber-200" : "border-border"
       }`}
     >
-      <div className={`px-4 pb-3 pt-4 ${isMine ? 'bg-amber-200/90' : 'bg-muted/50'}`}>
+      <div
+        className={`px-4 pb-3 pt-4 ${isMine ? "bg-amber-200/90" : "bg-muted/50"}`}
+      >
         <div className="mb-3">
           <span className="text-sm font-semibold uppercase tracking-wide text-foreground">
             Trip offer
@@ -145,7 +207,9 @@ function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMi
           <p className="text-xl font-bold uppercase tracking-wide text-foreground">
             Price
           </p>
-          <span className="text-xl font-bold text-foreground">{offer.price}</span>
+          <span className="text-xl font-bold text-foreground">
+            {offer.price}
+          </span>
         </div>
         {offer.location ? (
           <div className="mt-1.5 flex items-center gap-1.5">
@@ -157,7 +221,7 @@ function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMi
         ) : null}
       </div>
 
-      <div className="space-y-2.5 bg-card px-4 pb-3 pt-3">
+      <div className="space-y-2.5 bg-secondary px-4 pb-3 pt-3">
         {offer.date ? (
           <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
             <span className="text-muted-foreground">
@@ -165,11 +229,11 @@ function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMi
             </span>
             <span>
               {offer.date}
-              {offer.time ? ` at ${offer.time}` : ''}
+              {offer.time ? ` at ${offer.time}` : ""}
             </span>
           </div>
         ) : null}
-        {offer.duration && offer.duration !== '0' ? (
+        {offer.duration && offer.duration !== "0" ? (
           <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
             <span className="text-muted-foreground">
               <IconClock />
@@ -183,9 +247,9 @@ function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMi
               <IconUsers />
             </span>
             <span>
-              {offer.adults} adult{Number(offer.adults) !== 1 ? 's' : ''}
-              {offer.children !== '0' &&
-                `, ${offer.children} child${Number(offer.children) !== 1 ? 'ren' : ''}`}
+              {offer.adults} adult{Number(offer.adults) !== 1 ? "s" : ""}
+              {offer.children !== "0" &&
+                `, ${offer.children} child${Number(offer.children) !== 1 ? "ren" : ""}`}
             </span>
           </div>
         ) : null}
@@ -210,13 +274,13 @@ function OfferMessageCard({ offer, isMine }: Readonly<{ offer: ParsedOffer; isMi
       <div
         className={`border-t px-4 py-2.5 text-center text-[11px] font-medium ${
           isMine
-            ? 'border-amber-100 bg-amber-50 text-amber-700'
-            : 'border-border bg-muted/30 text-primary'
+            ? "border-amber-100 bg-amber-50 text-amber-700"
+            : "border-border bg-muted/30 text-primary"
         }`}
       >
         {isMine
-          ? 'Offer sent · Awaiting traveler review'
-          : 'Reply to discuss or accept this offer'}
+          ? "Offer sent · Awaiting traveler review"
+          : "Reply to discuss or accept this offer"}
       </div>
     </div>
   );
@@ -236,13 +300,14 @@ export default function MessageContainer({
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const { user } = useAuthStore();
   const canCreateOffer =
-    user?.roles?.some((role) => role.toLowerCase() === 'buddy') ?? false;
-  const isSendDisabled = isSending || draft.trim() === '' || !isRealtimeConnected;
+    user?.roles?.some((role) => role.toLowerCase() === "buddy") ?? false;
+  const isSendDisabled =
+    isSending || draft.trim() === "" || !isRealtimeConnected;
   const messagesViewportRef = useRef<HTMLDivElement>(null);
   const previousConversationIdRef = useRef<string | null>(null);
   const previousLastMessageIdRef = useRef<string | null>(null);
 
-  const scrollToLatest = useCallback((behavior: ScrollBehavior = 'smooth') => {
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = "smooth") => {
     const viewport = messagesViewportRef.current;
     if (!viewport) return;
 
@@ -257,7 +322,7 @@ export default function MessageContainer({
 
     onSend();
     requestAnimationFrame(() => {
-      scrollToLatest('smooth');
+      scrollToLatest("smooth");
     });
   }, [isSendDisabled, onSend, scrollToLatest]);
 
@@ -268,7 +333,7 @@ export default function MessageContainer({
     )
     .map((item) => ({
       id: item.id,
-      senderUserId: item.senderUserId ?? item.senderId ?? '',
+      senderUserId: item.senderUserId ?? item.senderId ?? "",
       bookingId: item.bookingId,
       contentType: item.contentType,
       contentText: item.contentText ?? getFallbackContentText(item.contentType),
@@ -282,29 +347,31 @@ export default function MessageContainer({
       return;
     }
 
-    const normalizedCurrentUserId = currentUserId?.trim().toLowerCase() ?? '';
+    const normalizedCurrentUserId = currentUserId?.trim().toLowerCase() ?? "";
     const conversationId = selectedConversation.id;
     const lastMessage = displayMessages.at(-1);
     const lastMessageId = lastMessage?.id ?? null;
 
-    const isConversationChanged = previousConversationIdRef.current !== conversationId;
+    const isConversationChanged =
+      previousConversationIdRef.current !== conversationId;
     const isNewLastMessage =
-      Boolean(lastMessageId) && lastMessageId !== previousLastMessageIdRef.current;
+      Boolean(lastMessageId) &&
+      lastMessageId !== previousLastMessageIdRef.current;
 
     if (isConversationChanged) {
       requestAnimationFrame(() => {
-        scrollToLatest('auto');
+        scrollToLatest("auto");
       });
     } else if (isNewLastMessage) {
       const normalizedSenderUserId =
-        lastMessage?.senderUserId.trim().toLowerCase() ?? '';
+        lastMessage?.senderUserId.trim().toLowerCase() ?? "";
       const isOwnMessage =
         Boolean(normalizedCurrentUserId) &&
         normalizedSenderUserId === normalizedCurrentUserId;
 
       if (isOwnMessage) {
         requestAnimationFrame(() => {
-          scrollToLatest('smooth');
+          scrollToLatest("smooth");
         });
       }
     }
@@ -315,7 +382,7 @@ export default function MessageContainer({
 
   if (!selectedConversation) {
     return (
-      <div className="flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden bg-card">
+      <div className="flex h-full min-h-0 flex-1 items-center justify-center overflow-hidden bg-secondary">
         <MessagesEmptyState />
       </div>
     );
@@ -339,29 +406,33 @@ export default function MessageContainer({
       <div className="space-y-3 pb-1">
         {displayMessages.map((message) => {
           const normalizedCurrentUserId = currentUserId?.trim().toLowerCase();
-          const normalizedSenderUserId = message.senderUserId.trim().toLowerCase();
+          const normalizedSenderUserId = message.senderUserId
+            .trim()
+            .toLowerCase();
           const isMine =
             Boolean(normalizedCurrentUserId) &&
             normalizedSenderUserId === normalizedCurrentUserId;
-          const senderInitial = selectedConversation.name.charAt(0).toUpperCase();
+          const senderInitial = selectedConversation.name
+            .charAt(0)
+            .toUpperCase();
           const parsedOffer =
-            message.contentType !== 'BookingCard'
+            message.contentType !== "BookingCard"
               ? parseOfferText(message.contentText)
               : null;
 
-          let bubbleClassName = 'max-w-[90%]';
-          if (message.contentType !== 'BookingCard' && !parsedOffer) {
+          let bubbleClassName = "max-w-[90%]";
+          if (message.contentType !== "BookingCard" && !parsedOffer) {
             bubbleClassName = `max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
               isMine
-                ? 'rounded-br-md bg-amber-200 text-foreground'
-                : 'rounded-bl-md bg-muted text-foreground'
+                ? "rounded-br-md bg-amber-200 text-foreground"
+                : "rounded-bl-md bg-muted text-foreground"
             }`;
           }
 
           return (
             <div
               key={message.id}
-              className={`flex items-end gap-2 ${isMine ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-end gap-2 ${isMine ? "justify-end" : "justify-start"}`}
             >
               {isMine ? null : (
                 <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-primary/10">
@@ -383,7 +454,7 @@ export default function MessageContainer({
               )}
 
               <div className={bubbleClassName}>
-                {message.contentType === 'BookingCard' ? (
+                {message.contentType === "BookingCard" ? (
                   <BookingDetailCard
                     bookingId={message.bookingId}
                     currentUserId={currentUserId}
@@ -392,11 +463,13 @@ export default function MessageContainer({
                 ) : parsedOffer ? (
                   <OfferMessageCard offer={parsedOffer} isMine={isMine} />
                 ) : (
-                  <p className="whitespace-pre-wrap break-words">{message.contentText}</p>
+                  <p className="whitespace-pre-wrap break-words">
+                    {message.contentText}
+                  </p>
                 )}
                 <p
                   className={`mt-1 text-[10px] ${
-                    isMine ? 'text-foreground/70' : 'text-muted-foreground'
+                    isMine ? "text-foreground/70" : "text-muted-foreground"
                   }`}
                 >
                   {formatTime(message.createdAt)}
@@ -410,7 +483,7 @@ export default function MessageContainer({
   }
 
   return (
-    <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden bg-card">
+    <div className="flex h-full min-h-0 max-h-full flex-1 flex-col overflow-hidden bg-">
       <div className="flex shrink-0 items-center gap-3 border-b border-border/70 px-4 py-3">
         <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/10">
           {selectedConversation.avatar ? (
@@ -442,7 +515,16 @@ export default function MessageContainer({
             onClick={() => setIsOfferModalOpen(true)}
             className="flex shrink-0 items-center gap-1.5 rounded-full bg-primary px-3.5 py-1.5 text-xs font-semibold text-primary-foreground shadow-sm transition-[background-color,transform,box-shadow] hover:bg-primary/90 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2"
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
               <line x1="12" y1="18" x2="12" y2="12" />
@@ -482,7 +564,7 @@ export default function MessageContainer({
           value={draft}
           onChange={(event) => onDraftChange(event.target.value)}
           onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey && !isSendDisabled) {
+            if (event.key === "Enter" && !event.shiftKey && !isSendDisabled) {
               event.preventDefault();
               handleSendMessage();
             }
@@ -499,7 +581,7 @@ export default function MessageContainer({
           className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Send message"
         >
-          {isSending ? 'Sending…' : 'Send'}
+          {isSending ? "Sending…" : "Send"}
         </button>
       </div>
     </div>

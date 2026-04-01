@@ -7,6 +7,7 @@ export interface CreateTripRequest {
   durationHours: number;
   adults: number;
   children: number;
+  activities: string[];
   preferredLanguages: string[];
   notes: string;
 }
@@ -18,6 +19,7 @@ export interface TripUpdateRequest {
   durationHours?: number;
   adults?: number;
   children?: number;
+  activities?: string[];
   preferredLanguages?: string[];
   notes?: string;
 }
@@ -30,6 +32,7 @@ export interface TripDto {
   durationHours: number;
   adults: number;
   children: number;
+  activities: string[];
   preferredLanguages: string[];
   notes: string;
   status: string;
@@ -86,4 +89,11 @@ export interface TripRequestOfferResponse {
   expiresAt: string;
   createdAt: string;
   existingChatRoomId: string | null;
+}
+
+export interface StartTripRequestChatResponse {
+  chatRoomId: string;
+  tripRequestId: string;
+  buddyUserId: string;
+  buddyName: string;
 }

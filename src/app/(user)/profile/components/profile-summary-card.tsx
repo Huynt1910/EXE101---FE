@@ -11,12 +11,10 @@ import {
   MapPin,
   Phone,
   Save,
-  ShieldCheck,
   UserRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -438,20 +436,6 @@ export function ProfileSummaryCard() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-secondary/30 p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              Roles
-            </div>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {(profile.roles?.length ? profile.roles : ["User"]).map((role) => (
-                <Badge key={role} variant="secondary" className="rounded-full px-3 py-1">
-                  {role}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
           <div className="space-y-4 rounded-2xl border border-border/70 p-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -569,18 +553,6 @@ export function ProfileSummaryCard() {
                 <Input type="date" {...form.register("dateOfBirth")} />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
-                  Roles
-                </label>
-                <div className="flex min-h-10 flex-wrap items-center gap-2 rounded-md border border-input bg-secondary/40 px-3 py-2">
-                  {(profile.roles?.length ? profile.roles : ["User"]).map((role) => (
-                    <Badge key={role} variant="secondary">
-                      {role}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="space-y-2">

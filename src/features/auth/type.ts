@@ -10,8 +10,8 @@ export interface LoginGoogleRequest {
 export interface LoginResponse {
   email: string;
   fullName: string;
-  roles: string[];
-  role?: string[];
+  roles?: string[] | string | null;
+  role?: string[] | string | null;
   isEmailVerified: boolean;
   accessToken: string;
   refreshToken: string;
@@ -42,7 +42,7 @@ export interface RequestOtpRequest {
 export interface VerifyEmailResponse {
   email: string;
   fullName: string;
-  roles: string[];
+  roles?: string[] | string | null;
   isEmailVerified: boolean;
   isEmailToken: string;
   refreshToken: string;

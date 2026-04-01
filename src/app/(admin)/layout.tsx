@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
+import { requireRouteAccess } from "@/lib/auth/server-route-guard";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,11 +14,16 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await requireRouteAccess({
+    pathname: "/admin",
+    allowedRoles: ["Admin"],
+  });
+
   return (
     <SidebarProvider>
       <Suspense fallback={null}>

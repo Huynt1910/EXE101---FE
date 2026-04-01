@@ -1,6 +1,6 @@
 "use client";
 
-import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { FacebookIcon, Mail, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import { footerContent } from "@/content/site-content";
 
@@ -22,10 +22,9 @@ type FooterProps = {
   phone?: string;
   sections?: readonly FooterSection[];
   socialLinks?: {
-    twitter?: string;
-    linkedin?: string;
-    github?: string;
+    facebook?: string;
     email?: string;
+    phone?: string;
   };
   copyrightText?: string;
 };
@@ -40,10 +39,9 @@ export const Footer = ({
   phone = footerContent.phone,
   sections = defaultSections,
   socialLinks = {
-    twitter: "https://twitter.com",
-    linkedin: "https://linkedin.com",
-    github: "https://github.com",
-    email: "hello@bonddy.com",
+    facebook: "https://www.facebook.com/bonddy.nova",
+    email: "bonddy.contact@gmail.com",
+    phone: "098 986 12 70",
   },
   copyrightText,
 }: FooterProps) => {
@@ -95,31 +93,15 @@ export const Footer = ({
             </div>
 
             <div className="mt-6 flex items-center gap-3">
-              {socialLinks.twitter && (
+              {socialLinks.facebook && (
                 <a
-                  href={socialLinks.twitter}
+                  href={socialLinks.facebook}
+                  target="_blank"
+                  rel="noreferrer"
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors duration-150 hover:text-primary-foreground/80"
-                  aria-label="Twitter"
+                  aria-label="Facebook"
                 >
-                  <Twitter className="h-4 w-4" />
-                </a>
-              )}
-              {socialLinks.linkedin && (
-                <a
-                  href={socialLinks.linkedin}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors duration-150 hover:text-primary-foreground/80"
-                  aria-label="LinkedIn"
-                >
-                  <Linkedin className="h-4 w-4" />
-                </a>
-              )}
-              {socialLinks.github && (
-                <a
-                  href={socialLinks.github}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors duration-150 hover:text-primary-foreground/80"
-                  aria-label="GitHub"
-                >
-                  <Github className="h-4 w-4" />
+                  <FacebookIcon className="h-4 w-4" />
                 </a>
               )}
               {socialLinks.email && (
@@ -129,6 +111,15 @@ export const Footer = ({
                   aria-label="Email"
                 >
                   <Mail className="h-4 w-4" />
+                </a>
+              )}
+              {socialLinks.phone && (
+                <a
+                  href={`tel:${socialLinks.phone.replace(/\s+/g, "")}`}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground transition-colors duration-150 hover:text-primary-foreground/80"
+                  aria-label="Phone"
+                >
+                  <Phone className="h-4 w-4" />
                 </a>
               )}
             </div>
