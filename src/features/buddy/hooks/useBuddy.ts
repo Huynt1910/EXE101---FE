@@ -39,3 +39,27 @@ export function useRegisterAsBuddyMutation() {
     mutationFn: (payload: RegisterAsBuddyRequest) => buddyApi.registerAsBuddy(payload),
   });
 }
+
+export function useBuddyMeQuery() {
+  return useQuery({
+    queryKey: buddyQueryKeys.me(),
+    queryFn: () => buddyApi.getBuddyMe(),
+    staleTime: 60 * 1000,
+  });
+}
+
+export function useMyBuddyBookingsQuery() {
+  return useQuery({
+    queryKey: buddyQueryKeys.myBookings(),
+    queryFn: () => buddyApi.getMyBuddyBookings(),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useMyTripRequestsQuery() {
+  return useQuery({
+    queryKey: buddyQueryKeys.myTripRequests(),
+    queryFn: () => buddyApi.getMyTripRequests(),
+    staleTime: 30 * 1000,
+  });
+}

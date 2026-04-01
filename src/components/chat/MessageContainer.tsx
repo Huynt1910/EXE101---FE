@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import MessagesEmptyState from "./MessagesEmptyState";
 import { type Conversation } from "./ConversationList";
 import type { ChatMessage } from "@/features/chat/type";
@@ -29,6 +30,9 @@ type Props = {
   onSend: () => void;
   isSending?: boolean;
   isLoadingMessages?: boolean;
+  isLoadingMore?: boolean;
+  canLoadMore?: boolean;
+  onLoadMore?: () => void;
   showMobileBack?: boolean;
   onBackToList?: () => void;
 };
@@ -299,6 +303,9 @@ export default function MessageContainer({
   onSend,
   isSending = false,
   isLoadingMessages = false,
+  isLoadingMore = false,
+  canLoadMore = false,
+  onLoadMore,
   showMobileBack = false,
   onBackToList,
 }: Readonly<Props>) {
@@ -311,6 +318,39 @@ export default function MessageContainer({
   const messagesViewportRef = useRef<HTMLDivElement>(null);
   const previousConversationIdRef = useRef<string | null>(null);
   const previousLastMessageIdRef = useRef<string | null>(null);
+  const prevScrollHeightRef = useRef<number | null>(null);
+  const onLoadMoreRef = useRef(onLoadMore);
+  useEffect(() => {
+    onLoadMoreRef.current = onLoadMore;
+  }, [onLoadMore]);
+
+  // Scroll listener: trigger load-more when near the top
+  useEffect(() => {
+    const viewport = messagesViewportRef.current;
+    if (!viewport) return;
+
+    const handleScroll = () => {
+      if (viewport.scrollTop < 80 && canLoadMore && !isLoadingMore) {
+        onLoadMoreRef.current?.();
+      }
+    };
+
+    viewport.addEventListener("scroll", handleScroll, { passive: true });
+    return () => viewport.removeEventListener("scroll", handleScroll);
+  }, [canLoadMore, isLoadingMore]);
+
+  // Save scroll height when loading starts; restore position after older messages are prepended
+  useEffect(() => {
+    const viewport = messagesViewportRef.current;
+    if (isLoadingMore) {
+      if (viewport) prevScrollHeightRef.current = viewport.scrollHeight;
+    } else if (prevScrollHeightRef.current !== null) {
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight - prevScrollHeightRef.current;
+      }
+      prevScrollHeightRef.current = null;
+    }
+  }, [isLoadingMore, messages]);
 
   const scrollToLatest = useCallback((behavior: ScrollBehavior = "smooth") => {
     const viewport = messagesViewportRef.current;
@@ -384,12 +424,14 @@ export default function MessageContainer({
     );
   }
 
+  const isOnline = selectedConversation.isOnline === true;
+
   let messageBody: React.ReactNode;
   if (isLoadingMessages) {
     messageBody = (
-      <p className="mt-6 text-center text-xs text-muted-foreground">
-        Loading messages…
-      </p>
+      <div className="flex flex-1 items-center justify-center py-16">
+        <Spinner className="h-6 w-6 text-muted-foreground" />
+      </div>
     );
   } else if (displayMessages.length === 0) {
     messageBody = (
@@ -491,29 +533,41 @@ export default function MessageContainer({
             <ChevronLeft className="h-4 w-4" />
           </button>
         ) : null}
-        <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/10">
-          {selectedConversation.avatar ? (
-            <Image
-              src={selectedConversation.avatar}
-              alt={selectedConversation.name}
-              width={32}
-              height={32}
-              className="h-full w-full rounded-full object-cover"
-              unoptimized
-            />
-          ) : (
-            <span className="text-sm font-semibold text-primary">
-              {selectedConversation.name.charAt(0).toUpperCase()}
-            </span>
-          )}
+        <div className="relative h-8 w-8 shrink-0">
+          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-primary/10">
+            {selectedConversation.avatar ? (
+              <Image
+                src={selectedConversation.avatar}
+                alt={selectedConversation.name}
+                width={32}
+                height={32}
+                className="h-full w-full rounded-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="text-sm font-semibold text-primary">
+                {selectedConversation.name.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+          <span
+            className={`absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-background ${
+              isOnline ? "bg-green-500" : "bg-slate-400"
+            }`}
+            aria-hidden="true"
+          />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-semibold text-foreground">
             {selectedConversation.name}
           </p>
-          {selectedConversation.isOnline ? (
-            <p className="text-xs text-green-600">Active now</p>
-          ) : null}
+          <p
+            className={`text-xs ${
+              isOnline ? "text-green-600" : "text-muted-foreground"
+            }`}
+          >
+            {isOnline ? "Active now" : "Offline"}
+          </p>
         </div>
         {canCreateOffer ? (
           <button
@@ -556,6 +610,11 @@ export default function MessageContainer({
         ref={messagesViewportRef}
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 scrollbar-hide"
       >
+        {isLoadingMore && (
+          <div className="flex justify-center pb-3">
+            <Spinner className="h-5 w-5 text-muted-foreground" />
+          </div>
+        )}
         {messageBody}
       </div>
 

@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export type Conversation = {
   id: string;
@@ -22,6 +23,7 @@ type Props = {
   onSelect: (id: string) => void;
   searchQuery: string;
   onSearchChange: (q: string) => void;
+  isLoading?: boolean;
 };
 
 export default function ConversationList({
@@ -30,6 +32,7 @@ export default function ConversationList({
   onSelect,
   searchQuery,
   onSearchChange,
+  isLoading = false,
 }: Readonly<Props>) {
   const filtered = conversations.filter(
     (conversation) =>
@@ -41,7 +44,7 @@ export default function ConversationList({
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden border-r border-border bg-secondary">
       <div className="shrink-0 px-4 py-4">
-        <h1 className="text-base font-semibold text-foreground">Chat</h1>
+        <h1 className="text-xl font-semibold text-foreground">Messages</h1>
       </div>
 
       {conversations.length > 0 ? (
@@ -67,7 +70,19 @@ export default function ConversationList({
       ) : null}
 
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <ul className="divide-y divide-border/60">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <li key={i} className="flex items-start gap-3 px-4 py-3">
+                <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
+                <div className="flex flex-1 flex-col gap-2 pt-1">
+                  <Skeleton className="h-3.5 w-32" />
+                  <Skeleton className="h-3 w-48" />
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
             <p className="text-xs text-muted-foreground">No conversations found</p>
           </div>
@@ -101,9 +116,12 @@ export default function ConversationList({
                         </span>
                       )}
                     </div>
-                    {conversation.isOnline ? (
-                      <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card bg-green-500" />
-                    ) : null}
+                    <span
+                      className={cn(
+                        "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card",
+                        conversation.isOnline ? "bg-green-500" : "bg-slate-400",
+                      )}
+                    />
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -130,7 +148,7 @@ export default function ConversationList({
                       >
                         {conversation.lastMessage}
                         {conversation.lastMessageTime
-                          ? ` - ${conversation.lastMessageTime}`
+                          ? ` • ${conversation.lastMessageTime}`
                           : ''}
                       </p>
                       {conversation.unreadCount ? (

@@ -12,6 +12,7 @@ import {
 import { useIsMobile } from "@/features/use-mobile";
 import { useChatSignalR } from "@/features/chat/hooks/useChatSignalR";
 import type { ChatMessage, ChatRoom } from "@/features/chat/type";
+import { chatApi } from "@/features/chat/api/chat.services";
 import { useAuthStore } from "@/lib/store/authStore";
 import { decodeJwtPayload, extractJwtUserId } from "@/lib/auth/decode-jwt";
 
@@ -72,10 +73,16 @@ export default function MessagesLayout() {
   const requestedRoomId = searchParams.get("roomId");
   const normalizedToken = (authState.token ?? "").trim();
 
+  const [olderPage, setOlderPage] = useState(2);
+  const [olderMessages, setOlderMessages] = useState<ChatMessage[]>([]);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [canLoadMore, setCanLoadMore] = useState(false);
+  const [onlineByRoomId, setOnlineByRoomId] = useState<Record<string, boolean>>({});
+
   const roomsQuery = useChatRooms();
   const messagesQuery = useChatRoomMessages(selectedId ?? undefined, {
     page: 1,
-    pageSize: 50,
+    pageSize: 10,
   });
 
   const currentUserId = useMemo(() => {
@@ -103,16 +110,71 @@ export default function MessagesLayout() {
     });
 
   const conversations = useMemo(
-    () => (roomsQuery.data?.data ?? []).map(mapRoomToConversation),
-    [roomsQuery.data?.data],
+    () =>
+      (roomsQuery.data?.data ?? []).map((room) => {
+        const conversation = mapRoomToConversation(room);
+        return {
+          ...conversation,
+          isOnline: onlineByRoomId[room.id],
+        };
+      }),
+    [onlineByRoomId, roomsQuery.data?.data],
   );
+
+  // Reset older messages when switching rooms
+  useEffect(() => {
+    setOlderMessages([]);
+    setOlderPage(2);
+    setCanLoadMore(false);
+  }, [selectedId]);
 
   useEffect(() => {
     const baseMessages = messagesQuery.data?.data?.items ?? [];
     setRealtimeMessages(baseMessages);
-  }, [messagesQuery.data?.data?.items, selectedId]);
+    if (messagesQuery.data?.data) {
+      setCanLoadMore(messagesQuery.data.data.hasNextPage ?? false);
 
-  const messages = useMemo(() => realtimeMessages, [realtimeMessages]);
+      if (selectedId && typeof messagesQuery.data.data.isOnline === "boolean") {
+        setOnlineByRoomId((current) => ({
+          ...current,
+          [selectedId]: messagesQuery.data?.data?.isOnline ?? false,
+        }));
+      }
+    }
+  }, [messagesQuery.data?.data, messagesQuery.data?.data?.items, selectedId]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (isLoadingMore || !selectedId || !canLoadMore) return;
+    setIsLoadingMore(true);
+    try {
+      const result = await chatApi.getRoomMessages(selectedId, {
+        page: olderPage,
+        pageSize: 10,
+      });
+      const items = result.data?.items ?? [];
+      if (items.length > 0) {
+        setOlderMessages((prev) => [...items, ...prev]);
+        setOlderPage((prev) => prev + 1);
+      }
+      setCanLoadMore(result.data?.hasNextPage ?? false);
+    } catch {
+      // silently ignore load-more errors
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [isLoadingMore, selectedId, canLoadMore, olderPage]);
+
+  const messages = useMemo(() => {
+    const seen = new Set<string>();
+    const combined: ChatMessage[] = [];
+    for (const m of [...olderMessages, ...realtimeMessages]) {
+      if (!seen.has(m.id)) {
+        seen.add(m.id);
+        combined.push(m);
+      }
+    }
+    return combined;
+  }, [olderMessages, realtimeMessages]);
 
   useEffect(() => {
     if (conversations.length === 0) return;
@@ -176,7 +238,7 @@ export default function MessagesLayout() {
     conversations.find((conversation) => conversation.id === selectedId) ?? null;
 
   return (
-    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-none border-y border-border bg-secondary shadow-sm md:rounded-[1.5rem] md:border">
+    <div className="flex h-full min-h-0 max-h-full min-w-0 flex-1 overflow-hidden overscroll-none rounded-none border-y border-border bg-secondary shadow-sm md:rounded-3xl md:border">
       <div
         className={`
           w-full min-h-0 min-w-0 shrink-0 overflow-hidden md:basis-[clamp(18rem,28vw,22rem)] md:max-w-[42%] md:border-r md:border-border/70
@@ -190,6 +252,7 @@ export default function MessagesLayout() {
           onSelect={setSelectedId}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          isLoading={roomsQuery.isLoading}
         />
       </div>
 
@@ -208,7 +271,14 @@ export default function MessagesLayout() {
           onDraftChange={setDraft}
           onSend={handleSend}
           isSending={isSendingRealtime}
-          isLoadingMessages={messagesQuery.isLoading || roomsQuery.isLoading}
+          isLoadingMessages={
+            messagesQuery.isLoading ||
+            roomsQuery.isLoading ||
+            (messagesQuery.isFetching && messages.length === 0)
+          }
+          isLoadingMore={isLoadingMore}
+          canLoadMore={canLoadMore}
+          onLoadMore={handleLoadMore}
           showMobileBack={isMobile}
           onBackToList={() => setSelectedId(null)}
         />

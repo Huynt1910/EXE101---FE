@@ -47,10 +47,75 @@ export interface RegisterAsBuddyRequest {
   bio: string;
 }
 
+// GET /api/Bookings/my/buddy
+export interface BuddyBooking {
+  id: string;
+  tripId: string;
+  tripRequestId: string;
+  buddyId: string;
+  buddyName: string;
+  buddyAvatar: string;
+  travelerUserId: string;
+  travelerName: string;
+  chatRoomId: string;
+  bookedDate: string;
+  bookedStartTime: string;
+  bookedDurationHours: number;
+  bookedAdults: number;
+  bookedChildren: number;
+  price: number;
+  currency: string;
+  platformFeeAmount: number;
+  totalAmount: number;
+  includes: string;
+  excludes: string;
+  noteForCustomer: string;
+  status: string;
+  statusName: string;
+  paymentDeadline: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// GET /api/TripRequests/my
+export interface MyTripRequestTrip {
+  id: string;
+  city: string;
+  startDate: string;
+  startTime: string;
+  durationHours: number;
+  adults: number;
+  children: number;
+}
+
+export interface MyTripRequestOffer {
+  price: number;
+  isInboxOnly: boolean;
+  note: string;
+}
+
+export interface MyTripRequest {
+  id: string;
+  trip: MyTripRequestTrip;
+  buddy: {
+    id: string;
+    name: string;
+    avatar: string;
+  };
+  offer: MyTripRequestOffer;
+  isExpired: boolean;
+  expiresAt: string;
+  createdAt: string;
+  existingChatRoomId: string | null;
+}
+
 export type GetBuddiesResponse = ApiResponse<BuddyProfile[]>;
 export type GetBuddyDetailResponse = ApiResponse<BuddyProfile>;
 export type GetBuddyReviewsResponse = ApiResponse<BuddyReviewsList | BuddyReview[]>;
 export type RegisterAsBuddyResponse = ApiResponse<BuddyProfile>;
+export type GetBuddyMeResponse = ApiResponse<BuddyProfile>;
+export type GetMyBuddyBookingsResponse = ApiResponse<BuddyBooking[]>;
+export type GetMyTripRequestsResponse = ApiResponse<MyTripRequest[]>;
 export interface Buddy {
   id: string;
   userId: string;
