@@ -166,3 +166,7 @@ export const buddyApi = {
     };
   },
 };
+import type { ApiResponse } from "@/features/api-type";
+import type { Buddy } from "@/features/buddy/type";
+
+

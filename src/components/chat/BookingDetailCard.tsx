@@ -1,9 +1,8 @@
 'use client';
 
-import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 import {
   useBookingDetailQuery,
-  useConfirmAndCreatePaypalOrderMutation,
 } from '@/features/booking/hooks/useCreateBookingOffer';
 
 type Props = {
@@ -54,8 +53,8 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function BookingDetailCard({ bookingId, currentUserId, isMine = false }: Readonly<Props>) {
+  const router = useRouter();
   const bookingDetailQuery = useBookingDetailQuery(bookingId);
-  const confirmAndPayMutation = useConfirmAndCreatePaypalOrderMutation();
 
   if (!bookingId) {
     return (
@@ -109,38 +108,15 @@ export default function BookingDetailCard({ bookingId, currentUserId, isMine = f
     Boolean(normalizedCurrentUserId) &&
     booking.travelerUserId.trim().toLowerCase() === normalizedCurrentUserId;
 
-  const canConfirmAndPay =
+  const canBookNow =
     isTraveler &&
     (booking.statusName === 'PendingCustomerConfirm' || booking.statusName === 'PendingPayment');
 
-  const paymentLabel = booking.statusName === 'PendingPayment' ? 'Continue to PayPal' : 'Confirm & Pay';
   const statusLabel = getBookingStatusLabel(booking.statusName);
   const statusVariant = getStatusVariant(booking.statusName);
 
-  async function handleConfirmAndPay() {
-    if (!canConfirmAndPay || confirmAndPayMutation.isPending) return;
-
-    try {
-      const response = await confirmAndPayMutation.mutateAsync({ bookingId: booking.id });
-      const paymentOrder = response.data.paymentOrder;
-
-      sessionStorage.setItem('pendingPaymentId', paymentOrder.paymentId);
-      sessionStorage.setItem('pendingOrderId', paymentOrder.orderId);
-      sessionStorage.setItem('pendingBookingId', paymentOrder.bookingId);
-
-      if (!paymentOrder.approveUrl) {
-        toast.error('Missing PayPal approval url.');
-        return;
-      }
-
-      window.location.href = paymentOrder.approveUrl;
-    } catch (error) {
-      const message =
-        typeof error === 'object' && error !== null && 'message' in error
-          ? String((error as { message?: string }).message ?? 'Failed to initialize PayPal payment.')
-          : 'Failed to initialize PayPal payment.';
-      toast.error(message);
-    }
+  function handleBookNow() {
+    router.push(`/booking/${booking.id}`);
   }
 
   const cardBase = isMine
@@ -266,22 +242,13 @@ export default function BookingDetailCard({ bookingId, currentUserId, isMine = f
           </p>
         ) : null}
 
-        {canConfirmAndPay ? (
+        {canBookNow ? (
           <button
             type="button"
-            onClick={handleConfirmAndPay}
-            disabled={confirmAndPayMutation.isPending}
-            className="w-full rounded-xl bg-[#1a2b4a] py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] hover:bg-[#243d6a] hover:shadow-md active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={handleBookNow}
+            className="w-full rounded-xl bg-[#1a2b4a] py-2.5 text-sm font-semibold text-white shadow-sm transition-[background-color,transform,box-shadow] hover:bg-[#243d6a] hover:shadow-md active:scale-[0.98]"
           >
-            {confirmAndPayMutation.isPending ? (
-              <span className="flex items-center justify-center gap-2">
-                <svg className="h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
-                Processing…
-              </span>
-            ) : paymentLabel}
+            Book Now
           </button>
         ) : (
           <p className={`text-[11px] text-center ${isMine ? 'text-amber-700/50' : 'text-gray-400'}`}>
