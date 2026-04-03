@@ -4,6 +4,7 @@ import {
   ClipboardList,
   LockKeyhole,
   MessageCircle,
+  Package,
   Sparkles,
   UserRound,
 } from "lucide-react";
@@ -30,6 +31,12 @@ export const MENU_ITEMS: MenuItem[] = [
     href: "/profile?section=trips",
     section: "trips",
     badgeKey: "trips",
+  },
+  {
+    label: "Service package",
+    icon: Package,
+    href: "/profile?section=services",
+    section: "services",
   },
   {
     label: "Notifications",

@@ -73,7 +73,7 @@ export function TestimonialsSection() {
     >
       <div className="w-full">
         <div className="text-center mb-16 lg:mb-20 px-6">
-          <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-accent font-medium mb-4">
+          <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-orange-600 font-medium mb-4">
             {t.eyebrow}
           </p>
           <ScrollBlurText
@@ -120,4 +120,3 @@ export function TestimonialsSection() {
     </section>
   );
 }
-

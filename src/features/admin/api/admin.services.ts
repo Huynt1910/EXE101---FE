@@ -5,6 +5,7 @@ import {
   type AdminBookingResponse,
   type AdminBookingStatusUpdateRequest,
   type AdminBuddy,
+  type AdminBuddiesQuery,
   type AdminBuddyListResponse,
   type AdminBuddyRegisterRequest,
   type AdminBuddyResponse,
@@ -16,6 +17,10 @@ import {
   type AdminIncidentResponse,
   type AdminReview,
   type AdminReviewResponse,
+  type AdminServicePackage,
+  type AdminServicePackageListResponse,
+  type AdminServicePackageRequest,
+  type AdminServicePackageResponse,
   type AdminTrip,
   type AdminTripBookingListResponse,
   type AdminTripListResponse,
@@ -31,35 +36,80 @@ import { httpClient } from "@/lib/http/client";
 
 const ADMIN_BASE_PATH = "/api/admin";
 const INCIDENTS_BASE_PATH = "/api/Incidents";
+const SERVICE_PACKAGES_BASE_PATH = "/api/ServicePackages";
 
 function ensureArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
+function normalizeText(value: unknown) {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
+function normalizeDate(value: unknown) {
+  const text = normalizeText(value);
+  if (!text || text.startsWith("0001-01-01")) return null;
+  return text;
+}
+
+function normalizeStringArray(value: unknown) {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0 && item.toLowerCase() !== "string");
+}
+
 function normalizeBuddy(item: unknown): AdminBuddy {
   const value = item as Partial<AdminBuddy>;
   return {
-    id: typeof value.id === "string" ? value.id : "",
-    userId: typeof value.userId === "string" ? value.userId : null,
-    fullName: typeof value.fullName === "string" ? value.fullName : null,
-    name: typeof value.name === "string" ? value.name : null,
-    email: typeof value.email === "string" ? value.email : null,
-    avatar: typeof value.avatar === "string" ? value.avatar : null,
-    profilePicture:
-      typeof value.profilePicture === "string" ? value.profilePicture : null,
-    activities: Array.isArray(value.activities) ? value.activities : [],
+    id: normalizeText(value.id) ?? "",
+    userId: normalizeText(value.userId),
+    fullName: normalizeText(value.fullName),
+    name: normalizeText(value.name),
+    email: normalizeText(value.email),
+    avatar: normalizeText(value.avatar),
+    profilePicture: normalizeText(value.profilePicture),
+    gender: normalizeText(value.gender),
+    phoneNumber: normalizeText(value.phoneNumber),
+    address: normalizeText(value.address),
+    dateOfBirth: normalizeDate(value.dateOfBirth),
+    aboutMe: normalizeText(value.aboutMe),
+    activities: normalizeStringArray(value.activities),
     costPerHour:
-      typeof value.costPerHour === "number" ? value.costPerHour : null,
-    languages: Array.isArray(value.languages) ? value.languages : [],
-    bio: typeof value.bio === "string" ? value.bio : null,
-    isActive: typeof value.isActive === "boolean" ? value.isActive : null,
-    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
-    updatedAt: typeof value.updatedAt === "string" ? value.updatedAt : null,
+      typeof value.costPerHour === "number" && Number.isFinite(value.costPerHour)
+        ? value.costPerHour
+        : null,
+    rate:
+      typeof value.rate === "number" && Number.isFinite(value.rate)
+        ? value.rate
+        : null,
+    languages: normalizeStringArray(value.languages),
+    bio: normalizeText(value.bio),
+    isActive: value.isActive !== false,
+    createdAt: normalizeDate(value.createdAt),
+    updatedAt: normalizeDate(value.updatedAt),
   };
 }
 
 function normalizeBuddyListPayload(payload: unknown): AdminBuddy[] {
   return ensureArray<unknown>(payload).map(normalizeBuddy);
+}
+
+function normalizeBuddyPagePayload(payload: unknown): PaginatedResult<AdminBuddy> {
+  const value = payload as Partial<PaginatedResult<AdminBuddy>>;
+  return {
+    items: normalizeBuddyListPayload(value.items),
+    totalCount: typeof value.totalCount === "number" ? value.totalCount : 0,
+    page: typeof value.page === "number" ? value.page : 1,
+    pageSize: typeof value.pageSize === "number" ? value.pageSize : 10,
+    totalPages: typeof value.totalPages === "number" ? value.totalPages : 0,
+    hasPreviousPage:
+      typeof value.hasPreviousPage === "boolean" ? value.hasPreviousPage : false,
+    hasNextPage:
+      typeof value.hasNextPage === "boolean" ? value.hasNextPage : false,
+  };
 }
 
 function normalizeBooking(item: unknown): AdminBooking {
@@ -146,6 +196,47 @@ function normalizeIncidentListPayload(payload: unknown): PaginatedResult<AdminIn
   };
 }
 
+function normalizeServicePackage(item: unknown): AdminServicePackage {
+  const value = item as Partial<AdminServicePackage>;
+
+  return {
+    id: normalizeText(value.id) ?? "",
+    name: normalizeText(value.name) ?? "Unnamed package",
+    description: normalizeText(value.description),
+    pricePerMonth:
+      typeof value.pricePerMonth === "number" && Number.isFinite(value.pricePerMonth)
+        ? value.pricePerMonth
+        : 0,
+    currency: normalizeText(value.currency) ?? "VND",
+    commissionRate:
+      typeof value.commissionRate === "number" &&
+      Number.isFinite(value.commissionRate)
+        ? value.commissionRate
+        : 0,
+    hasChatAccess: value.hasChatAccess === true,
+    hasSearchPriority: value.hasSearchPriority === true,
+    hasPrioritySupport: value.hasPrioritySupport === true,
+    hasProductFeedback: value.hasProductFeedback === true,
+    maxSlots:
+      typeof value.maxSlots === "number" && Number.isFinite(value.maxSlots)
+        ? value.maxSlots
+        : 0,
+    currentSlots:
+      typeof value.currentSlots === "number" &&
+      Number.isFinite(value.currentSlots)
+        ? value.currentSlots
+        : 0,
+    sortOrder:
+      typeof value.sortOrder === "number" && Number.isFinite(value.sortOrder)
+        ? value.sortOrder
+        : 0,
+    isActive: value.isActive !== false,
+    features: normalizeStringArray(value.features),
+    createdAt: normalizeDate(value.createdAt),
+    updatedAt: normalizeDate(value.updatedAt),
+  };
+}
+
 export const adminApi = {
   async getUsers(params?: AdminUsersQuery) {
     const res = await httpClient.get<AdminUserListResponse>(
@@ -177,13 +268,14 @@ export const adminApi = {
     return res.data;
   },
 
-  async getBuddies() {
+  async getBuddies(params?: AdminBuddiesQuery) {
     const res = await httpClient.get<AdminBuddyListResponse>(
       `${ADMIN_BASE_PATH}/buddies`,
+      params,
     );
     return {
       ...res.data,
-      data: normalizeBuddyListPayload(res.data.data),
+      data: normalizeBuddyPagePayload(res.data.data),
     };
   },
 
@@ -309,5 +401,58 @@ export const adminApi = {
       ...res.data,
       data: normalizeIncident(res.data.data),
     };
+  },
+
+  async getServicePackages() {
+    const res = await httpClient.get<AdminServicePackageListResponse>(
+      `${SERVICE_PACKAGES_BASE_PATH}/all`,
+    );
+
+    return {
+      ...res.data,
+      data: ensureArray<unknown>(res.data.data).map(normalizeServicePackage),
+    };
+  },
+
+  async getServicePackageById(id: string) {
+    const res = await httpClient.get<AdminServicePackageResponse>(
+      `${SERVICE_PACKAGES_BASE_PATH}/${id}`,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeServicePackage(res.data.data),
+    };
+  },
+
+  async createServicePackage(payload: AdminServicePackageRequest) {
+    const res = await httpClient.post<
+      AdminServicePackageResponse,
+      AdminServicePackageRequest
+    >(SERVICE_PACKAGES_BASE_PATH, payload);
+
+    return {
+      ...res.data,
+      data: normalizeServicePackage(res.data.data),
+    };
+  },
+
+  async updateServicePackage(id: string, payload: AdminServicePackageRequest) {
+    const res = await httpClient.put<
+      AdminServicePackageResponse,
+      AdminServicePackageRequest
+    >(`${SERVICE_PACKAGES_BASE_PATH}/${id}`, payload);
+
+    return {
+      ...res.data,
+      data: normalizeServicePackage(res.data.data),
+    };
+  },
+
+  async deleteServicePackage(id: string) {
+    const res = await httpClient.delete<ApiResponse<null>>(
+      `${SERVICE_PACKAGES_BASE_PATH}/${id}`,
+    );
+    return res.data;
   },
 };

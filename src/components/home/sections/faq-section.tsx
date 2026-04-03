@@ -17,7 +17,8 @@ export function FAQ() {
         <h2 className="text-4xl font-bold">{t.hero.title1}</h2>
 
         <h2 className="text-4xl font-bold text-primary-foreground">
-          {t.hero.title2} <span className="text-accent">{t.hero.brand}</span>
+          {t.hero.title2}{" "}
+          <span className="text-orange-600">{t.hero.brand}</span>
         </h2>
       </div>
 
@@ -40,4 +41,3 @@ export function FAQ() {
     </section>
   );
 }
-

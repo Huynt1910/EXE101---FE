@@ -93,7 +93,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
           <div className={navInnerClassName}>
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
-              <span className="font-serif text-accent text-2xl font-normal">
+              <span className="font-serif text-orange-600 text-2xl font-normal">
                 Bonddy
               </span>
             </Link>

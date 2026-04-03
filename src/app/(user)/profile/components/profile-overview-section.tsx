@@ -10,6 +10,7 @@ import {
   Mail,
   MapPin,
   MessageCircle,
+  Package,
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
@@ -29,12 +30,14 @@ import {
   useChatRooms,
   useChatUnreadSummary,
 } from "@/features/chat/hooks/useChat";
+import { useMyServiceSubscriptionQuery } from "@/features/service-package/hooks/useServicePackage";
 import {
   useNotificationUnreadCount,
   useNotifications,
 } from "@/features/notification/hooks/useNotifications";
 import { useMyTrips } from "@/features/trip/hooks/useTripRequest";
 import { useUserProfile } from "@/features/user/hooks/useUserProfile";
+import { hasRole } from "@/lib/auth/route-access";
 
 function getInitials(name?: string | null, email?: string | null) {
   const source = name?.trim() || email?.split("@")[0] || "U";
@@ -96,7 +99,7 @@ function OverviewSkeleton() {
         </Card>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
-          {Array.from({ length: 4 }).map((_, index) => (
+          {Array.from({ length: 5 }).map((_, index) => (
             <Card
               key={index}
               className="rounded-[1.75rem] border-border/70 py-0"
@@ -165,6 +168,8 @@ export function ProfileOverviewSection() {
   const chatUnreadQuery = useChatUnreadSummary();
   const notificationsQuery = useNotifications({ page: 1, pageSize: 3 });
   const notificationUnreadQuery = useNotificationUnreadCount();
+  const isBuddy = hasRole(profileQuery.data?.data?.roles ?? [], "Buddy");
+  const subscriptionQuery = useMyServiceSubscriptionQuery(isBuddy);
 
   if (profileQuery.isLoading) {
     return <OverviewSkeleton />;
@@ -190,6 +195,9 @@ export function ProfileOverviewSection() {
   const unreadMessages = chatUnreadQuery.data?.data.totalUnread ?? 0;
   const unreadNotifications =
     notificationUnreadQuery.data?.data.unreadCount ?? 0;
+  const packageLabel = !isBuddy
+    ? "Not a buddy"
+    : subscriptionQuery.data?.data?.packageName || "No package";
 
   const statCards = [
     {
@@ -219,6 +227,13 @@ export function ProfileOverviewSection() {
       icon: Bell,
       href: "/profile?section=notifications",
       tone: "bg-[#fff0ef] text-[#b33a32]",
+    },
+    {
+      label: "Service package",
+      value: packageLabel,
+      icon: Package,
+      href: "/profile?section=services",
+      tone: "bg-[#f4efff] text-[#6d3fd1]",
     },
   ];
 

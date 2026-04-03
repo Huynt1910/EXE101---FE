@@ -212,15 +212,6 @@ export function GroupBudgetStep({
 
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Travelers and interests
-        </p>
-        <h3 className="mt-2 text-xl font-semibold sm:text-2xl">
-          Tell us who is joining, what you want to do, and which languages fit
-        </h3>
-      </div>
-
       <FieldGroup className="grid gap-4 md:grid-cols-2">
         <Field>
           <FieldLabel htmlFor="trip-adults">
