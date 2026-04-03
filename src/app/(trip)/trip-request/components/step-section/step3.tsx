@@ -20,15 +20,6 @@ export function MeetingNotesStep({
 }: MeetingNotesStepProps) {
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-[0.16em] text-muted-foreground">
-          Meeting and notes
-        </p>
-        <h3 className="mt-2 text-xl font-semibold sm:text-2xl">
-          Add the details that make your trip clear and personal
-        </h3>
-      </div>
-
       <Field>
         <FieldLabel htmlFor="trip-notes">Additional notes</FieldLabel>
         <Textarea

@@ -195,8 +195,7 @@ export const buddyApi = {
       data: Array.isArray(res.data.data) ? res.data.data : [],
     };
   },
+
 };
-import type { ApiResponse } from "@/features/api-type";
-import type { Buddy } from "@/features/buddy/type";
 
 

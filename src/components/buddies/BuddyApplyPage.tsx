@@ -34,6 +34,8 @@ import { buildAuthUrl } from "@/lib/callback-url";
 import { useAuthStore } from "@/lib/store/authStore";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
 import { cn } from "@/lib/utils";
+import { hasRole } from "@/lib/auth/route-access";
+import { ActionNotice } from "@/components/common/ActionNotice";
 
 const ACTIVITY_OPTIONS = [
   "Food",
@@ -240,7 +242,7 @@ function MultiSelectField({
 export default function BuddyApplyPage() {
   const router = useRouter();
   const isHydrated = useHydratedStore();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const registerMutation = useRegisterAsBuddyMutation();
 
   const [activities, setActivities] = useState<string[]>([]);
@@ -253,6 +255,9 @@ export default function BuddyApplyPage() {
     "h-10 w-10 shrink-0 rounded-md border border-input bg-background text-foreground hover:bg-accent";
 
   const loginHref = useMemo(() => buildAuthUrl("/login", "/buddy/apply"), []);
+  const userRoles = user?.roles ?? [];
+  const hasBuddyRole = hasRole(userRoles, "Buddy");
+  const hasAdminRole = hasRole(userRoles, "Admin");
 
   const validate = () => {
     const nextErrors: Record<string, string | undefined> = {};
@@ -286,6 +291,10 @@ export default function BuddyApplyPage() {
   const handleSubmit = async () => {
     if (!isHydrated || !isAuthenticated) {
       router.push(loginHref);
+      return;
+    }
+
+    if (hasBuddyRole || hasAdminRole) {
       return;
     }
 
@@ -373,162 +382,176 @@ export default function BuddyApplyPage() {
             </div>
           </div>
         </Card>
+        {!isHydrated ? null : !isAuthenticated ? (
+          <ActionNotice
+            title="You need to log in before submitting the application."
+            buttonText="Log in now"
+            href={loginHref}
+          />
+        ) : hasBuddyRole ? (
+          <ActionNotice
+            title="Your account is already registered as a buddy."
+            buttonText="Go to buddy dashboard"
+            href="/buddy"
+          />
+        ) : hasAdminRole ? (
+          <ActionNotice
+            title="Admin accounts cannot submit a buddy application from this page."
+            buttonText="Go to admin dashboard"
+            href="/admin"
+          />
+        ) : (
+          <Card className="rounded-[2.5rem] border-border/70 bg-card py-0 shadow-sm">
+            <CardContent className="space-y-6 p-6 md:p-8">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+                  Buddy registration
+                </h2>
+              </div>
+              <MultiSelectField
+                label="Activities"
+                placeholder="No activity selected yet."
+                options={ACTIVITY_OPTIONS}
+                values={activities}
+                onChange={(nextValues) => {
+                  setActivities(nextValues);
+                  setErrors((current) => ({
+                    ...current,
+                    activities: undefined,
+                  }));
+                }}
+              />
+              {errors.activities ? (
+                <p className="-mt-3 text-xs text-destructive">
+                  {errors.activities}
+                </p>
+              ) : null}
 
-        <Card className="rounded-[2.5rem] border-border/70 bg-card py-0 shadow-sm">
-          <CardContent className="space-y-6 p-6 md:p-8">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-semibold tracking-tight text-foreground">
-                Buddy registration
-              </h2>
-            </div>
+              <MultiSelectField
+                label="Languages"
+                placeholder="No language selected yet."
+                options={LANGUAGE_OPTIONS}
+                values={languages}
+                onChange={(nextValues) => {
+                  setLanguages(nextValues);
+                  setErrors((current) => ({
+                    ...current,
+                    languages: undefined,
+                  }));
+                }}
+              />
+              {errors.languages ? (
+                <p className="-mt-3 text-xs text-destructive">
+                  {errors.languages}
+                </p>
+              ) : null}
 
-            {!isAuthenticated && isHydrated ? (
-              <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-                Sign in is required before submitting the application.
-                <div className="mt-3">
-                  <Button asChild size="sm" className="rounded-full">
-                    <Link href={loginHref}>
-                      Log in to apply
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Cost per hour
+                </label>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={stepperButtonClass}
+                    onClick={() => {
+                      const nextValue = Math.max(
+                        1,
+                        (Number(costPerHour) || 1) - 1,
+                      );
+                      setCostPerHour(String(nextValue));
+                      setErrors((current) => ({
+                        ...current,
+                        costPerHour: undefined,
+                      }));
+                    }}
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                    type="number"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={costPerHour}
+                    onChange={(event) => {
+                      setCostPerHour(event.target.value);
+                      setErrors((current) => ({
+                        ...current,
+                        costPerHour: undefined,
+                      }));
+                    }}
+                    placeholder="Hourly rate in USD"
+                    className={cn(
+                      "text-center",
+                      unifiedInputClass,
+                      errors.costPerHour && "border-red-500",
+                    )}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className={stepperButtonClass}
+                    onClick={() => {
+                      const nextValue = Math.min(
+                        100,
+                        (Number(costPerHour) || 0) + 1,
+                      );
+                      setCostPerHour(String(nextValue));
+                      setErrors((current) => ({
+                        ...current,
+                        costPerHour: undefined,
+                      }));
+                    }}
+                  >
+                    <Plus className="h-4 w-4" />
                   </Button>
                 </div>
+                {errors.costPerHour ? (
+                  <p className="text-xs text-destructive">
+                    {errors.costPerHour}
+                  </p>
+                ) : null}
               </div>
-            ) : null}
 
-            <MultiSelectField
-              label="Activities"
-              placeholder="No activity selected yet."
-              options={ACTIVITY_OPTIONS}
-              values={activities}
-              onChange={(nextValues) => {
-                setActivities(nextValues);
-                setErrors((current) => ({ ...current, activities: undefined }));
-              }}
-            />
-            {errors.activities ? (
-              <p className="-mt-3 text-xs text-destructive">
-                {errors.activities}
-              </p>
-            ) : null}
-
-            <MultiSelectField
-              label="Languages"
-              placeholder="No language selected yet."
-              options={LANGUAGE_OPTIONS}
-              values={languages}
-              onChange={(nextValues) => {
-                setLanguages(nextValues);
-                setErrors((current) => ({ ...current, languages: undefined }));
-              }}
-            />
-            {errors.languages ? (
-              <p className="-mt-3 text-xs text-destructive">
-                {errors.languages}
-              </p>
-            ) : null}
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Cost per hour
-              </label>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={stepperButtonClass}
-                  onClick={() => {
-                    const nextValue = Math.max(
-                      1,
-                      (Number(costPerHour) || 1) - 1,
-                    );
-                    setCostPerHour(String(nextValue));
-                    setErrors((current) => ({
-                      ...current,
-                      costPerHour: undefined,
-                    }));
-                  }}
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  type="number"
-                  min="1"
-                  max="100"
-                  step="1"
-                  value={costPerHour}
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Bio
+                </label>
+                <Textarea
+                  value={bio}
                   onChange={(event) => {
-                    setCostPerHour(event.target.value);
-                    setErrors((current) => ({
-                      ...current,
-                      costPerHour: undefined,
-                    }));
+                    setBio(event.target.value);
+                    setErrors((current) => ({ ...current, bio: undefined }));
                   }}
-                  placeholder="Hourly rate in USD"
+                  placeholder="Tell travelers what kind of local support you provide and why exploring with you feels different."
                   className={cn(
-                    "text-center",
-                    unifiedInputClass,
-                    errors.costPerHour && "border-red-500",
+                    "min-h-36 border-input bg-background text-foreground",
+                    errors.bio && "border-red-500",
                   )}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  className={stepperButtonClass}
-                  onClick={() => {
-                    const nextValue = Math.min(
-                      100,
-                      (Number(costPerHour) || 0) + 1,
-                    );
-                    setCostPerHour(String(nextValue));
-                    setErrors((current) => ({
-                      ...current,
-                      costPerHour: undefined,
-                    }));
-                  }}
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                {errors.bio ? (
+                  <p className="text-xs text-destructive">{errors.bio}</p>
+                ) : null}
               </div>
-              {errors.costPerHour ? (
-                <p className="text-xs text-destructive">{errors.costPerHour}</p>
-              ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">Bio</label>
-              <Textarea
-                value={bio}
-                onChange={(event) => {
-                  setBio(event.target.value);
-                  setErrors((current) => ({ ...current, bio: undefined }));
-                }}
-                placeholder="Tell travelers what kind of local support you provide and why exploring with you feels different."
-                className={cn(
-                  "min-h-36 border-input bg-background text-foreground",
-                  errors.bio && "border-red-500",
-                )}
-              />
-              {errors.bio ? (
-                <p className="text-xs text-destructive">{errors.bio}</p>
-              ) : null}
-            </div>
-          </CardContent>
-          <Button
-            onClick={handleSubmit}
-            disabled={registerMutation.isPending}
-            className="h-11 w-1/2 rounded-xl mx-auto mb-8"
-          >
-            {registerMutation.isPending ? (
-              <LoaderCircle className="h-4 w-4 animate-spin" />
-            ) : (
-              <BadgeCheck className="h-4 w-4" />
-            )}
-            {registerMutation.isPending ? "Submitting..." : "Apply now"}
-          </Button>
-        </Card>
+            </CardContent>
+            <Button
+              onClick={handleSubmit}
+              disabled={registerMutation.isPending}
+              className="h-11 w-1/2 rounded-xl mx-auto mb-8"
+            >
+              {registerMutation.isPending ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                <BadgeCheck className="h-4 w-4" />
+              )}
+              {registerMutation.isPending ? "Submitting..." : "Apply now"}
+            </Button>
+          </Card>
+        )}
       </div>
     </section>
   );

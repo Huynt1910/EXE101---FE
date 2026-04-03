@@ -37,7 +37,7 @@ export function SolutionSection() {
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="text-center mb-16 lg:mb-20">
-          <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-accent font-medium mb-4">
+          <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-orange-600 font-medium mb-4">
             {t.eyebrow}
           </p>
           <ScrollBlurText
@@ -100,4 +100,3 @@ export function SolutionSection() {
     </section>
   );
 }
-

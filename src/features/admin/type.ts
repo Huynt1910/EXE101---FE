@@ -47,6 +47,14 @@ export interface AdminTripsQuery extends RequestParams {
   SortOrder?: string;
 }
 
+export interface AdminBuddiesQuery extends RequestParams {
+  Search?: string;
+  Page?: number;
+  PageSize?: number;
+  SortBy?: string;
+  SortOrder?: string;
+}
+
 export interface AdminIncidentsQuery extends RequestParams {
   Status?: AdminIncidentStatus;
   Type?: AdminIncidentType;
@@ -88,8 +96,14 @@ export interface AdminBuddy {
   email?: string | null;
   avatar?: string | null;
   profilePicture?: string | null;
+  gender?: AdminGender | null;
+  phoneNumber?: string | null;
+  address?: string | null;
+  dateOfBirth?: string | null;
+  aboutMe?: string | null;
   activities?: string[] | null;
   costPerHour?: number | null;
+  rate?: number | null;
   languages?: string[] | null;
   bio?: string | null;
   isActive?: boolean | null;
@@ -194,9 +208,44 @@ export interface AdminIncidentResolveRequest {
   resolution?: string | null;
 }
 
+export interface AdminServicePackage {
+  id: string;
+  name: string;
+  description: string | null;
+  pricePerMonth: number;
+  currency: string;
+  commissionRate: number;
+  hasChatAccess: boolean;
+  hasSearchPriority: boolean;
+  hasPrioritySupport: boolean;
+  hasProductFeedback: boolean;
+  maxSlots: number;
+  currentSlots: number;
+  sortOrder: number;
+  isActive: boolean;
+  features: string[];
+  createdAt: string | null;
+  updatedAt: string | null;
+}
+
+export interface AdminServicePackageRequest {
+  name: string;
+  description: string;
+  pricePerMonth: number;
+  currency: string;
+  commissionRate: number;
+  hasChatAccess: boolean;
+  hasSearchPriority: boolean;
+  hasPrioritySupport: boolean;
+  hasProductFeedback: boolean;
+  maxSlots: number;
+  sortOrder: number;
+  features: string[];
+}
+
 export type AdminUserListResponse = ApiResponse<PaginatedResult<AdminUser>>;
 export type AdminUserResponse = ApiResponse<AdminUser>;
-export type AdminBuddyListResponse = ApiResponse<AdminBuddy[]>;
+export type AdminBuddyListResponse = ApiResponse<PaginatedResult<AdminBuddy>>;
 export type AdminBuddyResponse = ApiResponse<AdminBuddy>;
 export type AdminTripListResponse = ApiResponse<PaginatedResult<AdminTrip>>;
 export type AdminTripResponse = ApiResponse<AdminTrip>;
@@ -206,3 +255,5 @@ export type AdminReviewResponse = ApiResponse<AdminReview | null>;
 export type AdminIncidentListResponse = ApiResponse<PaginatedResult<AdminIncident>>;
 export type AdminBookingIncidentListResponse = ApiResponse<AdminIncident[]>;
 export type AdminIncidentResponse = ApiResponse<AdminIncident>;
+export type AdminServicePackageListResponse = ApiResponse<AdminServicePackage[]>;
+export type AdminServicePackageResponse = ApiResponse<AdminServicePackage>;

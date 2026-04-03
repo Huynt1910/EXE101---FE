@@ -78,7 +78,7 @@ export function Hero() {
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-medium leading-[1.1] text-primary-foreground text-balance mb-8">
             <AnimatedText text={t.titleLine1} delay={0.2} />
             <br />
-            <span className="text-accent">
+            <span className="text-orange-600">
               <AnimatedText text={t.titleLine2} delay={0.6} />
             </span>
             <br />
@@ -92,7 +92,7 @@ export function Hero() {
             <Button
               asChild
               size="lg"
-              className="bg-accent text-primary-foreground cursor-pointer hover:bg-accent/90 rounded-full px-8 py-6 text-base group"
+              className="bg-orange-600 text-primary-foreground cursor-pointer hover:bg-orange-600/90 rounded-full px-8 py-6 text-base group"
             >
               <Link href="/trip-request">
                 {t.primaryCta}

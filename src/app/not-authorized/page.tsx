@@ -12,7 +12,6 @@ export default async function NotAuthorizedPage({
 }: Readonly<NotAuthorizedPageProps>) {
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
   const from = resolvedSearchParams?.from;
-  const loginHref = `/login?callbackUrl=${encodeURIComponent(from || "/")}`;
 
   return (
     <section className="bg-primary text-primary-foreground">
@@ -29,12 +28,6 @@ export default async function NotAuthorizedPage({
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href={loginHref}
-              className="inline-block rounded border border-accent-foreground bg-transparent px-4 py-2 text-accent-foreground shadow-lg transition hover:border-transparent hover:bg-accent-foreground hover:text-accent"
-            >
-              Login
-            </Link>
             <Link
               href="/"
               className="inline-block rounded border border-accent-foreground bg-transparent px-4 py-2 text-accent-foreground shadow-lg transition hover:border-transparent hover:bg-accent-foreground hover:text-accent"

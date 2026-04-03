@@ -88,7 +88,7 @@ export function VietnamHighlightsSection() {
       className="py-24 lg:py-32 bg-muted/30"
     >
       <div className="text-center mb-16 lg:mb-20">
-        <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-accent font-medium mb-4">
+        <p className="reveal opacity-0 text-sm uppercase tracking-[0.2em] text-orange-600 font-medium mb-4">
           {t.eyebrow}
         </p>
 
@@ -118,9 +118,11 @@ export function VietnamHighlightsSection() {
           ref={topRowRef}
           className="flex gap-6 absolute top-6 whitespace-nowrap"
         >
-          {[...t.topRowHighlights, ...t.topRowHighlights].map((highlight, i) => (
-            <HighlightCard key={`top-${i}`} highlight={highlight} />
-          ))}
+          {[...t.topRowHighlights, ...t.topRowHighlights].map(
+            (highlight, i) => (
+              <HighlightCard key={`top-${i}`} highlight={highlight} />
+            ),
+          )}
         </div>
 
         <div
@@ -140,4 +142,3 @@ export function VietnamHighlightsSection() {
     </section>
   );
 }
-

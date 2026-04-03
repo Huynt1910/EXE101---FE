@@ -15,6 +15,7 @@ const sectionTitleMap: Record<string, string> = {
   personal: "Personal Information",
   bookings: "My Bookings",
   trips: "My Trips",
+  services: "Service Package",
   notifications: "Notifications",
   security: "Security",
 };

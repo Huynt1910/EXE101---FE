@@ -1,9 +1,19 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "@/components/ui/use-toast";
+import {
+  useServicePackages,
+  useSubscribeServicePackageMutation,
+} from "@/features/service-package/hooks/useServicePackage";
+import type { ServicePackage } from "@/features/service-package/type";
+import { hasRole } from "@/lib/auth/route-access";
+import { buildAuthUrl } from "@/lib/callback-url";
+import { useAuthStore } from "@/lib/store/authStore";
 
 type Plan = {
+  id?: string;
   name: string;
   price: string;
   description: string;
@@ -16,61 +26,209 @@ type Plan = {
   featured?: boolean;
 };
 
-const plans: Plan[] = [
-  {
-    name: "Starter",
-    price: "50,000",
+function formatPlanPrice(amount: number) {
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+function formatCommissionRate(rate: number) {
+  return `${Math.round(rate * 100)}% commission`;
+}
+
+function dedupePlanFeatures(features: Plan["features"]) {
+  const seenLabels = new Set<string>();
+
+  return features.filter((feature) => {
+    const key = feature.label.trim().toLowerCase();
+    if (!key || seenLabels.has(key)) return false;
+
+    seenLabels.add(key);
+    return true;
+  });
+}
+
+function mapServicePackageToPlan(servicePackage: ServicePackage): Plan {
+  const featureSet = new Set(
+    servicePackage.features.map((feature) => feature.trim()).filter(Boolean),
+  );
+
+  const baseFeatures = [
+    {
+      label: servicePackage.features[0] || "Profile visible on the platform",
+      included: true,
+    },
+    {
+      label: servicePackage.features[1] || "Unlimited booking requests",
+      included: true,
+    },
+    {
+      label:
+        servicePackage.features.find((feature) =>
+          feature.toLowerCase().includes("commission"),
+        ) || formatCommissionRate(servicePackage.commissionRate),
+      included: true,
+    },
+    {
+      label:
+        servicePackage.features.find((feature) =>
+          feature.toLowerCase().includes("chat"),
+        ) || "Chat with travelers in the app",
+      included: servicePackage.hasChatAccess,
+    },
+    {
+      label:
+        [...featureSet].find((feature) =>
+          feature.toLowerCase().includes("tìm kiếm"),
+        ) || "Priority placement in search",
+      included: servicePackage.hasSearchPriority,
+    },
+    {
+      label:
+        [...featureSet].find((feature) =>
+          feature.toLowerCase().includes("hỗ trợ"),
+        ) || "Priority support",
+      included: servicePackage.hasPrioritySupport,
+    },
+  ];
+
+  const founderSlotFeature =
+    servicePackage.maxSlots && servicePackage.maxSlots > 0
+      ? {
+          label:
+            servicePackage.features.find((feature) =>
+              feature.toLowerCase().includes("suất"),
+            ) || `Limited to ${servicePackage.maxSlots} slots`,
+          included: true,
+        }
+      : null;
+
+  return {
+    id: servicePackage.id,
+    name: servicePackage.name,
+    price: formatPlanPrice(servicePackage.pricePerMonth),
     description:
-      "For new buddies who want to try the platform and start with the essentials.",
-    features: [
-      { label: "Profile visible on the platform", included: true },
-      { label: "Unlimited booking requests", included: true },
-      { label: "20% commission", included: true },
-      { label: "Chat with travelers in the app", included: true },
-      { label: "Priority visibility", included: false },
-      { label: "Priority support", included: false },
-    ],
-    cta: "Choose Starter",
+      servicePackage.description || "Designed for buddies growing on Bonddy.",
+    features: dedupePlanFeatures(
+      servicePackage.name === "Founder" && founderSlotFeature
+        ? [
+            ...baseFeatures.slice(0, 5),
+            {
+              label:
+                [...featureSet].find((feature) =>
+                  feature.toLowerCase().includes("góp ý"),
+                ) || "Input on product direction",
+              included: servicePackage.hasProductFeedback,
+            },
+            founderSlotFeature,
+          ]
+        : baseFeatures,
+    ),
+    cta: `Choose ${servicePackage.name}`,
     href: "/buddy/apply",
-  },
-  {
-    name: "Pro",
-    price: "100,000",
-    description:
-      "For buddies who want to grow income, stand out more, and build a stronger personal brand.",
-    features: [
-      { label: "Profile visible on the platform", included: true },
-      { label: "Unlimited booking requests", included: true },
-      { label: "Only 10% commission", included: true },
-      { label: "Chat with travelers in the app", included: true },
-      { label: "Priority placement in search", included: true },
-      { label: "Priority support", included: false },
-    ],
-    cta: "Choose Pro",
-    href: "/buddy/apply",
-    featured: true,
-  },
-  {
-    name: "Founder",
-    price: "150,000",
-    description:
-      "Only 30 slots. Early adopter benefits for the first buddies joining Bonddy.",
-    features: [
-      { label: "Everything included in Pro", included: true },
-      { label: "0% commission and keep 100% income", included: true },
-      { label: "Top placement in search", included: true },
-      { label: "Direct support from the Bonddy team", included: true },
-      { label: "Input on product direction", included: true },
-      { label: "Limited to 30 slots", included: true },
-    ],
-    cta: "Choose Founder",
-    href: "/buddy/apply",
-  },
-];
+    featured: servicePackage.name === "Pro",
+  };
+}
+
+function getSubscribeRedirectUrl(payload: unknown) {
+  if (typeof payload === "string" && payload.startsWith("http")) {
+    return payload;
+  }
+
+  if (!payload || typeof payload !== "object") return null;
+
+  const value = payload as {
+    approveUrl?: unknown;
+    approvalUrl?: unknown;
+    url?: unknown;
+    paymentOrder?: { approveUrl?: unknown } | null;
+  };
+
+  const redirectUrl =
+    value.approveUrl ||
+    value.approvalUrl ||
+    value.url ||
+    value.paymentOrder?.approveUrl;
+
+  return typeof redirectUrl === "string" && redirectUrl.startsWith("http")
+    ? redirectUrl
+    : null;
+}
 
 export default function PricingSection() {
+  const router = useRouter();
+  const { isAuthenticated, user } = useAuthStore();
+  const userRoles = user?.roles ?? [];
+
+  const servicePackagesQuery = useServicePackages();
+  const subscribePackageMutation = useSubscribeServicePackageMutation();
+
+  const plans = (servicePackagesQuery.data?.data ?? [])
+    .filter((servicePackage) => servicePackage.isActive)
+    .sort((left, right) => left.sortOrder - right.sortOrder)
+    .map(mapServicePackageToPlan);
+
+  const handleChoosePackage = async (plan: Plan) => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Login required",
+        description: "Please log in before choosing a service package.",
+      });
+      router.push(buildAuthUrl("/login", "/"));
+      return;
+    }
+
+    if (!hasRole(userRoles, "Buddy")) {
+      toast({
+        title: "Buddy profile required",
+        description:
+          "Please register as a buddy before subscribing to a package.",
+      });
+      router.push(plan.href);
+      return;
+    }
+
+    if (!plan.id) {
+      toast({
+        title: "Package unavailable",
+        description:
+          "This package is not available for subscription right now.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await subscribePackageMutation.mutateAsync({
+        servicePackageId: plan.id,
+      });
+      const redirectUrl = getSubscribeRedirectUrl(response.data);
+
+      if (redirectUrl) {
+        globalThis.location.href = redirectUrl;
+        return;
+      }
+
+      toast({
+        title: "Service package updated",
+        description:
+          response.message ||
+          `Your subscription request for ${plan.name} was processed.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Could not subscribe",
+        description:
+          error && typeof error === "object" && "message" in error
+            ? String((error as { message?: string }).message)
+            : "Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <section className="px-4 py-16 sm:px-6 lg:px-8">
+    <section id="pricing" className="px-4 py-16 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="mx-auto max-w-3xl text-center">
           <div className="inline-flex rounded-full border border-border bg-secondary px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-secondary-foreground">
@@ -129,9 +287,9 @@ export default function PricingSection() {
               />
 
               <ul className="space-y-4">
-                {plan.features.map((feature) => (
+                {plan.features.map((feature, featureIndex) => (
                   <li
-                    key={feature.label}
+                    key={`${plan.name}-${feature.label}-${featureIndex}`}
                     className="flex items-start gap-3 text-lg font-medium leading-9"
                   >
                     {feature.included ? (
@@ -169,17 +327,19 @@ export default function PricingSection() {
               </ul>
 
               <div className="mt-auto pt-10">
-                <Link
-                  href={plan.href}
+                <button
+                  type="button"
+                  onClick={() => handleChoosePackage(plan)}
+                  disabled={subscribePackageMutation.isPending}
                   className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl border px-5 py-4 text-2xl font-semibold transition ${
                     plan.featured
                       ? "border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/8"
                       : "border-border bg-secondary text-secondary-foreground hover:bg-background"
-                  }`}
+                  } disabled:cursor-not-allowed disabled:opacity-70`}
                 >
                   {plan.cta}
                   <ArrowUpRight className="h-5 w-5" />
-                </Link>
+                </button>
               </div>
             </article>
           ))}

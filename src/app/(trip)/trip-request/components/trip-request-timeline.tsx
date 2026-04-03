@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
-import { Timeline } from "@/components/common/timeline";
 import {
   TRIP_REQUEST_COMPLETED_ICON,
   TRIP_REQUEST_STEPS,
 } from "@/app/(trip)/trip-request/trip-request.config";
+import { Timeline } from "@/components/common/Timeline";
 
 type TripRequestTimelineProps = {
   step: number;

@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   AlertTriangle,
   BookOpen,
+  CalendarDays,
   LayoutDashboard,
   MapPinned,
+  Package,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -29,52 +31,63 @@ import {
 import {
   useAdminBuddies,
   useAdminIncidents,
+  useAdminServicePackages,
   useAdminTrips,
   useAdminUsers,
 } from "@/features/admin/hooks/useAdmin";
 import { useAuthStore } from "@/lib/store/authStore";
 import { authStore } from "@/lib/store/authStore";
 
-type AdminSidebarBadgeKey = "users" | "buddies" | "trips" | "incidents";
+type AdminSidebarBadgeKey =
+  | "users"
+  | "buddies"
+  | "servicePackages"
+  | "trips"
+  | "incidents";
 
 const ADMIN_MENU_ITEMS: Array<{
   title: string;
   href: string;
-  tab: string;
   icon: typeof LayoutDashboard;
   badgeKey?: AdminSidebarBadgeKey;
 }> = [
   {
     title: "Overview",
-    href: "/admin?tab=overview",
-    tab: "overview",
+    href: "/admin",
     icon: LayoutDashboard,
   },
   {
     title: "Users",
-    href: "/admin?tab=users",
-    tab: "users",
+    href: "/admin/users",
     icon: Users,
     badgeKey: "users",
   },
   {
     title: "Buddies",
-    href: "/admin?tab=buddies",
-    tab: "buddies",
+    href: "/admin/buddies",
     icon: MapPinned,
     badgeKey: "buddies",
   },
   {
-    title: "Trips & Bookings",
-    href: "/admin?tab=operations",
-    tab: "operations",
+    title: "Service Packages",
+    href: "/admin/service-packages",
+    icon: Package,
+    badgeKey: "servicePackages",
+  },
+  {
+    title: "Trips",
+    href: "/admin/trips",
     icon: BookOpen,
     badgeKey: "trips",
   },
   {
+    title: "Bookings",
+    href: "/admin/bookings",
+    icon: CalendarDays,
+  },
+  {
     title: "Incidents",
-    href: "/admin?tab=incidents",
-    tab: "incidents",
+    href: "/admin/incidents",
     icon: AlertTriangle,
     badgeKey: "incidents",
   },
@@ -92,19 +105,19 @@ function getInitials(name?: string | null) {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const currentTab = searchParams.get("tab") ?? "overview";
   const { user } = useAuthStore();
   const [isHydrated, setIsHydrated] = useState(false);
   const usersQuery = useAdminUsers({ Page: 1, PageSize: 1 });
-  const buddiesQuery = useAdminBuddies();
+  const buddiesQuery = useAdminBuddies({ Page: 1, PageSize: 1 });
+  const servicePackagesQuery = useAdminServicePackages();
   const tripsQuery = useAdminTrips({ Page: 1, PageSize: 1 });
   const incidentsQuery = useAdminIncidents({ Page: 1, PageSize: 1 });
 
   const badgeMap = {
     users: usersQuery.data?.data.totalCount ?? 0,
-    buddies: buddiesQuery.data?.data.length ?? 0,
+    buddies: buddiesQuery.data?.data.totalCount ?? 0,
+    servicePackages: servicePackagesQuery.data?.data.length ?? 0,
     trips: tripsQuery.data?.data.totalCount ?? 0,
     incidents: incidentsQuery.data?.data.totalCount ?? 0,
   } as const;
@@ -153,8 +166,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               {ADMIN_MENU_ITEMS.map((item) => {
                 const Icon = item.icon;
-                const isActive =
-                  pathname === "/admin" && currentTab === item.tab;
+                const isOverview = item.href === "/admin";
+                const isActive = isOverview
+                  ? pathname === "/admin" || pathname === item.href
+                  : pathname === item.href ||
+                    pathname.startsWith(`${item.href}/`);
                 const badge =
                   item.badgeKey !== undefined
                     ? badgeMap[item.badgeKey]

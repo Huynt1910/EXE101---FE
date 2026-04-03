@@ -1,10 +1,16 @@
-import type { AdminIncidentsQuery, AdminTripsQuery, AdminUsersQuery } from "@/features/admin/type";
+import type {
+  AdminBuddiesQuery,
+  AdminIncidentsQuery,
+  AdminTripsQuery,
+  AdminUsersQuery,
+} from "@/features/admin/type";
 
 export const adminQueryKeys = {
   all: ["admin"] as const,
   users: (params?: AdminUsersQuery) => [...adminQueryKeys.all, "users", params ?? {}] as const,
   userDetail: (id: string) => [...adminQueryKeys.all, "users", id] as const,
-  buddies: () => [...adminQueryKeys.all, "buddies"] as const,
+  buddies: (params?: AdminBuddiesQuery) =>
+    [...adminQueryKeys.all, "buddies", params ?? {}] as const,
   buddyDetail: (id: string) => [...adminQueryKeys.all, "buddies", id] as const,
   trips: (params?: AdminTripsQuery) => [...adminQueryKeys.all, "trips", params ?? {}] as const,
   tripDetail: (id: string) => [...adminQueryKeys.all, "trips", id] as const,
@@ -13,4 +19,7 @@ export const adminQueryKeys = {
   bookingReview: (bookingId: string) => [...adminQueryKeys.all, "booking-review", bookingId] as const,
   bookingIncidents: (bookingId: string) => [...adminQueryKeys.all, "booking-incidents", bookingId] as const,
   incidents: (params?: AdminIncidentsQuery) => [...adminQueryKeys.all, "incidents", params ?? {}] as const,
+  servicePackages: () => [...adminQueryKeys.all, "service-packages"] as const,
+  servicePackageDetail: (id: string) =>
+    [...adminQueryKeys.all, "service-packages", id] as const,
 };

@@ -5,10 +5,12 @@ import { adminQueryKeys } from "@/features/admin/api/admin.query-key";
 import { adminApi } from "@/features/admin/api/admin.services";
 import type {
   AdminBookingStatusUpdateRequest,
+  AdminBuddiesQuery,
   AdminBuddyRegisterRequest,
   AdminBuddyUpdateRequest,
   AdminIncidentsQuery,
   AdminIncidentResolveRequest,
+  AdminServicePackageRequest,
   AdminTripsQuery,
   AdminUsersQuery,
   AdminUserUpdateRequest,
@@ -30,10 +32,11 @@ export function useAdminUserDetail(id?: string | null) {
   });
 }
 
-export function useAdminBuddies() {
+export function useAdminBuddies(params?: AdminBuddiesQuery) {
   return useQuery({
-    queryKey: adminQueryKeys.buddies(),
-    queryFn: () => adminApi.getBuddies(),
+    queryKey: adminQueryKeys.buddies(params),
+    queryFn: () => adminApi.getBuddies(params),
+    placeholderData: (previous) => previous,
   });
 }
 
@@ -98,6 +101,21 @@ export function useAdminIncidents(params?: AdminIncidentsQuery) {
     queryKey: adminQueryKeys.incidents(params),
     queryFn: () => adminApi.getIncidents(params),
     placeholderData: (previous) => previous,
+  });
+}
+
+export function useAdminServicePackages() {
+  return useQuery({
+    queryKey: adminQueryKeys.servicePackages(),
+    queryFn: () => adminApi.getServicePackages(),
+  });
+}
+
+export function useAdminServicePackageDetail(id?: string | null) {
+  return useQuery({
+    queryKey: adminQueryKeys.servicePackageDetail(id ?? ""),
+    queryFn: () => adminApi.getServicePackageById(id ?? ""),
+    enabled: Boolean(id),
   });
 }
 
@@ -185,6 +203,43 @@ export function useAdminMutations() {
     },
   });
 
+  const createServicePackageMutation = useMutation({
+    mutationFn: (payload: AdminServicePackageRequest) =>
+      adminApi.createServicePackage(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.servicePackages(),
+      });
+    },
+  });
+
+  const updateServicePackageMutation = useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: AdminServicePackageRequest;
+    }) => adminApi.updateServicePackage(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.servicePackages(),
+      });
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.servicePackageDetail(variables.id),
+      });
+    },
+  });
+
+  const deleteServicePackageMutation = useMutation({
+    mutationFn: (id: string) => adminApi.deleteServicePackage(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.servicePackages(),
+      });
+    },
+  });
+
   return {
     updateUserMutation,
     deleteUserMutation,
@@ -193,5 +248,8 @@ export function useAdminMutations() {
     deleteBuddyMutation,
     updateBookingStatusMutation,
     resolveIncidentMutation,
+    createServicePackageMutation,
+    updateServicePackageMutation,
+    deleteServicePackageMutation,
   };
 }
