@@ -43,6 +43,7 @@ export interface ServicePackageSubscription {
 
 export interface SubscribeServicePackageRequest {
   servicePackageId: string;
+  preferredPaymentMethod: string;
 }
 
 export type GetServicePackagesResponse = ApiResponse<ServicePackage[]>;
