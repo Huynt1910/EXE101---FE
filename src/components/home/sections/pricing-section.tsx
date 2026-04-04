@@ -130,7 +130,7 @@ function mapServicePackageToPlan(servicePackage: ServicePackage): Plan {
   };
 }
 
-function getSubscribeRedirectUrl(payload: unknown) {
+function getSubscribeRedirectUrl(payload: unknown): string | null {
   if (typeof payload === "string" && payload.startsWith("http")) {
     return payload;
   }
@@ -140,19 +140,24 @@ function getSubscribeRedirectUrl(payload: unknown) {
   const value = payload as {
     approveUrl?: unknown;
     approvalUrl?: unknown;
+    checkoutUrl?: unknown;
+    data?: unknown;
     url?: unknown;
     paymentOrder?: { approveUrl?: unknown } | null;
   };
 
   const redirectUrl =
+    value.checkoutUrl ||
     value.approveUrl ||
     value.approvalUrl ||
     value.url ||
     value.paymentOrder?.approveUrl;
 
-  return typeof redirectUrl === "string" && redirectUrl.startsWith("http")
-    ? redirectUrl
-    : null;
+  if (typeof redirectUrl === "string" && redirectUrl.startsWith("http")) {
+    return redirectUrl;
+  }
+
+  return value.data ? getSubscribeRedirectUrl(value.data) : null;
 }
 
 export default function PricingSection() {
@@ -201,6 +206,7 @@ export default function PricingSection() {
     try {
       const response = await subscribePackageMutation.mutateAsync({
         servicePackageId: plan.id,
+        preferredPaymentMethod: "PayOS",
       });
       const redirectUrl = getSubscribeRedirectUrl(response.data);
 
