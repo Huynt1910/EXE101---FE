@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import * as React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
 import {
   UserCircleIcon,
   Menu,
@@ -21,11 +21,12 @@ import {
   CalendarIcon,
   MenuIcon,
   MessageSquare,
-} from 'lucide-react';
-import { motion } from 'framer-motion';
-import AnimatedTabs from '@/components/common/AnimatedTabs';
-import { authStore, useAuthStore } from '@/lib/store/authStore';
-import { useHydratedStore } from '@/hooks/useHydratedStore';
+  Package,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import AnimatedTabs from "@/components/common/AnimatedTabs";
+import { authStore, useAuthStore } from "@/lib/store/authStore";
+import { useHydratedStore } from "@/hooks/useHydratedStore";
 
 // Bottom Navigation Component
 function BottomNavigation({
@@ -43,7 +44,7 @@ function BottomNavigation({
 
   const handleLogout = () => {
     authStore.logout();
-    router.push('/');
+    router.push("/");
   };
 
   // Define navigation item type
@@ -59,8 +60,8 @@ function BottomNavigation({
   // Function to check if current path matches navigation item
   const isActiveNavItem = (navHref: string) => {
     if (!pathname) return false;
-    if (navHref === '/buddy') {
-      return pathname === '/buddy' || pathname === '/buddy/';
+    if (navHref === "/buddy") {
+      return pathname === "/buddy" || pathname === "/buddy/";
     }
 
     return pathname.startsWith(navHref);
@@ -69,27 +70,28 @@ function BottomNavigation({
   const defaultNavItems: NavItem[] = [
     {
       icon: LayoutDashboardIcon,
-      label: 'Overview',
-      href: '/buddy',
-      active: isActiveNavItem('/buddy'),
+      label: "Overview",
+      href: "/buddy",
+      active: isActiveNavItem("/buddy"),
     },
     {
       icon: CalendarIcon,
-      label: 'Trip requests',
-      href: '/buddy/trip-requests',
-      active: isActiveNavItem('/buddy/trip-requests'),
+      label: "Trip requests",
+      href: "/buddy/trip-requests",
+      active: isActiveNavItem("/buddy/trip-requests"),
     },
     {
       icon: MessageSquare,
-      label: 'Messages',
-      href: '/buddy/messages',
-      active: isActiveNavItem('/buddy/messages'),
+      label: "Messages",
+      href: "/buddy/messages",
+      active: isActiveNavItem("/buddy/messages"),
     },
     {
       icon: Menu,
-      label: 'Account',
-      href: '#',
-      active: false,
+      label: "Account",
+      href: "#",
+      active:
+        isActiveNavItem("/buddy/profile") || isActiveNavItem("/buddy/package"),
       isAccount: true,
     },
   ];
@@ -104,35 +106,65 @@ function BottomNavigation({
           opacity: 1,
         }}
         transition={{
-          type: 'spring',
+          type: "spring",
           stiffness: 400,
           damping: 35,
           mass: 0.8,
         }}
         style={{
-          willChange: 'transform, opacity',
+          willChange: "transform, opacity",
         }}
       >
         <div className="flex items-center justify-around py-1">
           {defaultNavItems.map((item: NavItem, index: number) => (
-            <div key={item.href || `account-${index}`} className="flex flex-col items-center">
+            <div
+              key={item.href || `account-${index}`}
+              className="flex flex-col items-center"
+            >
               {item.isAccount && canUseAuthenticatedView ? (
-                <DropdownMenu open={isAccountOpen} onOpenChange={setIsAccountOpen}>
+                <DropdownMenu
+                  open={isAccountOpen}
+                  onOpenChange={setIsAccountOpen}
+                >
                   <DropdownMenuTrigger asChild>
-                    <div className="flex flex-col items-center gap-1 p-1 rounded-lg transition-colors hover:bg-gray-50 cursor-pointer">
-                      <Avatar className="size-7">
-                        <AvatarImage src="" alt={fullName} className="object-cover" />
+                    <div className="flex flex-col items-center gap-1 rounded-lg p-1 transition-colors hover:bg-gray-50 cursor-pointer">
+                      <Avatar
+                        className={`size-7 ${item.active ? "ring-2 ring-red-500/70 ring-offset-2" : ""}`}
+                      >
+                        <AvatarImage
+                          src=""
+                          alt={fullName}
+                          className="object-cover"
+                        />
                         <AvatarFallback className="bg-red-500/10 text-red-500 text-[0.60rem]">
                           {initials}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="text-[0.60rem] font-light text-muted-foreground">
+                      <span
+                        className={`text-[0.60rem] font-light ${item.active ? "font-medium text-red-500" : "text-muted-foreground"}`}
+                      >
                         {item.label}
                       </span>
                     </div>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 mb-2 mr-2" align="center" side="top">
+                  <DropdownMenuContent
+                    className="w-64 mb-2 mr-2"
+                    align="center"
+                    side="top"
+                  >
                     <DropdownMenuGroup className="p-2 space-y-2">
+                      <DropdownMenuItem asChild>
+                        <Link href="/buddy/profile" className="cursor-pointer">
+                          <UserCircleIcon className="mr-1 h-5 w-5" />
+                          <span className="text-sm font-medium">Profile</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/buddy/package" className="cursor-pointer">
+                          <Package className="mr-1 h-5 w-5" />
+                          <span className="text-sm font-medium">Subscribe</span>
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href="/buddy/messages" className="cursor-pointer">
                           <MessageSquare className="mr-2 h-4 w-4" />
@@ -140,15 +172,14 @@ function BottomNavigation({
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link href="/buddy/trip-requests" className="cursor-pointer">
+                        <Link
+                          href="/buddy/trip-requests"
+                          className="cursor-pointer"
+                        >
                           <CalendarIcon className="mr-1 h-5 w-5" />
-                          <span className="text-sm font-medium">Trip requests</span>
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/profile" className="cursor-pointer">
-                          <UserCircleIcon className="mr-1 h-5 w-5" />
-                          <span className="text-sm font-medium">My account</span>
+                          <span className="text-sm font-medium">
+                            Trip requests
+                          </span>
                         </Link>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -158,13 +189,18 @@ function BottomNavigation({
                     <DropdownMenuGroup className="p-2 space-y-2">
                       <DropdownMenuItem className="cursor-pointer">
                         <Link href="/" className="cursor-pointer">
-                          <span className="text-sm font-medium">Switch to User</span>
+                          <span className="text-sm font-medium">
+                            Switch to User
+                          </span>
                         </Link>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
                     <DropdownMenuGroup className="p-2 space-y-2">
-                      <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="cursor-pointer"
+                      >
                         <span className="text-sm font-medium">Logout</span>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
@@ -176,10 +212,10 @@ function BottomNavigation({
                   className={`flex flex-col items-center gap-1 p-1 rounded-lg transition-colors `}
                 >
                   <item.icon
-                    className={`size-6 stroke-[1.5] ${item.active ? 'text-red-500' : 'text-muted-foreground'}`}
+                    className={`size-6 stroke-[1.5] ${item.active ? "text-red-500" : "text-muted-foreground"}`}
                   />
                   <span
-                    className={`text-[0.62rem] font-light ${item.active ? 'text-red-500 font-medium' : 'text-muted-foreground'}`}
+                    className={`text-[0.62rem] font-light ${item.active ? "text-red-500 font-medium" : "text-muted-foreground"}`}
                   >
                     {item.label}
                   </span>
@@ -201,23 +237,23 @@ export default function HeaderHosting() {
 
   const handleLogout = () => {
     authStore.logout();
-    router.push('/');
+    router.push("/");
   };
 
   const fullName = React.useMemo(
-    () => user?.fullName ?? user?.email?.split('@')[0] ?? 'Buddy',
+    () => user?.fullName ?? user?.email?.split("@")[0] ?? "Buddy",
     [user?.email, user?.fullName],
   );
 
   const initials = React.useMemo(() => {
     const chars = fullName
-      .split(' ')
+      .split(" ")
       .filter(Boolean)
       .slice(0, 2)
-      .map((word) => word[0]?.toUpperCase() ?? '')
-      .join('');
+      .map((word) => word[0]?.toUpperCase() ?? "")
+      .join("");
 
-    return chars || 'B';
+    return chars || "B";
   }, [fullName]);
 
   return (
@@ -252,10 +288,17 @@ export default function HeaderHosting() {
             <div className="flex items-center gap-2 shrink-0">
               {canUseAuthenticatedView ? (
                 <div className="flex items-center gap-4">
-                  <Button variant="ghost" className="relative size-12 rounded-full">
-                    <Link href="/profile">
+                  <Button
+                    variant="ghost"
+                    className="relative size-12 rounded-full"
+                  >
+                    <Link href="/buddy/profile">
                       <Avatar className="size-12">
-                        <AvatarImage src="" alt={fullName} className="object-cover" />
+                        <AvatarImage
+                          src=""
+                          alt={fullName}
+                          className="object-cover"
+                        />
                         <AvatarFallback className="bg-[#849cb1] text-[#0d3b66]">
                           {initials}
                         </AvatarFallback>
@@ -272,30 +315,60 @@ export default function HeaderHosting() {
                         <MenuIcon className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-68 shadow-2xl" align="end" forceMount>
+                    <DropdownMenuContent
+                      className="w-68 shadow-2xl"
+                      align="end"
+                      forceMount
+                    >
                       <DropdownMenuGroup className="p-2 space-y-1">
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/buddy/profile"
+                            className="cursor-pointer"
+                          >
+                            <UserCircleIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">Profile</span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/buddy/package"
+                            className="cursor-pointer"
+                          >
+                            <Package className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">
+                              Subscribe
+                            </span>
+                          </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem asChild>
                           <Link href="/buddy" className="cursor-pointer">
                             <LayoutDashboardIcon className="mr-1 h-5 w-5" />
-                            <span className="text-sm font-medium">Overview</span>
+                            <span className="text-sm font-medium">
+                              Overview
+                            </span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href="/buddy/messages" className="cursor-pointer">
+                          <Link
+                            href="/buddy/messages"
+                            className="cursor-pointer"
+                          >
                             <MessageSquare className="mr-1 h-5 w-5" />
-                            <span className="text-sm font-medium">Messages</span>
+                            <span className="text-sm font-medium">
+                              Messages
+                            </span>
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
-                          <Link href="/buddy/trip-requests" className="cursor-pointer">
+                          <Link
+                            href="/buddy/trip-requests"
+                            className="cursor-pointer"
+                          >
                             <CalendarIcon className="mr-1 h-5 w-5" />
-                            <span className="text-sm font-medium">Trip requests</span>
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href="/profile" className="cursor-pointer">
-                            <UserCircleIcon className="mr-1 h-5 w-5" />
-                            <span className="text-sm font-medium">My account</span>
+                            <span className="text-sm font-medium">
+                              Trip requests
+                            </span>
                           </Link>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>
@@ -304,10 +377,15 @@ export default function HeaderHosting() {
                       <DropdownMenuGroup className="p-2 space-y-2">
                         <DropdownMenuItem className="cursor-pointer" asChild>
                           <Link href="/" className="cursor-pointer">
-                            <span className="text-sm font-medium">Switch to User</span>
+                            <span className="text-sm font-medium">
+                              Switch to User
+                            </span>
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
+                        <DropdownMenuItem
+                          onClick={handleLogout}
+                          className="cursor-pointer"
+                        >
                           <span className="text-sm font-medium">Logout</span>
                         </DropdownMenuItem>
                       </DropdownMenuGroup>

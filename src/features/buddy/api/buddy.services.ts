@@ -11,6 +11,10 @@ import type {
   GetBuddyMeResponse,
   GetMyBuddyBookingsResponse,
   GetMyTripRequestsResponse,
+  UpdateBuddyProfileRequest,
+  UpdateBuddyProfileResponse,
+  UploadBuddyAvatarResponse,
+  BuddySubscription,
 } from "@/features/buddy/type";
 import { httpClient } from "@/lib/http/client";
 
@@ -33,6 +37,36 @@ function normalizeStringArray(value: unknown) {
     .filter((item): item is string => typeof item === "string")
     .map((item) => item.trim())
     .filter((item) => item.length > 0 && item.toLowerCase() !== "string");
+}
+
+function normalizeNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function normalizeBuddySubscription(item: unknown): BuddySubscription | null {
+  if (!item || typeof item !== "object") return null;
+
+  const value = item as Partial<BuddySubscription>;
+
+  return {
+    subscriptionId: normalizeText(value.subscriptionId),
+    servicePackageId: normalizeText(value.servicePackageId),
+    packageName: normalizeText(value.packageName),
+    commissionRate: normalizeNumber(value.commissionRate),
+    startDate: normalizeDate(value.startDate),
+    endDate: normalizeDate(value.endDate),
+    status: normalizeText(value.status),
+    paymentMethod: normalizeText(value.paymentMethod),
+    amountPaid: normalizeNumber(value.amountPaid),
+    currency: normalizeText(value.currency),
+    externalPaymentRef: normalizeText(value.externalPaymentRef),
+    paidAt: normalizeDate(value.paidAt),
+    downgradeToPackageId: normalizeText(value.downgradeToPackageId),
+    downgradeToPackageName: normalizeText(value.downgradeToPackageName),
+    isCancelledAtEndOfCycle: value.isCancelledAtEndOfCycle === true,
+    createdAt: normalizeDate(value.createdAt),
+    updatedAt: normalizeDate(value.updatedAt),
+  };
 }
 
 function normalizeBuddy(item: unknown): BuddyProfile {
@@ -63,6 +97,7 @@ function normalizeBuddy(item: unknown): BuddyProfile {
     isActive: value.isActive !== false,
     createdAt: normalizeDate(value.createdAt),
     updatedAt: normalizeDate(value.updatedAt),
+    subscription: normalizeBuddySubscription(value.subscription),
   };
 }
 
@@ -193,6 +228,33 @@ export const buddyApi = {
     return {
       ...res.data,
       data: Array.isArray(res.data.data) ? res.data.data : [],
+    };
+  },
+
+  async updateBuddyProfile(payload: UpdateBuddyProfileRequest) {
+    const res = await httpClient.put<UpdateBuddyProfileResponse, UpdateBuddyProfileRequest>(
+      `${BUDDY_BASE_PATH}/update-profile`,
+      payload,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeBuddy(res.data.data),
+    };
+  },
+
+  async uploadBuddyAvatar(file: File) {
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const res = await httpClient.post<UploadBuddyAvatarResponse, FormData>(
+      `${BUDDY_BASE_PATH}/upload-avatar`,
+      formData,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeBuddy(res.data.data),
     };
   },
 

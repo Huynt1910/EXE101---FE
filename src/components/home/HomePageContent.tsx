@@ -2,7 +2,6 @@ import { AboutUsSection } from "@/components/home/sections/about-us-section";
 import { BuddiesFormSection } from "@/components/home/sections/buddies-form-section";
 import { FAQ } from "@/components/home/sections/faq-section";
 import { Hero } from "@/components/home/sections/hero-section";
-import PricingSection from "@/components/home/sections/pricing-section";
 import { ProofSection } from "@/components/home/sections/proof-section";
 import { SolutionSection } from "@/components/home/sections/solution-section";
 import { TestimonialsSection } from "@/components/home/sections/testimonials-section";
@@ -20,7 +19,6 @@ export default function HomePageContent() {
       <SolutionSection />
       <BuddiesFormSection />
       <FAQ />
-      <PricingSection />
     </div>
   );
 }

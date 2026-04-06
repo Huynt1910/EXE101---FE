@@ -20,6 +20,27 @@ export interface BuddyProfile {
   isActive: boolean;
   createdAt: string | null;
   updatedAt: string | null;
+  subscription: BuddySubscription | null;
+}
+
+export interface BuddySubscription {
+  subscriptionId: string | null;
+  servicePackageId: string | null;
+  packageName: string | null;
+  commissionRate: number | null;
+  startDate: string | null;
+  endDate: string | null;
+  status: string | null;
+  paymentMethod: string | null;
+  amountPaid: number | null;
+  currency: string | null;
+  externalPaymentRef: string | null;
+  paidAt: string | null;
+  downgradeToPackageId: string | null;
+  downgradeToPackageName: string | null;
+  isCancelledAtEndOfCycle: boolean;
+  createdAt: string | null;
+  updatedAt: string | null;
 }
 
 export interface BuddyReview {
@@ -41,6 +62,19 @@ export interface BuddyReviewsQuery extends RequestParams {
 export interface BuddyReviewsList extends PaginatedResult<BuddyReview> {}
 
 export interface RegisterAsBuddyRequest {
+  activities: string[];
+  costPerHour: number;
+  languages: string[];
+  bio: string;
+}
+
+export interface UpdateBuddyProfileRequest {
+  fullName: string;
+  gender: string;
+  phoneNumber: string;
+  address: string;
+  dateOfBirth: string | null;
+  aboutMe: string;
   activities: string[];
   costPerHour: number;
   languages: string[];
@@ -116,6 +150,8 @@ export type RegisterAsBuddyResponse = ApiResponse<BuddyProfile>;
 export type GetBuddyMeResponse = ApiResponse<BuddyProfile>;
 export type GetMyBuddyBookingsResponse = ApiResponse<BuddyBooking[]>;
 export type GetMyTripRequestsResponse = ApiResponse<MyTripRequest[]>;
+export type UpdateBuddyProfileResponse = ApiResponse<BuddyProfile>;
+export type UploadBuddyAvatarResponse = ApiResponse<BuddyProfile>;
 export interface Buddy {
   id: string;
   userId: string;
@@ -135,4 +171,5 @@ export interface Buddy {
   isActive: boolean;
   createdAt: string;
   updatedAt: string | null;
+  subscription?: BuddySubscription | null;
 }

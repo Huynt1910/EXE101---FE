@@ -98,7 +98,7 @@ export function ProfileServicesSection() {
             You do not have an active subscription package right now.
           </p>
           <Button asChild>
-            <Link href="/#pricing">Choose a package</Link>
+            <Link href="/buddy/package">Choose a package</Link>
           </Button>
         </CardContent>
       </Card>
@@ -118,7 +118,7 @@ export function ProfileServicesSection() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/#pricing">Upgrade or downgrade</Link>
+          <Link href="/buddy/package">Upgrade or downgrade</Link>
         </Button>
       </div>
 

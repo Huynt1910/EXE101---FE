@@ -1,56 +1,54 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { motion } from "framer-motion";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const tabs = [
   {
-    name: 'Overview',
-    value: 'overview',
-    link: '/buddy',
+    name: "Overview",
+    value: "overview",
+    link: "/buddy",
   },
   {
-    name: 'Trip Requests',
-    value: 'trip-requests',
-    link: '/buddy/trip-requests',
+    name: "Trip Requests",
+    value: "trip-requests",
+    link: "/buddy/trip-requests",
   },
   {
-    name: 'Customers',
-    value: 'customers',
-    link: '/buddy/lead',
+    name: "Messages",
+    value: "messages",
+    link: "/buddy/messages",
   },
   {
-    name: 'Appointments',
-    value: 'appointments',
-    link: '/buddy/appointments',
-  },
-  {
-    name: 'Messages',
-    value: 'messages',
-    link: '/buddy/messages',
+    name: "Package",
+    value: "package",
+    link: "/buddy/package",
   },
 ];
 
 const AnimatedTabs = () => {
   const pathname = usePathname();
   const tabRefs = React.useRef<(HTMLButtonElement | null)[]>([]);
-  const [underlineStyle, setUnderlineStyle] = React.useState({ left: 0, width: 0 });
+  const [underlineStyle, setUnderlineStyle] = React.useState({
+    left: 0,
+    width: 0,
+  });
 
   const getActiveTab = () => {
-    if (!pathname) return 'overview';
+    if (!pathname) return "overview";
 
     const activeTab = tabs.find((tab) => {
-      if (tab.link === '/buddy') {
-        return pathname === '/buddy' || pathname === '/buddy/';
+      if (tab.link === "/buddy") {
+        return pathname === "/buddy" || pathname === "/buddy/";
       }
 
       return pathname.startsWith(tab.link);
     });
 
-    return activeTab?.value || 'overview';
+    return activeTab?.value || "overview";
   };
 
   const activeTab = getActiveTab();
@@ -95,7 +93,7 @@ const AnimatedTabs = () => {
               width: underlineStyle.width,
             }}
             transition={{
-              type: 'spring',
+              type: "spring",
               stiffness: 400,
               damping: 40,
             }}

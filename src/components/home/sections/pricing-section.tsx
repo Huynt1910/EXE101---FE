@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   useServicePackages,
   useSubscribeServicePackageMutation,
@@ -25,6 +25,12 @@ type Plan = {
   href: string;
   featured?: boolean;
 };
+
+type PricingSectionProps = {
+  embedded?: boolean;
+};
+
+const REDIRECT_NOTICE_DELAY_MS = 1800;
 
 function formatPlanPrice(amount: number) {
   return new Intl.NumberFormat("en-US", {
@@ -160,7 +166,31 @@ function getSubscribeRedirectUrl(payload: unknown): string | null {
   return value.data ? getSubscribeRedirectUrl(value.data) : null;
 }
 
-export default function PricingSection() {
+function getSubscribeResponseMessage(
+  message: string | null | undefined,
+  payload: unknown,
+): string | null {
+  if (typeof message === "string" && message.trim()) {
+    return message.trim();
+  }
+
+  if (!payload || typeof payload !== "object") return null;
+
+  const value = payload as {
+    message?: unknown;
+    data?: unknown;
+  };
+
+  if (typeof value.message === "string" && value.message.trim()) {
+    return value.message.trim();
+  }
+
+  return value.data ? getSubscribeResponseMessage(undefined, value.data) : null;
+}
+
+export default function PricingSection({
+  embedded = false,
+}: Readonly<PricingSectionProps>) {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
   const userRoles = user?.roles ?? [];
@@ -175,30 +205,27 @@ export default function PricingSection() {
 
   const handleChoosePackage = async (plan: Plan) => {
     if (!isAuthenticated) {
-      toast({
-        title: "Login required",
-        description: "Please log in before choosing a service package.",
+      toast.error("Please log in before choosing a service package.", {
+        description: "Login required",
       });
-      router.push(buildAuthUrl("/login", "/"));
+      router.push(buildAuthUrl("/login", "/buddy/package"));
       return;
     }
 
     if (!hasRole(userRoles, "Buddy")) {
-      toast({
-        title: "Buddy profile required",
-        description:
-          "Please register as a buddy before subscribing to a package.",
-      });
+      toast.error(
+        "Please register as a buddy before subscribing to a package.",
+        {
+          description: "Buddy profile required",
+        },
+      );
       router.push(plan.href);
       return;
     }
 
     if (!plan.id) {
-      toast({
-        title: "Package unavailable",
-        description:
-          "This package is not available for subscription right now.",
-        variant: "destructive",
+      toast.error("This package is not available for subscription right now.", {
+        description: "Package unavailable",
       });
       return;
     }
@@ -208,149 +235,157 @@ export default function PricingSection() {
         servicePackageId: plan.id,
         preferredPaymentMethod: "PayOS",
       });
+      const apiResponseMessage = getSubscribeResponseMessage(
+        response.message,
+        response.data,
+      );
+      const fallbackMessage = `Your subscription request for ${plan.name} was processed.`;
       const redirectUrl = getSubscribeRedirectUrl(response.data);
 
       if (redirectUrl) {
+        if (apiResponseMessage) {
+          toast.success(apiResponseMessage, {
+            description: "Package selected",
+          });
+
+          globalThis.setTimeout(() => {
+            globalThis.location.href = redirectUrl;
+          }, REDIRECT_NOTICE_DELAY_MS);
+          return;
+        }
+
         globalThis.location.href = redirectUrl;
         return;
       }
 
-      toast({
-        title: "Service package updated",
-        description:
-          response.message ||
-          `Your subscription request for ${plan.name} was processed.`,
+      toast.success(apiResponseMessage || fallbackMessage, {
+        description: "Service package updated",
       });
     } catch (error) {
-      toast({
-        title: "Could not subscribe",
-        description:
-          error && typeof error === "object" && "message" in error
-            ? String((error as { message?: string }).message)
-            : "Please try again later.",
-        variant: "destructive",
-      });
+      toast.error(
+        error && typeof error === "object" && "message" in error
+          ? String((error as { message?: string }).message)
+          : "Please try again later.",
+        {
+          description: "Could not subscribe",
+        },
+      );
     }
   };
 
-  return (
-    <section id="pricing" className="px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="mx-auto max-w-3xl text-center">
-          <div className="inline-flex rounded-full border border-border bg-secondary px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-secondary-foreground">
-            Pricing
-          </div>
-          <h2 className="mt-5 text-3xl font-semibold tracking-tight text-foreground sm:text-5xl">
-            Choose the plan that fits your growth on Bonddy
-          </h2>
-          <p className="mt-4 text-base leading-7 text-muted-foreground sm:text-lg">
-            Pricing built for buddies who want better visibility, stronger
-            earnings, and more support as they grow on the platform.
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-6 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <article
-              key={plan.name}
-              className={`flex min-h-[40rem] flex-col rounded-[2rem] border p-7 shadow-sm transition-all ${
-                plan.featured
-                  ? "border-primary bg-primary text-primary-foreground shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_28%,transparent)]"
-                  : "border-border bg-card text-foreground"
-              }`}
-            >
-              <div>
-                <p className="text-lg font-semibold">{plan.name}</p>
-                <div className="mt-3 flex items-end gap-2">
-                  <span className="text-5xl font-semibold leading-none">
-                    {plan.price}
-                  </span>
-                  <span
-                    className={`pb-1 text-xl font-medium ${
-                      plan.featured
-                        ? "text-primary-foreground/75"
-                        : "text-muted-foreground"
-                    }`}
-                  >
-                    VND / month
-                  </span>
-                </div>
-                <p
-                  className={`mt-4 max-w-xs text-lg leading-9 ${
+  const content = (
+    <div className="mx-auto max-w-7xl">
+      <div className="mt-12 grid gap-6 lg:grid-cols-3">
+        {plans.map((plan) => (
+          <article
+            key={plan.name}
+            className={`flex min-h-[40rem] flex-col rounded-[2rem] border p-7 shadow-sm transition-all ${
+              plan.featured
+                ? "border-primary bg-primary text-primary-foreground shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_28%,transparent)]"
+                : "border-border bg-card text-foreground"
+            }`}
+          >
+            <div>
+              <p className="text-lg font-semibold">{plan.name}</p>
+              <div className="mt-3 flex items-end gap-2">
+                <span className="text-5xl font-semibold leading-none">
+                  {plan.price}
+                </span>
+                <span
+                  className={`pb-1 text-xl font-medium ${
                     plan.featured
                       ? "text-primary-foreground/75"
                       : "text-muted-foreground"
                   }`}
                 >
-                  {plan.description}
-                </p>
+                  VND / month
+                </span>
               </div>
-
-              <div
-                className={`my-8 h-px ${
-                  plan.featured ? "bg-primary-foreground/10" : "bg-border"
+              <p
+                className={`mt-4 max-w-xs text-lg leading-9 ${
+                  plan.featured
+                    ? "text-primary-foreground/75"
+                    : "text-muted-foreground"
                 }`}
-              />
+              >
+                {plan.description}
+              </p>
+            </div>
 
-              <ul className="space-y-4">
-                {plan.features.map((feature, featureIndex) => (
-                  <li
-                    key={`${plan.name}-${feature.label}-${featureIndex}`}
-                    className="flex items-start gap-3 text-lg font-medium leading-9"
-                  >
-                    {feature.included ? (
-                      <CheckCircle2
-                        className={`mt-1 h-5 w-5 shrink-0 ${
-                          plan.featured
-                            ? "text-accent-foreground"
-                            : "text-primary"
-                        }`}
-                      />
-                    ) : (
-                      <XCircle
-                        className={`mt-1 h-5 w-5 shrink-0 ${
-                          plan.featured
-                            ? "text-primary-foreground/40"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    )}
-                    <span
-                      className={
-                        feature.included
-                          ? plan.featured
-                            ? "text-primary-foreground"
-                            : "text-foreground"
-                          : plan.featured
-                            ? "text-primary-foreground/65"
-                            : "text-muted-foreground"
-                      }
-                    >
-                      {feature.label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <div
+              className={`my-8 h-px ${
+                plan.featured ? "bg-primary-foreground/10" : "bg-border"
+              }`}
+            />
 
-              <div className="mt-auto pt-10">
-                <button
-                  type="button"
-                  onClick={() => handleChoosePackage(plan)}
-                  disabled={subscribePackageMutation.isPending}
-                  className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl border px-5 py-4 text-2xl font-semibold transition ${
-                    plan.featured
-                      ? "border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/8"
-                      : "border-border bg-secondary text-secondary-foreground hover:bg-background"
-                  } disabled:cursor-not-allowed disabled:opacity-70`}
+            <ul className="space-y-4">
+              {plan.features.map((feature, featureIndex) => (
+                <li
+                  key={`${plan.name}-${feature.label}-${featureIndex}`}
+                  className="flex items-start gap-3 text-lg font-medium leading-9"
                 >
-                  {plan.cta}
-                  <ArrowUpRight className="h-5 w-5" />
-                </button>
-              </div>
-            </article>
-          ))}
-        </div>
+                  {feature.included ? (
+                    <CheckCircle2
+                      className={`mt-1 h-5 w-5 shrink-0 ${
+                        plan.featured
+                          ? "text-accent-foreground"
+                          : "text-primary"
+                      }`}
+                    />
+                  ) : (
+                    <XCircle
+                      className={`mt-1 h-5 w-5 shrink-0 ${
+                        plan.featured
+                          ? "text-primary-foreground/40"
+                          : "text-muted-foreground"
+                      }`}
+                    />
+                  )}
+                  <span
+                    className={
+                      feature.included
+                        ? plan.featured
+                          ? "text-primary-foreground"
+                          : "text-foreground"
+                        : plan.featured
+                          ? "text-primary-foreground/65"
+                          : "text-muted-foreground"
+                    }
+                  >
+                    {feature.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="mt-auto pt-10">
+              <button
+                type="button"
+                onClick={() => handleChoosePackage(plan)}
+                disabled={subscribePackageMutation.isPending}
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl border px-5 py-4 text-2xl font-semibold transition ${
+                  plan.featured
+                    ? "border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/8"
+                    : "border-border bg-secondary text-secondary-foreground hover:bg-background"
+                } disabled:cursor-not-allowed disabled:opacity-70`}
+              >
+                {plan.cta}
+                <ArrowUpRight className="h-5 w-5" />
+              </button>
+            </div>
+          </article>
+        ))}
       </div>
+    </div>
+  );
+
+  if (embedded) {
+    return <div className="space-y-6">{content}</div>;
+  }
+
+  return (
+    <section id="pricing" className="px-4 py-16 sm:px-6 lg:px-8">
+      {content}
     </section>
   );
 }
