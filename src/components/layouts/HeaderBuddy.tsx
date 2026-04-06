@@ -187,16 +187,6 @@ function BottomNavigation({
                     <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
 
                     <DropdownMenuGroup className="p-2 space-y-2">
-                      <DropdownMenuItem className="cursor-pointer">
-                        <Link href="/" className="cursor-pointer">
-                          <span className="text-sm font-medium">
-                            Switch to User
-                          </span>
-                        </Link>
-                      </DropdownMenuItem>
-                    </DropdownMenuGroup>
-                    <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
-                    <DropdownMenuGroup className="p-2 space-y-2">
                       <DropdownMenuItem
                         onClick={handleLogout}
                         className="cursor-pointer"
@@ -375,13 +365,6 @@ export default function HeaderHosting() {
 
                       <DropdownMenuSeparator className="mx-4 h-[1.5px] bg-gray-200 my-0" />
                       <DropdownMenuGroup className="p-2 space-y-2">
-                        <DropdownMenuItem className="cursor-pointer" asChild>
-                          <Link href="/" className="cursor-pointer">
-                            <span className="text-sm font-medium">
-                              Switch to User
-                            </span>
-                          </Link>
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={handleLogout}
                           className="cursor-pointer"
