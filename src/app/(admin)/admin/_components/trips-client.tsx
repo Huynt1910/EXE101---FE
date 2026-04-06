@@ -4,14 +4,6 @@ import { useDeferredValue, useEffect, useState } from "react";
 import Link from "next/link";
 import { CalendarDays, Clock3, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -75,15 +67,17 @@ export function TripsClient() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-border/70">
-        <CardHeader>
-          <CardTitle>Trip management</CardTitle>
-          <CardDescription>
+      <div className="booking-muted-panel">
+        <div className="space-y-1.5 p-6">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
+            Trip management
+          </h2>
+          <p className="text-sm text-muted-foreground">
             Monitor demand from `/api/admin/trips` on a dedicated trip
             operations page.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          </p>
+        </div>
+        <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2">
             <Label htmlFor="trip-search-page">Search</Label>
             <Input
@@ -143,16 +137,20 @@ export function TripsClient() {
               Reset filters
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
-        <Card className="border-border/70">
-          <CardHeader>
-            <CardTitle>Trips</CardTitle>
-            <CardDescription>{totalTrips} total trip.</CardDescription>
-          </CardHeader>
-          <CardContent className="px-0">
+        <div className="booking-muted-panel">
+          <div className="space-y-1.5 p-6">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Trips
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {totalTrips} total trip.
+            </p>
+          </div>
+          <div className="px-0">
             {trips.length ? (
               <Table>
                 <TableHeader>
@@ -209,7 +207,7 @@ export function TripsClient() {
                 />
               </div>
             )}
-          </CardContent>
+          </div>
           <PaginationControls
             page={tripsQuery.data?.data.page ?? 1}
             totalPages={tripsQuery.data?.data.totalPages ?? 1}
@@ -224,14 +222,16 @@ export function TripsClient() {
               )
             }
           />
-        </Card>
+        </div>
 
         <div className="space-y-6">
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle>Trip Details</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="booking-muted-panel">
+            <div className="p-6">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                Trip Details
+              </h2>
+            </div>
+            <div className="px-6 pb-6">
               {selectedTrip ? (
                 <div className="grid grid-cols-2 gap-3">
                   <DetailItem
@@ -283,8 +283,8 @@ export function TripsClient() {
                   description="Select a trip from the table to inspect traveler demand."
                 />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </div>

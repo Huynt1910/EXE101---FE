@@ -31,7 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRegisterAsBuddyMutation } from "@/features/buddy/hooks/useBuddy";
 import { handleApiError } from "@/lib/error-handler";
 import { buildAuthUrl } from "@/lib/callback-url";
-import { useAuthStore } from "@/lib/store/authStore";
+import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
 import { cn } from "@/lib/utils";
 import { hasRole } from "@/lib/auth/route-access";
@@ -310,6 +310,16 @@ export default function BuddyApplyPage() {
         languages,
         bio: bio.trim(),
       });
+
+      try {
+        await authStore.refreshSession();
+      } catch (refreshError) {
+        if (refreshError instanceof Error) {
+          toast.error(refreshError.message);
+        } else {
+          toast.error("Buddy role created, but the session could not be refreshed.");
+        }
+      }
 
       toast.success(response.message ?? "Buddy registered successfully.");
       router.push(`/buddies/${response.data.id}`);

@@ -18,12 +18,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  BookingPanel,
+  BookingPanelContent,
+  BookingPanelDescription,
+  BookingPanelHeader,
+  BookingPanelTitle,
+} from "@/components/ui/booking-panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMyTravelerBookingsQuery } from "@/features/booking/hooks/useCreateBookingOffer";
 import {
@@ -81,8 +81,8 @@ function OverviewSkeleton() {
   return (
     <div className="space-y-4">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(20rem,1fr)]">
-        <Card className="rounded-[1.75rem] border-border/70 py-0">
-          <CardContent className="space-y-6 p-6">
+        <BookingPanel>
+          <BookingPanelContent className="space-y-6">
             <div className="flex flex-col gap-5 md:flex-row md:items-start">
               <Skeleton className="h-24 w-24 rounded-full" />
               <div className="min-w-0 flex-1 space-y-3">
@@ -95,47 +95,44 @@ function OverviewSkeleton() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </BookingPanelContent>
+        </BookingPanel>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
           {Array.from({ length: 5 }).map((_, index) => (
-            <Card
-              key={index}
-              className="rounded-[1.75rem] border-border/70 py-0"
-            >
-              <CardContent className="space-y-3 p-5">
+            <BookingPanel key={index} className="py-0">
+              <BookingPanelContent className="space-y-3 p-5">
                 <Skeleton className="h-10 w-10 rounded-2xl" />
                 <Skeleton className="h-8 w-16" />
                 <Skeleton className="h-4 w-24" />
-              </CardContent>
-            </Card>
+              </BookingPanelContent>
+            </BookingPanel>
           ))}
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <Card className="rounded-[1.75rem] border-border/70 py-0">
-          <CardContent className="space-y-3 p-6">
+        <BookingPanel>
+          <BookingPanelContent className="space-y-3">
             {Array.from({ length: 3 }).map((_, index) => (
               <Skeleton key={index} className="h-24 w-full rounded-2xl" />
             ))}
-          </CardContent>
-        </Card>
+          </BookingPanelContent>
+        </BookingPanel>
 
         <div className="space-y-4">
-          <Card className="rounded-[1.75rem] border-border/70 py-0">
-            <CardContent className="space-y-3 p-6">
+          <BookingPanel>
+            <BookingPanelContent className="space-y-3">
               <Skeleton className="h-20 w-full rounded-2xl" />
               <Skeleton className="h-20 w-full rounded-2xl" />
-            </CardContent>
-          </Card>
-          <Card className="rounded-[1.75rem] border-border/70 py-0">
-            <CardContent className="space-y-3 p-6">
+            </BookingPanelContent>
+          </BookingPanel>
+          <BookingPanel>
+            <BookingPanelContent className="space-y-3">
               <Skeleton className="h-16 w-full rounded-2xl" />
               <Skeleton className="h-16 w-full rounded-2xl" />
-            </CardContent>
-          </Card>
+            </BookingPanelContent>
+          </BookingPanel>
         </div>
       </div>
     </div>
@@ -177,11 +174,11 @@ export function ProfileOverviewSection() {
 
   if (profileQuery.isError || !profileQuery.data?.data) {
     return (
-      <Card className="rounded-[1.75rem] border-destructive/20 py-0">
-        <CardContent className="p-6 text-sm text-destructive">
+      <BookingPanel className="border-destructive/20">
+        <BookingPanelContent className="text-sm text-destructive">
           Unable to load your profile dashboard right now.
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
@@ -195,9 +192,6 @@ export function ProfileOverviewSection() {
   const unreadMessages = chatUnreadQuery.data?.data.totalUnread ?? 0;
   const unreadNotifications =
     notificationUnreadQuery.data?.data.unreadCount ?? 0;
-  const packageLabel = !isBuddy
-    ? "Not a buddy"
-    : subscriptionQuery.data?.data?.packageName || "No package";
 
   const statCards = [
     {
@@ -228,25 +222,19 @@ export function ProfileOverviewSection() {
       href: "/profile?section=notifications",
       tone: "bg-[#fff0ef] text-[#b33a32]",
     },
-    {
-      label: "Service package",
-      value: packageLabel,
-      icon: Package,
-      href: "/profile?section=services",
-      tone: "bg-[#f4efff] text-[#6d3fd1]",
-    },
   ];
 
   return (
     <div className="space-y-4">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(20rem,1fr)]">
-        <Card className="overflow-hidden rounded-[1.75rem] border-border/70 bg-card py-0 shadow-sm">
-          <CardContent className="p-6">
+        <BookingPanel className="overflow-hidden shadow-sm">
+          <BookingPanelContent>
             <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
               <Avatar className="h-24 w-24 border border-white/80 shadow-sm">
                 <AvatarImage
                   src={profile.profilePicture ?? undefined}
                   alt={profile.fullName ?? "Profile"}
+                  className="h-full w-full object-cover object-center"
                 />
                 <AvatarFallback className="bg-white text-lg font-semibold text-primary">
                   {getInitials(profile.fullName, profile.email)}
@@ -285,36 +273,9 @@ export function ProfileOverviewSection() {
 
                   <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
                     {profile.aboutMe?.trim() ||
-                      "Build trust with buddies by adding a short introduction, travel preferences, and a little context about how you like to explore a city."}
+                      "Your profile summary is empty. Add a brief introduction about yourself to let local buddies know more about you."}
                   </p>
                 </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {(profile.roles?.length ? profile.roles : ["User"]).map(
-                    (role) => (
-                      <Badge
-                        key={role}
-                        variant="secondary"
-                        className="rounded-full border border-border/60 bg-secondary/50 px-3 py-1"
-                      >
-                        <ShieldCheck className="mr-1 h-3.5 w-3.5 text-primary" />
-                        {role}
-                      </Badge>
-                    ),
-                  )}
-                </div>
-
-                {/* <div className="flex flex-wrap gap-3">
-                  <Button asChild className="rounded-xl">
-                    <Link href="/profile?section=personal">
-                      Edit personal info
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline" className="rounded-xl">
-                    <Link href="/profile?section=bookings">View bookings</Link>
-                  </Button>
-                </div> */}
 
                 <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">
                   <div className="p-4">
@@ -336,19 +297,16 @@ export function ProfileOverviewSection() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </BookingPanelContent>
+        </BookingPanel>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-2">
           {statCards.map((card) => {
             const Icon = card.icon;
 
             return (
-              <Card
-                key={card.label}
-                className="rounded-[1.75rem] border-border/70 py-0"
-              >
-                <CardContent className="flex h-full flex-col justify-between gap-4 p-5">
+              <BookingPanel key={card.label} className="py-0">
+                <BookingPanelContent className="flex h-full flex-col justify-between gap-4 p-5">
                   <div className="flex items-start justify-between gap-3">
                     <span
                       className={`grid h-11 w-11 place-items-center rounded-2xl ${card.tone}`}
@@ -372,30 +330,30 @@ export function ProfileOverviewSection() {
                       {card.label}
                     </p>
                   </div>
-                </CardContent>
-              </Card>
+                </BookingPanelContent>
+              </BookingPanel>
             );
           })}
         </div>
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)]">
-        <Card>
-          <CardHeader className="border-b border-border/70">
+        <BookingPanel>
+          <BookingPanelHeader className="border-b border-border/70">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <CardTitle className="text-xl">Travel activity</CardTitle>
-                <CardDescription>
+                <BookingPanelTitle>Travel activity</BookingPanelTitle>
+                <BookingPanelDescription>
                   Keep an eye on recent bookings and trip requests from one
                   place.
-                </CardDescription>
+                </BookingPanelDescription>
               </div>
               <Button asChild variant="outline" className="rounded-xl">
                 <Link href="/profile?section=bookings">All bookings</Link>
               </Button>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-4 p-6">
+          </BookingPanelHeader>
+          <BookingPanelContent className="space-y-4">
             {bookings.length > 0 ? (
               bookings.slice(0, 3).map((booking) => (
                 <div
@@ -482,25 +440,25 @@ export function ProfileOverviewSection() {
                 </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </BookingPanelContent>
+        </BookingPanel>
 
         <div className="space-y-4">
-          <Card>
-            <CardHeader className="border-b border-border/70">
+          <BookingPanel>
+            <BookingPanelHeader className="border-b border-border/70">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-xl">Messages</CardTitle>
-                  <CardDescription>
+                  <BookingPanelTitle>Messages</BookingPanelTitle>
+                  <BookingPanelDescription>
                     Quick pulse on active conversations with buddies.
-                  </CardDescription>
+                  </BookingPanelDescription>
                 </div>
                 <Badge className="bg-primary/10 px-3 py-1 text-primary">
                   {unreadMessages} unread
                 </Badge>
               </div>
-            </CardHeader>
-            <CardContent>
+            </BookingPanelHeader>
+            <BookingPanelContent>
               {rooms.length > 0 ? (
                 rooms.slice(0, 3).map((room) => (
                   <div
@@ -523,7 +481,7 @@ export function ProfileOverviewSection() {
                   No conversations yet.
                 </div>
               )}
-            </CardContent>
+            </BookingPanelContent>
             <Button
               asChild
               variant="outline"
@@ -531,23 +489,23 @@ export function ProfileOverviewSection() {
             >
               <Link href="/messages">Open inbox</Link>
             </Button>
-          </Card>
+          </BookingPanel>
 
-          <Card className="rounded-[1.75rem] border-border/70">
-            <CardHeader className="border-b border-border/70">
+          <BookingPanel>
+            <BookingPanelHeader className="border-b border-border/70">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <CardTitle className="text-xl">Notifications</CardTitle>
-                  <CardDescription>
+                  <BookingPanelTitle>Notifications</BookingPanelTitle>
+                  <BookingPanelDescription>
                     Recent account and travel activity alerts.
-                  </CardDescription>
+                  </BookingPanelDescription>
                 </div>
                 <Badge className="rounded-full bg-primary/10 px-3 py-1 text-primary">
                   {unreadNotifications} unread
                 </Badge>
               </div>
-            </CardHeader>
-            <CardContent>
+            </BookingPanelHeader>
+            <BookingPanelContent>
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
@@ -578,7 +536,7 @@ export function ProfileOverviewSection() {
                   No notifications yet.
                 </div>
               )}
-            </CardContent>
+            </BookingPanelContent>
             <Button
               asChild
               variant="outline"
@@ -588,7 +546,7 @@ export function ProfileOverviewSection() {
                 View notifications
               </Link>
             </Button>
-          </Card>
+          </BookingPanel>
         </div>
       </div>
     </div>

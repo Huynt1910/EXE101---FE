@@ -9,7 +9,7 @@ export function SubscriptionCard() {
         <li>Exclusive educational offers every month</li>
       </ul>
       <button
-        className="type-body mt-8 w-full rounded-2xl bg-card px-4 py-3 font-semibold text-primary hover:opacity-95"
+        className="type-body mt-8 w-full rounded-2xl bg-background px-4 py-3 font-semibold text-primary hover:opacity-95"
         type="button"
       >
         Subscribe

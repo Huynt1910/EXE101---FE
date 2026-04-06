@@ -14,7 +14,7 @@ export function ProfileTopBar({
   description = "Manage your account, upcoming plans, and travel activity.",
 }: Readonly<ProfileTopBarProps>) {
   return (
-    <header className="rounded-[1.75rem] border border-border/60 bg-card/90 p-4 shadow-sm">
+    <header className="rounded-[1.75rem] border border-border/60 bg-background p-4 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="space-y-1">
           <h1 className="type-h2 font-semibold text-foreground">{title}</h1>

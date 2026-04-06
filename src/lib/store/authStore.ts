@@ -66,7 +66,16 @@ function getStoredRoles(): string[] {
 	}
 }
 
-function setAuthFromToken(token: string, roles: unknown = [], writeCookie = true) {
+function getStoredRefreshToken() {
+	return getCookie(cookieConfig.authSession.name);
+}
+
+function setAuthFromToken(
+	token: string,
+	roles: unknown = [],
+	writeCookie = true,
+	refreshToken?: string | null,
+) {
 	const payload = decodeJwtPayload(token);
 	const baseUser = mapJwtPayloadToUser(payload);
 	const normalizedRoles = normalizeRoles(roles);
@@ -94,6 +103,17 @@ function setAuthFromToken(token: string, roles: unknown = [], writeCookie = true
 			...cookieConfig.authRoles.options,
 			maxAge: getTokenMaxAge(token),
 		});
+
+		const nextRefreshToken =
+			typeof refreshToken === "string" && refreshToken.trim() !== ""
+				? refreshToken.trim()
+				: getStoredRefreshToken();
+
+		if (nextRefreshToken) {
+			setCookie(cookieConfig.authSession.name, nextRefreshToken, {
+				...cookieConfig.authSession.options,
+			});
+		}
 	}
 
 	httpClient.setAuthToken(token);
@@ -109,6 +129,7 @@ function setAuthFromToken(token: string, roles: unknown = [], writeCookie = true
 function clearAuthState() {
 	removeCookie(cookieConfig.authToken.name, cookieConfig.authToken.options.path);
 	removeCookie(cookieConfig.authRoles.name, cookieConfig.authRoles.options.path);
+	removeCookie(cookieConfig.authSession.name, cookieConfig.authSession.options.path);
 	httpClient.setAuthToken(null);
 	setState(initialState);
 }
@@ -132,6 +153,8 @@ async function login(payload: LoginRequest) {
 	const isValid = setAuthFromToken(
 		response.data.accessToken,
 		response.data.roles ?? response.data.role ?? [],
+		true,
+		response.data.refreshToken,
 	);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");
@@ -150,6 +173,8 @@ async function loginGoogle(payload: LoginGoogleRequest) {
 	const isValid = setAuthFromToken(
 		response.data.accessToken,
 		response.data.roles ?? response.data.role ?? [],
+		true,
+		response.data.refreshToken,
 	);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");
@@ -176,12 +201,38 @@ function restoreAuth() {
 	}
 }
 
-function setAuthToken(token: string, roles: unknown = []) {
-	const isValid = setAuthFromToken(token, roles, true);
+function setAuthToken(token: string, roles: unknown = [], refreshToken?: string | null) {
+	const isValid = setAuthFromToken(token, roles, true, refreshToken);
 	if (!isValid) {
 		throw new Error("Invalid access token payload");
 	}
 	return isValid;
+}
+
+async function refreshSession() {
+	const refreshToken = getStoredRefreshToken();
+	if (!refreshToken) {
+		throw new Error("Missing refresh token. Please sign in again.");
+	}
+
+	const response = await authApi.refreshToken({ refreshToken });
+
+	if (!response.success || !response.data?.accessToken) {
+		throw new Error(response.message ?? "Unable to refresh session.");
+	}
+
+	const isValid = setAuthFromToken(
+		response.data.accessToken,
+		response.data.roles ?? response.data.role ?? [],
+		true,
+		response.data.refreshToken ?? refreshToken,
+	);
+
+	if (!isValid) {
+		throw new Error("Invalid access token payload");
+	}
+
+	return response;
 }
 
 export function useAuthStore() {
@@ -194,5 +245,6 @@ export const authStore = {
 	loginGoogle,
 	logout,
 	restoreAuth,
+	refreshSession,
 	setAuthToken,
 };

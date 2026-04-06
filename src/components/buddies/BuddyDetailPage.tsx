@@ -136,8 +136,12 @@ function BookingIntentCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
     <Card className="sticky top-28 overflow-hidden rounded-[2rem] border-border/70 bg-card py-0 shadow-xl">
       <div className="bg-gradient-to-br from-primary to-primary/80 px-6 py-6 text-primary-foreground">
         <div className="flex items-center gap-4">
-          <Avatar className="h-16 w-16 border border-white/30 bg-white/10">
-            <AvatarImage src={buddy.profilePicture ?? undefined} alt={buddy.fullName ?? "Buddy"} />
+          <Avatar className="h-16 w-16 shrink-0 overflow-hidden border border-white/30 bg-white/10">
+            <AvatarImage
+              src={buddy.profilePicture ?? undefined}
+              alt={buddy.fullName ?? "Buddy"}
+              className="h-full w-full object-cover object-center"
+            />
             <AvatarFallback className="bg-white text-primary">
               {getInitials(buddy.fullName)}
             </AvatarFallback>
@@ -305,8 +309,12 @@ export default function BuddyDetailPage({
                   </Badge>
                 </div>
                 <div className="absolute bottom-6 left-6 right-6 flex items-end gap-4">
-                  <Avatar className="h-20 w-20 border-2 border-white/80 bg-white/20 shadow-lg">
-                    <AvatarImage src={buddy.profilePicture ?? undefined} alt={buddy.fullName ?? "Buddy"} />
+                  <Avatar className="h-20 w-20 shrink-0 overflow-hidden border-2 border-white/80 bg-white/20 shadow-lg">
+                    <AvatarImage
+                      src={buddy.profilePicture ?? undefined}
+                      alt={buddy.fullName ?? "Buddy"}
+                      className="h-full w-full object-cover object-center"
+                    />
                     <AvatarFallback className="bg-white text-lg text-primary">
                       {getInitials(buddy.fullName)}
                     </AvatarFallback>

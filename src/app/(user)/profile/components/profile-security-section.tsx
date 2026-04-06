@@ -7,12 +7,12 @@ import { toast } from "sonner";
 import { KeyRound, LoaderCircle, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  BookingPanel,
+  BookingPanelContent,
+  BookingPanelDescription,
+  BookingPanelHeader,
+  BookingPanelTitle,
+} from "@/components/ui/booking-panel";
 import { Input } from "@/components/ui/input";
 import { handleApiError } from "@/lib/error-handler";
 import { useChangePasswordMutation } from "@/features/auth/hooks/useChangePassword";
@@ -67,15 +67,15 @@ export function ProfileSecuritySection() {
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.8fr)]">
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
-        <CardHeader className="border-b border-border/70">
-          <CardTitle className="text-2xl">Security</CardTitle>
-          <CardDescription>
+      <BookingPanel>
+        <BookingPanelHeader className="border-b border-border/70">
+          <BookingPanelTitle className="text-2xl">Security</BookingPanelTitle>
+          <BookingPanelDescription>
             Update your password to keep your bookings, chats, and travel plans
             protected.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6">
+          </BookingPanelDescription>
+        </BookingPanelHeader>
+        <BookingPanelContent>
           <form className="space-y-5" onSubmit={handleSubmit}>
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
@@ -134,17 +134,17 @@ export function ProfileSecuritySection() {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
 
-      <Card className="rounded-[1.75rem] border-border/70 bg-card py-0 shadow-sm">
-        <CardHeader className="border-b border-border/70">
-          <CardTitle className="text-xl">Security guidance</CardTitle>
-          <CardDescription>
+      <BookingPanel>
+        <BookingPanelHeader className="border-b border-border/70">
+          <BookingPanelTitle>Security guidance</BookingPanelTitle>
+          <BookingPanelDescription>
             Keep this account ready for future bookings and payment actions.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 p-6 text-sm text-muted-foreground">
+          </BookingPanelDescription>
+        </BookingPanelHeader>
+        <BookingPanelContent className="space-y-4 text-sm text-muted-foreground">
           <div className="rounded-2xl border border-border/70 bg-white/90 p-4">
             <div className="flex items-center gap-2 font-medium text-foreground">
               <ShieldCheck className="h-4 w-4 text-primary" />
@@ -173,8 +173,8 @@ export function ProfileSecuritySection() {
               but new sensitive actions will use the updated password.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     </div>
   );
 }

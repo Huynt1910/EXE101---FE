@@ -4,12 +4,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminQueryKeys } from "@/features/admin/api/admin.query-key";
 import { adminApi } from "@/features/admin/api/admin.services";
 import type {
+  AdminBookingsQuery,
   AdminBookingStatusUpdateRequest,
   AdminBuddiesQuery,
   AdminBuddyRegisterRequest,
   AdminBuddyUpdateRequest,
   AdminIncidentsQuery,
   AdminIncidentResolveRequest,
+  AdminOverviewQuery,
+  AdminOverviewSummaryQuery,
+  AdminOverviewTopBuddiesQuery,
   AdminServicePackageRequest,
   AdminTripsQuery,
   AdminUsersQuery,
@@ -72,6 +76,14 @@ export function useAdminTripBookings(tripId?: string | null) {
   });
 }
 
+export function useAdminBookings(params?: AdminBookingsQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.bookings(params),
+    queryFn: () => adminApi.getBookings(params),
+    placeholderData: (previous) => previous,
+  });
+}
+
 export function useAdminBookingDetail(id?: string | null) {
   return useQuery({
     queryKey: adminQueryKeys.bookingDetail(id ?? ""),
@@ -101,6 +113,102 @@ export function useAdminIncidents(params?: AdminIncidentsQuery) {
     queryKey: adminQueryKeys.incidents(params),
     queryFn: () => adminApi.getIncidents(params),
     placeholderData: (previous) => previous,
+  });
+}
+
+export function useAdminOverviewKpiCards(params?: AdminOverviewQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewKpiCards(params),
+    queryFn: () => adminApi.getOverviewKpiCards(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewTripDemandTrend(params?: AdminOverviewQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewTripDemandTrend(params),
+    queryFn: () => adminApi.getOverviewTripDemandTrend(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBookingMix(params?: AdminOverviewQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBookingMix(params),
+    queryFn: () => adminApi.getOverviewBookingMix(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBottomStats(params?: AdminOverviewQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBottomStats(params),
+    queryFn: () => adminApi.getOverviewBottomStats(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewRevenue(params?: AdminOverviewQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewRevenue(params),
+    queryFn: () => adminApi.getOverviewRevenue(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBuddyGrowthTrend(params?: AdminOverviewQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBuddyGrowthTrend(params),
+    queryFn: () => adminApi.getOverviewBuddyGrowthTrend(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBuddySubscriptionDistribution(
+  params?: AdminOverviewQuery,
+) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBuddySubscriptionDistribution(params),
+    queryFn: () => adminApi.getOverviewBuddySubscriptionDistribution(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBuddyTopEarners(
+  params?: AdminOverviewTopBuddiesQuery,
+) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBuddyTopEarners(params),
+    queryFn: () => adminApi.getOverviewBuddyTopEarners(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBuddyTopRated(
+  params?: AdminOverviewTopBuddiesQuery,
+) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBuddyTopRated(params),
+    queryFn: () => adminApi.getOverviewBuddyTopRated(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewBuddyRecentActivity(
+  params?: AdminOverviewQuery,
+) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewBuddyRecentActivity(params),
+    queryFn: () => adminApi.getOverviewBuddyRecentActivity(params),
+    staleTime: 30 * 1000,
+  });
+}
+
+export function useAdminOverviewSummary(params?: AdminOverviewSummaryQuery) {
+  return useQuery({
+    queryKey: adminQueryKeys.overviewSummary(params),
+    queryFn: () => adminApi.getOverviewSummary(params),
+    staleTime: 30 * 1000,
   });
 }
 
@@ -181,6 +289,7 @@ export function useAdminMutations() {
       payload: AdminBookingStatusUpdateRequest;
     }) => adminApi.updateBookingStatus(id, payload),
     onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "bookings"] });
       queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "trips"] });
       queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "trip-bookings"] });
       queryClient.invalidateQueries({

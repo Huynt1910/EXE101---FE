@@ -7,12 +7,12 @@ import { CalendarClock, CreditCard, MessageCircle, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  BookingPanel,
+  BookingPanelContent,
+  BookingPanelDescription,
+  BookingPanelHeader,
+  BookingPanelTitle,
+} from "@/components/ui/booking-panel";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useConfirmAndCreatePaypalOrderMutation,
@@ -115,34 +115,34 @@ export function ProfileBookingsSection() {
 
   if (bookingsQuery.isLoading) {
     return (
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
-        <CardContent className="p-6 text-sm text-muted-foreground">
+      <BookingPanel>
+        <BookingPanelContent className="text-sm text-muted-foreground">
           Loading your bookings…
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
   if (bookingsQuery.isError) {
     return (
-      <Card className="rounded-[1.75rem] border-destructive/20 py-0">
-        <CardContent className="p-6 text-sm text-destructive">
+      <BookingPanel className="border-destructive/20">
+        <BookingPanelContent className="text-sm text-destructive">
           Unable to load your bookings right now.
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
   return (
-    <Card className="rounded-[1.75rem] border-border/70 py-0">
-      <CardHeader className="border-b border-border/70">
+    <BookingPanel>
+      <BookingPanelHeader className="border-b border-border/70">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <CardTitle className="text-2xl">My bookings</CardTitle>
-            <CardDescription>
+            <BookingPanelTitle className="text-2xl">My bookings</BookingPanelTitle>
+            <BookingPanelDescription>
               Track confirmation, payment, and local buddy commitments in one
               place.
-            </CardDescription>
+            </BookingPanelDescription>
           </div>
           <Tabs
             value={activeTab}
@@ -161,8 +161,8 @@ export function ProfileBookingsSection() {
             </TabsList>
           </Tabs>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 p-6">
+      </BookingPanelHeader>
+      <BookingPanelContent className="space-y-4">
         {filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => {
             const group = getBookingGroup(booking.statusName || booking.status);
@@ -173,7 +173,7 @@ export function ProfileBookingsSection() {
             return (
               <div
                 key={booking.id}
-                className="rounded-[1.5rem] border border-border/70 bg-card p-5 shadow-sm"
+                className="rounded-[1.5rem] border border-border/70 bg-background p-5 shadow-sm"
               >
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                   <div className="min-w-0 flex-1 space-y-4">
@@ -227,7 +227,7 @@ export function ProfileBookingsSection() {
                         </div>
                       </div>
 
-                      <div className="space-y-3 rounded-[1.25rem] border border-border/70 bg-card/90 p-4">
+                      <div className="space-y-3 rounded-[1.25rem] border border-border/70 bg-background p-4">
                         <div>
                           <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
                             Includes
@@ -291,7 +291,7 @@ export function ProfileBookingsSection() {
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </BookingPanelContent>
+    </BookingPanel>
   );
 }

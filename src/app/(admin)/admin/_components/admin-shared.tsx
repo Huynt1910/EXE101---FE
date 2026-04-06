@@ -53,7 +53,7 @@ export const TRIP_STATUS_OPTIONS: AdminTripStatus[] = [
 export const GENDER_OPTIONS = ["Male", "Female", "Other"];
 
 export const selectClassName =
-  "flex h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50";
+  "flex h-9 w-full text-primary rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50";
 
 export const BOOKING_CHART_COLORS = [
   "#fb923c",

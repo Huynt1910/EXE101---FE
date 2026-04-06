@@ -16,7 +16,13 @@ import {
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AvatarCropDialog } from "@/components/common/avatar-crop-dialog";
+import {
+  BookingPanel,
+  BookingPanelContent,
+  BookingPanelHeader,
+  BookingPanelTitle,
+} from "@/components/ui/booking-panel";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -25,6 +31,10 @@ import {
   useUserProfile,
   useUserProfileMutations,
 } from "@/features/user/hooks/useUserProfile";
+import {
+  cropAvatarFile,
+  type AvatarCropTransform,
+} from "@/utils/optimizeAvatarFile";
 import type {
   UpdateUserProfileRequest,
   UserProfile,
@@ -130,91 +140,11 @@ function getInitials(profile?: UserProfile | null) {
     .join("");
 }
 
-async function loadImageElement(file: File) {
-  const objectUrl = URL.createObjectURL(file);
-
-  try {
-    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const nextImage = new Image();
-      nextImage.onload = () => resolve(nextImage);
-      nextImage.onerror = () =>
-        reject(new Error("Unable to read the selected image."));
-      nextImage.src = objectUrl;
-    });
-
-    return image;
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
-async function canvasToBlob(canvas: HTMLCanvasElement, quality: number) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (!blob) {
-          reject(new Error("Unable to process the selected image."));
-          return;
-        }
-
-        resolve(blob);
-      },
-      "image/jpeg",
-      quality,
-    );
-  });
-}
-
-async function optimizeAvatarFile(file: File) {
-  if (file.size <= MAX_AVATAR_FILE_BYTES) {
-    return file;
-  }
-
-  const image = await loadImageElement(file);
-  const scale = Math.min(
-    1,
-    MAX_AVATAR_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight),
-  );
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    throw new Error("Unable to process the selected image.");
-  }
-
-  context.drawImage(image, 0, 0, width, height);
-
-  let quality = 0.9;
-  let blob = await canvasToBlob(canvas, quality);
-
-  while (blob.size > MAX_AVATAR_FILE_BYTES && quality > 0.45) {
-    quality -= 0.1;
-    blob = await canvasToBlob(canvas, quality);
-  }
-
-  if (blob.size > MAX_AVATAR_FILE_BYTES) {
-    throw new Error(
-      "Image is still too large after compression. Please choose a smaller file.",
-    );
-  }
-
-  const fileBaseName = file.name.replace(/\.[^/.]+$/, "");
-  return new File([blob], `${fileBaseName || "avatar"}.jpg`, {
-    type: "image/jpeg",
-    lastModified: Date.now(),
-  });
-}
-
 function ProfileSummarySkeleton() {
   return (
     <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
-        <CardContent className="space-y-6 p-6">
+      <BookingPanel>
+        <BookingPanelContent className="space-y-6">
           <div className="flex flex-col items-center gap-4 text-center">
             <Skeleton className="h-28 w-28 rounded-full" />
             <div className="space-y-2">
@@ -232,15 +162,15 @@ function ProfileSummarySkeleton() {
             </div>
             <Skeleton className="h-10 w-full rounded-xl" />
           </div>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
 
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
-        <CardHeader className="border-b border-border/70 pb-5">
+      <BookingPanel>
+        <BookingPanelHeader className="border-b border-border/70 pb-5">
           <Skeleton className="h-6 w-40" />
           <Skeleton className="h-4 w-64" />
-        </CardHeader>
-        <CardContent className="space-y-5 p-6">
+        </BookingPanelHeader>
+        <BookingPanelContent className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             {Array.from({ length: 6 }).map((_, index) => (
               <div key={index} className="space-y-2">
@@ -263,8 +193,8 @@ function ProfileSummarySkeleton() {
           <div className="flex justify-end">
             <Skeleton className="h-10 w-32 rounded-xl" />
           </div>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     </div>
   );
 }
@@ -276,6 +206,8 @@ export function ProfileSummaryCard() {
   const { updateProfileMutation, uploadAvatarMutation } =
     useUserProfileMutations();
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
+  const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
+  const [cropDialogImageSrc, setCropDialogImageSrc] = useState<string | null>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -302,13 +234,20 @@ export function ProfileSummaryCard() {
   useEffect(() => {
     return () => {
       revokeObjectUrl(avatarPreviewUrl);
+      revokeObjectUrl(cropDialogImageSrc);
     };
-  }, [avatarPreviewUrl]);
+  }, [avatarPreviewUrl, cropDialogImageSrc]);
 
   const profile = profileQuery.data?.data;
   const avatarSrc = avatarPreviewUrl || profile?.profilePicture || undefined;
   const isSavingProfile = updateProfileMutation.isPending;
   const isUploadingAvatar = uploadAvatarMutation.isPending;
+
+  const closeCropDialog = () => {
+    revokeObjectUrl(cropDialogImageSrc);
+    setCropDialogImageSrc(null);
+    setPendingAvatarFile(null);
+  };
 
   const handleSave = form.handleSubmit(async (values) => {
     try {
@@ -337,8 +276,22 @@ export function ProfileSummaryCard() {
       return;
     }
 
+    setPendingAvatarFile(file);
+    setCropDialogImageSrc((current) => {
+      revokeObjectUrl(current);
+      return URL.createObjectURL(file);
+    });
+    event.target.value = "";
+  };
+
+  const handleConfirmAvatarCrop = async (transform: AvatarCropTransform) => {
+    if (!pendingAvatarFile) return;
+
     try {
-      const optimizedFile = await optimizeAvatarFile(file);
+      const optimizedFile = await cropAvatarFile(pendingAvatarFile, transform, {
+        maxBytes: MAX_AVATAR_FILE_BYTES,
+        maxDimension: MAX_AVATAR_DIMENSION,
+      });
       const nextPreviewUrl = URL.createObjectURL(optimizedFile);
 
       setAvatarPreviewUrl((current) => {
@@ -349,6 +302,7 @@ export function ProfileSummaryCard() {
       await uploadAvatarMutation.mutateAsync(optimizedFile);
       revokeObjectUrl(nextPreviewUrl);
       setAvatarPreviewUrl(null);
+      closeCropDialog();
       toast.success("Avatar updated successfully.");
     } catch (error) {
       setAvatarPreviewUrl((current) => {
@@ -363,18 +317,14 @@ export function ProfileSummaryCard() {
         (error as { status?: number }).status === 413
       ) {
         toast.error("Image is too large. Please choose a smaller image.");
-        event.target.value = "";
         return;
       }
 
       if (error instanceof Error) {
         toast.error(error.message);
-        event.target.value = "";
         return;
       }
       handleApiError(error, { showTitle: false });
-    } finally {
-      event.target.value = "";
     }
   };
 
@@ -384,20 +334,21 @@ export function ProfileSummaryCard() {
 
   if (profileQuery.isError || !profile) {
     return (
-      <Card className="rounded-[1.75rem] border-destructive/20 py-0">
-        <CardContent className="p-6">
+      <BookingPanel className="border-destructive/20">
+        <BookingPanelContent>
           <p className="text-sm text-destructive">
             Unable to load your profile information.
           </p>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
-        <CardContent className="space-y-6 p-6">
+    <>
+      <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <BookingPanel>
+        <BookingPanelContent className="space-y-6">
           <div className="flex flex-col items-center gap-4 text-center">
             <Avatar className="h-28 w-28 border border-border/70 bg-secondary">
               <AvatarImage
@@ -463,16 +414,16 @@ export function ProfileSummaryCard() {
               <p>Last update {formatDateLabel(profile.updatedAt)}</p>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
 
-      <Card className="rounded-[1.75rem] border-border/70 py-2">
-        <CardHeader className="border-b border-border/70 pb-5">
+      <BookingPanel className="py-2">
+        <BookingPanelHeader className="border-b border-border/70 pb-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-2xl text-foreground">
+              <BookingPanelTitle className="text-2xl text-foreground">
                 Profile details
-              </CardTitle>
+              </BookingPanelTitle>
               <p className="text-sm text-muted-foreground">
                 Review your self-service profile and save text changes
                 separately from the avatar upload.
@@ -493,9 +444,9 @@ export function ProfileSummaryCard() {
               {isSavingProfile ? "Saving…" : "Save profile"}
             </Button> */}
           </div>
-        </CardHeader>
+        </BookingPanelHeader>
 
-        <CardContent className="p-6">
+        <BookingPanelContent>
           <form className="space-y-5" onSubmit={handleSave}>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -627,8 +578,18 @@ export function ProfileSummaryCard() {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
-    </div>
+        </BookingPanelContent>
+        </BookingPanel>
+      </div>
+      <AvatarCropDialog
+        open={Boolean(cropDialogImageSrc)}
+        imageSrc={cropDialogImageSrc}
+        isSubmitting={isUploadingAvatar}
+        onOpenChange={(open) => {
+          if (!open) closeCropDialog();
+        }}
+        onConfirm={handleConfirmAvatarCrop}
+      />
+    </>
   );
 }

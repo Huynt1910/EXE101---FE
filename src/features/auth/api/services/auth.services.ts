@@ -4,6 +4,7 @@ import {
   LoginGoogleRequest,
   LoginRequest,
   LoginResponse,
+  RefreshTokenRequest,
   RequestOtpRequest,
   SignUpRequest,
   SignUpResponse,
@@ -26,6 +27,14 @@ export const authApi = {
   async loginGoogle(payload: LoginGoogleRequest) {
     const res = await httpClient.post<ApiResponse<LoginResponse>, LoginGoogleRequest>(
       `${AUTH_BASE_PATH}/login-google`,
+      payload,
+    );
+    return res.data;
+  },
+
+  async refreshToken(payload: RefreshTokenRequest) {
+    const res = await httpClient.post<ApiResponse<LoginResponse>, RefreshTokenRequest>(
+      `${AUTH_BASE_PATH}/refresh-token`,
       payload,
     );
     return res.data;
