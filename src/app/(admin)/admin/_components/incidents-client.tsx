@@ -4,14 +4,6 @@ import { useEffect, useState } from "react";
 import { Clock3, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -120,14 +112,16 @@ export function IncidentsClient() {
   return (
     <>
       <div className="space-y-6">
-        <Card className="border-border/70">
-          <CardHeader>
-            <CardTitle>Incident management</CardTitle>
-            <CardDescription>
+        <div className="booking-muted-panel">
+          <div className="space-y-1.5 p-6">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Incident management
+            </h2>
+            <p className="text-sm text-muted-foreground">
               Filter the admin incident queue and close the loop on booking issues.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            </p>
+          </div>
+          <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-2">
               <Label htmlFor="incident-booking">Booking ID</Label>
               <Input
@@ -192,16 +186,20 @@ export function IncidentsClient() {
                 Reset filters
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.95fr)]">
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle>Incident queue</CardTitle>
-              <CardDescription>{totalIncidents} incidents returned by `/api/Incidents`.</CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
+          <div className="booking-muted-panel">
+            <div className="space-y-1.5 p-6">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                Incident queue
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {totalIncidents} incidents returned by `/api/Incidents`.
+              </p>
+            </div>
+            <div className="px-0">
               {incidents.length ? (
                 <Table>
                   <TableHeader>
@@ -258,8 +256,8 @@ export function IncidentsClient() {
                   <EmptyState title="No incidents found" description="The current filters did not return any incident records." />
                 </div>
               )}
-            </CardContent>
-            <CardFooter className="border-t border-border/70 px-0 pt-0">
+            </div>
+            <div className="border-t border-border/70 px-0 pt-0">
               <PaginationControls
                 page={incidentsQuery.data?.data.page ?? 1}
                 totalPages={incidentsQuery.data?.data.totalPages ?? 1}
@@ -272,20 +270,24 @@ export function IncidentsClient() {
                   )
                 }
               />
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="border-border/70">
-            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="booking-muted-panel">
+            <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>Selected incident</CardTitle>
-                <CardDescription>Investigate context before updating the resolution state.</CardDescription>
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                  Selected incident
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Investigate context before updating the resolution state.
+                </p>
               </div>
               <Button variant="outline" onClick={() => setIsResolveIncidentDialogOpen(true)} disabled={!selectedIncident}>
                 Resolve incident
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="px-6 pb-6">
               {selectedIncident ? (
                 <div className="grid gap-3">
                   <DetailItem label="Type" value={selectedIncident.typeName || selectedIncident.type} />
@@ -300,8 +302,8 @@ export function IncidentsClient() {
               ) : (
                 <EmptyState title="No incident selected" description="Select an incident row to inspect ticket details and save a resolution." />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 

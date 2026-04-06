@@ -1,9 +1,12 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { buddyQueryKeys } from "@/features/buddy/api/buddy.query-key";
 import { buddyApi } from "@/features/buddy/api/buddy.services";
-import type { RegisterAsBuddyRequest } from "@/features/buddy/type";
+import type {
+  RegisterAsBuddyRequest,
+  UpdateBuddyProfileRequest,
+} from "@/features/buddy/type";
 
 export function useBuddiesQuery() {
   return useQuery({
@@ -62,4 +65,28 @@ export function useMyTripRequestsQuery() {
     queryFn: () => buddyApi.getMyTripRequests(),
     staleTime: 30 * 1000,
   });
+}
+
+export function useBuddyProfileMutations() {
+  const queryClient = useQueryClient();
+
+  const invalidateBuddyProfile = async () => {
+    await queryClient.invalidateQueries({ queryKey: buddyQueryKeys.me() });
+  };
+
+  const updateBuddyProfileMutation = useMutation({
+    mutationFn: (payload: UpdateBuddyProfileRequest) =>
+      buddyApi.updateBuddyProfile(payload),
+    onSuccess: invalidateBuddyProfile,
+  });
+
+  const uploadBuddyAvatarMutation = useMutation({
+    mutationFn: (file: File) => buddyApi.uploadBuddyAvatar(file),
+    onSuccess: invalidateBuddyProfile,
+  });
+
+  return {
+    updateBuddyProfileMutation,
+    uploadBuddyAvatarMutation,
+  };
 }

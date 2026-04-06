@@ -71,11 +71,11 @@ export function VietnamHighlightsSection() {
 
   const HighlightCard = ({ highlight }: { highlight: Highlight }) => {
     return (
-      <div className="w-64 h-40 rounded-3xl overflow-hidden flex-shrink-0 shadow-lg group">
+      <div className="group h-40 w-64 shrink-0 overflow-hidden rounded-[2rem] shadow-lg">
         <img
           src={highlight.image}
           alt={highlight.name}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="block h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
       </div>
     );
@@ -113,10 +113,10 @@ export function VietnamHighlightsSection() {
         </motion.a>
       </div>
 
-      <div className="relative h-[320px] overflow-hidden">
+      <div className="relative h-[380px] overflow-hidden">
         <div
           ref={topRowRef}
-          className="flex gap-6 absolute top-6 whitespace-nowrap"
+          className="absolute top-4 flex gap-6 whitespace-nowrap"
         >
           {[...t.topRowHighlights, ...t.topRowHighlights].map(
             (highlight, i) => (
@@ -127,7 +127,7 @@ export function VietnamHighlightsSection() {
 
         <div
           ref={bottomRowRef}
-          className="flex gap-6 absolute top-[180px] whitespace-nowrap"
+          className="absolute top-[204px] flex gap-6 whitespace-nowrap"
         >
           {[...t.bottomRowHighlights, ...t.bottomRowHighlights].map(
             (highlight, i) => (

@@ -5,12 +5,12 @@ import { Bell, CheckCheck, RefreshCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+  BookingPanel,
+  BookingPanelContent,
+  BookingPanelDescription,
+  BookingPanelHeader,
+  BookingPanelTitle,
+} from "@/components/ui/booking-panel";
 import {
   useNotificationMutations,
   useNotificationUnreadCount,
@@ -87,21 +87,21 @@ export function ProfileNotificationsSection() {
 
   if (notificationsQuery.isLoading) {
     return (
-      <Card className="rounded-[1.75rem] border-border/70 py-0">
-        <CardContent className="p-6 text-sm text-muted-foreground">
+      <BookingPanel>
+        <BookingPanelContent className="text-sm text-muted-foreground">
           Loading notifications…
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
   if (notificationsQuery.isError) {
     return (
-      <Card className="rounded-[1.75rem] border-destructive/20 py-0">
-        <CardContent className="p-6 text-sm text-destructive">
+      <BookingPanel className="border-destructive/20">
+        <BookingPanelContent className="text-sm text-destructive">
           Unable to load notifications right now.
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
@@ -109,15 +109,15 @@ export function ProfileNotificationsSection() {
   const unreadCount = unreadCountQuery.data?.data.unreadCount ?? 0;
 
   return (
-    <Card className="rounded-[1.75rem] border-border/70 py-0">
-      <CardHeader className="border-b border-border/70">
+    <BookingPanel>
+      <BookingPanelHeader className="border-b border-border/70">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <CardTitle className="text-2xl">Notifications</CardTitle>
-            <CardDescription>
+            <BookingPanelTitle className="text-2xl">Notifications</BookingPanelTitle>
+            <BookingPanelDescription>
               Review recent account and travel events without leaving your
               profile.
-            </CardDescription>
+            </BookingPanelDescription>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
@@ -146,13 +146,13 @@ export function ProfileNotificationsSection() {
             </Button>
           </div>
         </div>
-      </CardHeader>
-      <CardContent className="space-y-4 p-6">
+      </BookingPanelHeader>
+      <BookingPanelContent className="space-y-4">
         {items.length > 0 ? (
           items.map((notification) => (
             <div
               key={notification.id}
-              className="rounded-[1.5rem] border border-border/70 bg-card/90 p-5"
+              className="rounded-[1.5rem] border border-border/70 bg-background p-5"
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div className="min-w-0 flex-1">
@@ -211,7 +211,7 @@ export function ProfileNotificationsSection() {
             </p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </BookingPanelContent>
+    </BookingPanel>
   );
 }

@@ -1,8 +1,10 @@
 import type { ApiResponse, PaginatedResult } from "@/features/api-type";
 import {
   type AdminBooking,
+  type AdminBookingListResponse,
   type AdminBookingIncidentListResponse,
   type AdminBookingResponse,
+  type AdminBookingsQuery,
   type AdminBookingStatusUpdateRequest,
   type AdminBuddy,
   type AdminBuddiesQuery,
@@ -15,6 +17,29 @@ import {
   type AdminIncidentListResponse,
   type AdminIncidentResolveRequest,
   type AdminIncidentResponse,
+  type AdminOverviewBookingMix,
+  type AdminOverviewBookingMixResponse,
+  type AdminOverviewBottomStats,
+  type AdminOverviewBottomStatsResponse,
+  type AdminOverviewBuddyGrowthTrend,
+  type AdminOverviewBuddyGrowthTrendResponse,
+  type AdminOverviewBuddyRecentActivity,
+  type AdminOverviewBuddyRecentActivityResponse,
+  type AdminOverviewBuddySubscriptionDistribution,
+  type AdminOverviewBuddySubscriptionDistributionResponse,
+  type AdminOverviewKpiCards,
+  type AdminOverviewKpiCardsResponse,
+  type AdminOverviewQuery,
+  type AdminOverviewRevenueOverview,
+  type AdminOverviewRevenueOverviewResponse,
+  type AdminOverviewSummary,
+  type AdminOverviewSummaryQuery,
+  type AdminOverviewSummaryResponse,
+  type AdminOverviewTopBuddiesQuery,
+  type AdminOverviewTopBuddy,
+  type AdminOverviewTopBuddiesResponse,
+  type AdminOverviewTripDemandTrend,
+  type AdminOverviewTripDemandTrendResponse,
   type AdminReview,
   type AdminReviewResponse,
   type AdminServicePackage,
@@ -59,6 +84,14 @@ function normalizeStringArray(value: unknown) {
     .filter((item): item is string => typeof item === "string")
     .map((item) => item.trim())
     .filter((item) => item.length > 0 && item.toLowerCase() !== "string");
+}
+
+function normalizeNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function normalizeBoolean(value: unknown) {
+  return value === true;
 }
 
 function normalizeBuddy(item: unknown): AdminBuddy {
@@ -159,6 +192,23 @@ function normalizeBooking(item: unknown): AdminBooking {
   };
 }
 
+function normalizeBookingPagePayload(
+  payload: unknown,
+): PaginatedResult<AdminBooking> {
+  const value = payload as Partial<PaginatedResult<AdminBooking>>;
+  return {
+    items: ensureArray<unknown>(value.items).map(normalizeBooking),
+    totalCount: typeof value.totalCount === "number" ? value.totalCount : 0,
+    page: typeof value.page === "number" ? value.page : 1,
+    pageSize: typeof value.pageSize === "number" ? value.pageSize : 10,
+    totalPages: typeof value.totalPages === "number" ? value.totalPages : 0,
+    hasPreviousPage:
+      typeof value.hasPreviousPage === "boolean" ? value.hasPreviousPage : false,
+    hasNextPage:
+      typeof value.hasNextPage === "boolean" ? value.hasNextPage : false,
+  };
+}
+
 function normalizeIncident(item: unknown): AdminIncident {
   const value = item as Partial<AdminIncident>;
   return {
@@ -234,6 +284,276 @@ function normalizeServicePackage(item: unknown): AdminServicePackage {
     features: normalizeStringArray(value.features),
     createdAt: normalizeDate(value.createdAt),
     updatedAt: normalizeDate(value.updatedAt),
+  };
+}
+
+function normalizeOverviewKpiCards(item: unknown): AdminOverviewKpiCards {
+  const value = (item ?? {}) as Partial<AdminOverviewKpiCards>;
+
+  return {
+    totalUsers: normalizeNumber(value.totalUsers),
+    verifiedUsers: normalizeNumber(value.verifiedUsers),
+    newUsersThisWindow: normalizeNumber(value.newUsersThisWindow),
+    totalBuddies: normalizeNumber(value.totalBuddies),
+    activeBuddies: normalizeNumber(value.activeBuddies),
+    buddiesWithSubscription: normalizeNumber(value.buddiesWithSubscription),
+    totalTrips: normalizeNumber(value.totalTrips),
+    openTrips: normalizeNumber(value.openTrips),
+    totalIncidents: normalizeNumber(value.totalIncidents),
+    unresolvedIncidents: normalizeNumber(value.unresolvedIncidents),
+  };
+}
+
+function normalizeOverviewTripDemandTrend(
+  item: unknown,
+): AdminOverviewTripDemandTrend {
+  const value = (item ?? {}) as Partial<AdminOverviewTripDemandTrend>;
+
+  return {
+    weeks: ensureArray<unknown>(value.weeks).map((week) => {
+      const weekValue =
+        week as Partial<AdminOverviewTripDemandTrend["weeks"][number]>;
+
+      return {
+        weekLabel: normalizeText(weekValue.weekLabel) ?? "Unknown week",
+        weekStart: normalizeDate(weekValue.weekStart),
+        weekEnd: normalizeDate(weekValue.weekEnd),
+        totalTrips: normalizeNumber(weekValue.totalTrips),
+        openTrips: normalizeNumber(weekValue.openTrips),
+      };
+    }),
+  };
+}
+
+function normalizeOverviewBookingMix(item: unknown): AdminOverviewBookingMix {
+  const value = (item ?? {}) as Partial<AdminOverviewBookingMix>;
+
+  return {
+    totalBookings: normalizeNumber(value.totalBookings),
+    statusBreakdown: ensureArray<unknown>(value.statusBreakdown).map((entry) => {
+      const entryValue =
+        entry as Partial<AdminOverviewBookingMix["statusBreakdown"][number]>;
+
+      return {
+        statusName: normalizeText(entryValue.statusName) ?? "Unknown",
+        count: normalizeNumber(entryValue.count),
+        percentage: normalizeNumber(entryValue.percentage),
+      };
+    }),
+  };
+}
+
+function normalizeOverviewBottomStats(item: unknown): AdminOverviewBottomStats {
+  const value = (item ?? {}) as Partial<AdminOverviewBottomStats>;
+
+  return {
+    totalRevenue: normalizeNumber(value.totalRevenue),
+    platformFeeRevenue: normalizeNumber(value.platformFeeRevenue),
+    currency: normalizeText(value.currency),
+    totalActiveBookings: normalizeNumber(value.totalActiveBookings),
+    directBookings: normalizeNumber(value.directBookings),
+    resolutionRate: normalizeNumber(value.resolutionRate),
+    resolvedIncidents: normalizeNumber(value.resolvedIncidents),
+    closedIncidents: normalizeNumber(value.closedIncidents),
+  };
+}
+
+function normalizeOverviewRevenue(
+  item: unknown,
+): AdminOverviewRevenueOverview {
+  const value = (item ?? {}) as Partial<AdminOverviewRevenueOverview>;
+
+  return {
+    totalBookingRevenue: normalizeNumber(value.totalBookingRevenue),
+    totalPlatformFees: normalizeNumber(value.totalPlatformFees),
+    totalSubscriptionRevenue: normalizeNumber(value.totalSubscriptionRevenue),
+    totalCombinedRevenue: normalizeNumber(value.totalCombinedRevenue),
+    revenueThisMonth: normalizeNumber(value.revenueThisMonth),
+    revenueLastMonth: normalizeNumber(value.revenueLastMonth),
+    growthPercentage: normalizeNumber(value.growthPercentage),
+  };
+}
+
+function normalizeOverviewBuddyGrowthTrend(
+  item: unknown,
+): AdminOverviewBuddyGrowthTrend {
+  const value = (item ?? {}) as Partial<AdminOverviewBuddyGrowthTrend>;
+
+  return {
+    weeks: ensureArray<unknown>(value.weeks).map((week) => {
+      const weekValue =
+        week as Partial<AdminOverviewBuddyGrowthTrend["weeks"][number]>;
+
+      return {
+        weekLabel: normalizeText(weekValue.weekLabel) ?? "Unknown week",
+        weekStart: normalizeDate(weekValue.weekStart),
+        weekEnd: normalizeDate(weekValue.weekEnd),
+        newBuddies: normalizeNumber(weekValue.newBuddies),
+        newSubscriptions: normalizeNumber(weekValue.newSubscriptions),
+        completedBookings: normalizeNumber(weekValue.completedBookings),
+      };
+    }),
+  };
+}
+
+function normalizeOverviewBuddySubscriptionDistribution(
+  item: unknown,
+): AdminOverviewBuddySubscriptionDistribution {
+  const value = (item ?? {}) as Partial<AdminOverviewBuddySubscriptionDistribution>;
+
+  return {
+    totalSubscribed: normalizeNumber(value.totalSubscribed),
+    totalFree: normalizeNumber(value.totalFree),
+    packages: ensureArray<unknown>(value.packages).map((pkg) => {
+      const packageValue =
+        pkg as Partial<AdminOverviewBuddySubscriptionDistribution["packages"][number]>;
+
+      return {
+        packageId: normalizeText(packageValue.packageId) ?? "",
+        packageName: normalizeText(packageValue.packageName) ?? "Unknown package",
+        pricePerMonth: normalizeNumber(packageValue.pricePerMonth),
+        currency: normalizeText(packageValue.currency) ?? "VND",
+        commissionRate: normalizeNumber(packageValue.commissionRate),
+        activeCount: normalizeNumber(packageValue.activeCount),
+        percentage: normalizeNumber(packageValue.percentage),
+      };
+    }),
+  };
+}
+
+function normalizeOverviewTopBuddy(item: unknown): AdminOverviewTopBuddy {
+  const value = (item ?? {}) as Partial<AdminOverviewTopBuddy>;
+
+  return {
+    buddyId: normalizeText(value.buddyId) ?? "",
+    fullName: normalizeText(value.fullName),
+    profilePicture: normalizeText(value.profilePicture),
+    totalEarnings: normalizeNumber(value.totalEarnings),
+    completedBookings: normalizeNumber(value.completedBookings),
+    rating: normalizeNumber(value.rating),
+    currentPackage: normalizeText(value.currentPackage),
+  };
+}
+
+function normalizeOverviewBuddyRecentActivity(
+  item: unknown,
+): AdminOverviewBuddyRecentActivity {
+  const value = (item ?? {}) as Partial<AdminOverviewBuddyRecentActivity>;
+
+  return {
+    recentRegistrations: ensureArray<unknown>(value.recentRegistrations).map(
+      (registration) => {
+        const entry =
+          registration as Partial<AdminOverviewBuddyRecentActivity["recentRegistrations"][number]>;
+
+        return {
+          buddyId: normalizeText(entry.buddyId) ?? "",
+          fullName: normalizeText(entry.fullName),
+          email: normalizeText(entry.email),
+          registeredAt: normalizeDate(entry.registeredAt),
+        };
+      },
+    ),
+    recentBookings: ensureArray<unknown>(value.recentBookings).map((booking) => {
+      const entry =
+        booking as Partial<AdminOverviewBuddyRecentActivity["recentBookings"][number]>;
+
+      return {
+        bookingId: normalizeText(entry.bookingId) ?? "",
+        buddyName: normalizeText(entry.buddyName),
+        travelerName: normalizeText(entry.travelerName),
+        statusName: normalizeText(entry.statusName),
+        totalAmount: normalizeNumber(entry.totalAmount),
+        createdAt: normalizeDate(entry.createdAt),
+      };
+    }),
+    recentSubscriptions: ensureArray<unknown>(value.recentSubscriptions).map(
+      (subscription) => {
+        const entry =
+          subscription as Partial<AdminOverviewBuddyRecentActivity["recentSubscriptions"][number]>;
+
+        return {
+          buddyId: normalizeText(entry.buddyId) ?? "",
+          buddyName: normalizeText(entry.buddyName),
+          packageName: normalizeText(entry.packageName),
+          amountPaid: normalizeNumber(entry.amountPaid),
+          currency: normalizeText(entry.currency),
+          paidAt: normalizeDate(entry.paidAt),
+        };
+      },
+    ),
+  };
+}
+
+function normalizeOverviewSummary(item: unknown): AdminOverviewSummary {
+  const value = (item ?? {}) as Partial<AdminOverviewSummary>;
+  const kpiCards = (value.kpiCards ?? {}) as Partial<AdminOverviewSummary["kpiCards"]>;
+  const tripDemandTrend = (value.tripDemandTrend ?? {}) as Partial<AdminOverviewSummary["tripDemandTrend"]>;
+  const bookingMix = (value.bookingMix ?? {}) as Partial<AdminOverviewSummary["bookingMix"]>;
+  const bottomStats = (value.bottomStats ?? {}) as Partial<AdminOverviewSummary["bottomStats"]>;
+  const revenueOverview = (value.revenueOverview ?? {}) as Partial<AdminOverviewSummary["revenueOverview"]>;
+  const recentActivity = (value.recentActivity ?? {}) as Partial<AdminOverviewSummary["recentActivity"]>;
+  const platformHealth = (value.platformHealth ?? {}) as Partial<AdminOverviewSummary["platformHealth"]>;
+
+  return {
+    kpiCards: normalizeOverviewKpiCards(kpiCards),
+    tripDemandTrend: normalizeOverviewTripDemandTrend(tripDemandTrend),
+    bookingMix: normalizeOverviewBookingMix(bookingMix),
+    bottomStats: normalizeOverviewBottomStats(bottomStats),
+    revenueOverview: normalizeOverviewRevenue(revenueOverview),
+    recentActivity: {
+      recentBookings: ensureArray<unknown>(recentActivity.recentBookings).map((item) => {
+        const itemValue = item as Partial<AdminOverviewSummary["recentActivity"]["recentBookings"][number]>;
+        return {
+          id: normalizeText(itemValue.id) ?? "",
+          travelerName: normalizeText(itemValue.travelerName),
+          buddyName: normalizeText(itemValue.buddyName),
+          statusName: normalizeText(itemValue.statusName),
+          totalAmount: normalizeNumber(itemValue.totalAmount),
+          createdAt: normalizeDate(itemValue.createdAt),
+        };
+      }),
+      recentIncidents: ensureArray<unknown>(recentActivity.recentIncidents).map((item) => {
+        const itemValue = item as Partial<AdminOverviewSummary["recentActivity"]["recentIncidents"][number]>;
+        return {
+          id: normalizeText(itemValue.id) ?? "",
+          typeName: normalizeText(itemValue.typeName),
+          statusName: normalizeText(itemValue.statusName),
+          reporterName: normalizeText(itemValue.reporterName),
+          createdAt: normalizeDate(itemValue.createdAt),
+        };
+      }),
+      recentUsers: ensureArray<unknown>(recentActivity.recentUsers).map((item) => {
+        const itemValue = item as Partial<AdminOverviewSummary["recentActivity"]["recentUsers"][number]>;
+        return {
+          id: normalizeText(itemValue.id) ?? "",
+          fullName: normalizeText(itemValue.fullName),
+          email: normalizeText(itemValue.email),
+          isEmailVerified: normalizeBoolean(itemValue.isEmailVerified),
+          createdAt: normalizeDate(itemValue.createdAt),
+        };
+      }),
+    },
+    platformHealth: {
+      userVerificationRate: normalizeNumber(platformHealth.userVerificationRate),
+      inactiveUsers: normalizeNumber(platformHealth.inactiveUsers),
+      averageBuddyRating: normalizeNumber(platformHealth.averageBuddyRating),
+      buddiesWithoutBookings: normalizeNumber(platformHealth.buddiesWithoutBookings),
+      bookingCompletionRate: normalizeNumber(platformHealth.bookingCompletionRate),
+      averageBookingValue: normalizeNumber(platformHealth.averageBookingValue),
+      cancelledBookingsThisMonth: normalizeNumber(platformHealth.cancelledBookingsThisMonth),
+      activeSubscriptions: normalizeNumber(platformHealth.activeSubscriptions),
+      pendingPaymentSubscriptions: normalizeNumber(platformHealth.pendingPaymentSubscriptions),
+      subscriptionByPackage: ensureArray<unknown>(platformHealth.subscriptionByPackage).map((item) => {
+        const itemValue = item as Partial<AdminOverviewSummary["platformHealth"]["subscriptionByPackage"][number]>;
+        return {
+          packageName: normalizeText(itemValue.packageName) ?? "Unknown",
+          count: normalizeNumber(itemValue.count),
+        };
+      }),
+      averageReviewRating: normalizeNumber(platformHealth.averageReviewRating),
+      totalReviews: normalizeNumber(platformHealth.totalReviews),
+    },
   };
 }
 
@@ -343,6 +663,17 @@ export const adminApi = {
     };
   },
 
+  async getBookings(params?: AdminBookingsQuery) {
+    const res = await httpClient.get<AdminBookingListResponse>(
+      `${ADMIN_BASE_PATH}/bookings`,
+      params,
+    );
+    return {
+      ...res.data,
+      data: normalizeBookingPagePayload(res.data.data),
+    };
+  },
+
   async getBookingById(id: string) {
     const res = await httpClient.get<AdminBookingResponse>(
       `${ADMIN_BASE_PATH}/bookings/${id}`,
@@ -389,6 +720,139 @@ export const adminApi = {
     return {
       ...res.data,
       data: normalizeIncidentListPayload(res.data.data),
+    };
+  },
+
+  async getOverviewKpiCards(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewKpiCardsResponse>(
+      `${ADMIN_BASE_PATH}/overview/kpi-cards`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewKpiCards(res.data.data),
+    };
+  },
+
+  async getOverviewTripDemandTrend(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewTripDemandTrendResponse>(
+      `${ADMIN_BASE_PATH}/overview/trip-demand-trend`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewTripDemandTrend(res.data.data),
+    };
+  },
+
+  async getOverviewBookingMix(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewBookingMixResponse>(
+      `${ADMIN_BASE_PATH}/overview/booking-mix`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewBookingMix(res.data.data),
+    };
+  },
+
+  async getOverviewBottomStats(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewBottomStatsResponse>(
+      `${ADMIN_BASE_PATH}/overview/bottom-stats`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewBottomStats(res.data.data),
+    };
+  },
+
+  async getOverviewRevenue(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewRevenueOverviewResponse>(
+      `${ADMIN_BASE_PATH}/overview/revenue`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewRevenue(res.data.data),
+    };
+  },
+
+  async getOverviewBuddyGrowthTrend(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewBuddyGrowthTrendResponse>(
+      `${ADMIN_BASE_PATH}/overview/buddy-growth-trend`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewBuddyGrowthTrend(res.data.data),
+    };
+  },
+
+  async getOverviewBuddySubscriptionDistribution(params?: AdminOverviewQuery) {
+    const res =
+      await httpClient.get<AdminOverviewBuddySubscriptionDistributionResponse>(
+        `${ADMIN_BASE_PATH}/overview/buddy-subscription-distribution`,
+        params,
+      );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewBuddySubscriptionDistribution(res.data.data),
+    };
+  },
+
+  async getOverviewBuddyTopEarners(params?: AdminOverviewTopBuddiesQuery) {
+    const res = await httpClient.get<AdminOverviewTopBuddiesResponse>(
+      `${ADMIN_BASE_PATH}/overview/buddy-top-earners`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: ensureArray<unknown>(res.data.data).map(normalizeOverviewTopBuddy),
+    };
+  },
+
+  async getOverviewBuddyTopRated(params?: AdminOverviewTopBuddiesQuery) {
+    const res = await httpClient.get<AdminOverviewTopBuddiesResponse>(
+      `${ADMIN_BASE_PATH}/overview/buddy-top-rated`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: ensureArray<unknown>(res.data.data).map(normalizeOverviewTopBuddy),
+    };
+  },
+
+  async getOverviewBuddyRecentActivity(params?: AdminOverviewQuery) {
+    const res = await httpClient.get<AdminOverviewBuddyRecentActivityResponse>(
+      `${ADMIN_BASE_PATH}/overview/buddy-recent-activity`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewBuddyRecentActivity(res.data.data),
+    };
+  },
+
+  async getOverviewSummary(params?: AdminOverviewSummaryQuery) {
+    const res = await httpClient.get<AdminOverviewSummaryResponse>(
+      `${ADMIN_BASE_PATH}/overview/summary`,
+      params,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeOverviewSummary(res.data.data),
     };
   },
 

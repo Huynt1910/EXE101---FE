@@ -13,9 +13,14 @@ import {
   Trash2,
   Users,
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  BookingPanel,
+  BookingPanelContent,
+  BookingPanelHeader,
+  BookingPanelTitle,
+} from "@/components/ui/booking-panel";
 import { useMyTrips } from "../../../../features/trip/hooks/useTripRequest";
 import { useTripMutations } from "@/features/trip/hooks/useTripMutation";
 import {
@@ -79,39 +84,39 @@ export function MyTripsSection() {
 
   if (myTripsQuery.isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-muted-foreground">
+      <BookingPanel>
+        <BookingPanelContent className="text-sm text-muted-foreground">
           Loading your trips…
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
   if (myTripsQuery.isError) {
     return (
-      <Card>
-        <CardContent className="p-6 text-sm text-destructive">
+      <BookingPanel className="border-destructive/20">
+        <BookingPanelContent className="text-sm text-destructive">
           Unable to load your trips right now.
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
   if (trips.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>My trips</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <BookingPanel>
+        <BookingPanelHeader>
+          <BookingPanelTitle>My trips</BookingPanelTitle>
+        </BookingPanelHeader>
+        <BookingPanelContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
             You have not created any trips yet.
           </p>
           <Button asChild>
             <Link href="/trip-request">Create a trip</Link>
           </Button>
-        </CardContent>
-      </Card>
+        </BookingPanelContent>
+      </BookingPanel>
     );
   }
 
@@ -136,8 +141,8 @@ export function MyTripsSection() {
 
       <div className="min-w-0 grid gap-2">
         {trips.map((trip) => (
-          <Card key={trip.id} className="min-w-0 overflow-hidden">
-            <CardContent className="p-6">
+          <BookingPanel key={trip.id} className="min-w-0 overflow-hidden">
+            <BookingPanelContent>
               <div className="flex min-w-0 flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                 <div className="min-w-0 flex-1 space-y-4">
                   <div className="flex flex-wrap items-center gap-3">
@@ -216,8 +221,8 @@ export function MyTripsSection() {
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </BookingPanelContent>
+          </BookingPanel>
         ))}
       </div>
 

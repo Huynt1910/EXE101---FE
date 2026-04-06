@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Send } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
 import MessagesEmptyState from "./MessagesEmptyState";
 import { type Conversation } from "./ConversationList";
@@ -463,7 +463,7 @@ export default function MessageContainer({
             bubbleClassName = `max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
               isMine
                 ? "rounded-br-md bg-primary/90 text-primary-foreground"
-                : "rounded-bl-md bg-muted text-foreground"
+                : "rounded-bl-md bg-[#f3f5f7] text-foreground"
             }`;
           }
 
@@ -618,36 +618,41 @@ export default function MessageContainer({
         {messageBody}
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 border-t border-border/70 px-4 py-3">
+      <div className="flex shrink-0 items-center px-4 py-3">
         <label htmlFor="message-draft" className="sr-only">
           Type your message
         </label>
-        <input
-          id="message-draft"
-          name="message-draft"
-          type="text"
-          value={draft}
-          onChange={(event) => onDraftChange(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" && !event.shiftKey && !isSendDisabled) {
-              event.preventDefault();
-              handleSendMessage();
-            }
-          }}
-          aria-label="Type your message"
-          autoComplete="off"
-          placeholder="Type a message…"
-          className="flex-1 rounded-full border border-border bg-muted/40 px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
-        />
-        <button
-          type="button"
-          onClick={handleSendMessage}
-          disabled={isSendDisabled}
-          className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-          aria-label="Send message"
-        >
-          {isSending ? "Sending…" : "Send"}
-        </button>
+        <div className="relative flex-1">
+          <input
+            id="message-draft"
+            name="message-draft"
+            type="text"
+            value={draft}
+            onChange={(event) => onDraftChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey && !isSendDisabled) {
+                event.preventDefault();
+                handleSendMessage();
+              }
+            }}
+            aria-label="Type your message"
+            autoComplete="off"
+            placeholder="Message…"
+            className="w-full rounded-full border border-border bg-transparent px-4 py-2 pr-16 text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+          />
+          <button
+            type="button"
+            onClick={handleSendMessage}
+            disabled={isSendDisabled}
+            className="absolute right-1.5 top-1/2 inline-flex h-8 w-11 -translate-y-1/2 items-center justify-center rounded-2xl bg-primary text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label="Send message"
+          >
+            <Send
+              className={`h-4 w-4 ${isSending ? "animate-pulse" : ""}`}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
       </div>
     </div>
   );

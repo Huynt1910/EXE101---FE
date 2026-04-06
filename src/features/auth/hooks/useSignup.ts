@@ -30,8 +30,11 @@ export function useSignup() {
 
       // Handle token from verify email response
       if (response.success && response.data?.accessToken) {
-        const token = response.data.accessToken;
-        authStore.setAuthToken(token, response.data.roles ?? []);
+        authStore.setAuthToken(
+          response.data.accessToken,
+          response.data.roles ?? [],
+          response.data.refreshToken,
+        );
       }
 
       return response;

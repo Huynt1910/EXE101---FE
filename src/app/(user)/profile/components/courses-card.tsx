@@ -2,7 +2,7 @@ import { COURSES } from "./profile-data";
 
 export function CoursesCard() {
   return (
-    <section className="rounded-[1.75rem] bg-card p-5 shadow-sm md:p-6">
+    <section className="rounded-[1.75rem] bg-background p-5 shadow-sm md:p-6">
       <h3 className="type-h3 font-semibold text-foreground">My courses</h3>
 
       <div className="mt-5 grid gap-3">

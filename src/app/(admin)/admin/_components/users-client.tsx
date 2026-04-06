@@ -21,14 +21,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -274,15 +266,17 @@ export function UsersClient() {
   return (
     <>
       <div className="space-y-6">
-        <Card className="border-border/70">
-          <CardHeader>
-            <CardTitle>User management</CardTitle>
-            <CardDescription>
+        <div className="booking-muted-panel">
+          <div className="space-y-1.5 p-6">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              User management
+            </h2>
+            <p className="text-sm text-muted-foreground">
               Search and maintain customer accounts through the admin user
               endpoints.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            </p>
+          </div>
+          <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-2">
               <Label htmlFor="user-search">Search</Label>
               <Input
@@ -341,16 +335,20 @@ export function UsersClient() {
                 Register selected user as buddy
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)]">
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle>Users</CardTitle>
-              <CardDescription>{totalUsers} total users.</CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
+          <div className="booking-muted-panel">
+            <div className="space-y-1.5 p-6">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                Users
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {totalUsers} total users.
+              </p>
+            </div>
+            <div className="px-0">
               {users.length ? (
                 <Table>
                   <TableHeader>
@@ -439,7 +437,7 @@ export function UsersClient() {
                   />
                 </div>
               )}
-            </CardContent>
+            </div>
             <PaginationControls
               page={usersQuery.data?.data.page ?? 1}
               totalPages={usersQuery.data?.data.totalPages ?? 1}
@@ -454,18 +452,20 @@ export function UsersClient() {
                 )
               }
             />
-          </Card>
+          </div>
 
           <div className="space-y-6">
-            <Card className="border-border/70">
-              <CardHeader>
-                <CardTitle>Selected user</CardTitle>
-                <CardDescription>
+            <div className="booking-muted-panel">
+              <div className="space-y-1.5 p-6">
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                  Selected user
+                </h2>
+                <p className="text-sm text-muted-foreground">
                   Inspect profile data before editing or promoting the account
                   to buddy.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </p>
+              </div>
+              <div className="px-6 pb-6">
                 {selectedUser ? (
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 items-center gap-4">
@@ -555,8 +555,8 @@ export function UsersClient() {
                     description="Pick a row in the user table to inspect profile details."
                   />
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         </div>
       </div>

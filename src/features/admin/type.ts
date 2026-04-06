@@ -47,6 +47,19 @@ export interface AdminTripsQuery extends RequestParams {
   SortOrder?: string;
 }
 
+export interface AdminBookingsQuery extends RequestParams {
+  Status?: AdminBookingStatus;
+  BuddyName?: string;
+  TravelerName?: string;
+  BookedFrom?: string;
+  BookedTo?: string;
+  Search?: string;
+  Page?: number;
+  PageSize?: number;
+  SortBy?: string;
+  SortOrder?: string;
+}
+
 export interface AdminBuddiesQuery extends RequestParams {
   Search?: string;
   Page?: number;
@@ -62,6 +75,17 @@ export interface AdminIncidentsQuery extends RequestParams {
   Page?: number;
   PageSize?: number;
 }
+
+export interface AdminOverviewQuery extends RequestParams {
+  from?: string;
+  to?: string;
+}
+
+export interface AdminOverviewTopBuddiesQuery extends AdminOverviewQuery {
+  top?: number;
+}
+
+export interface AdminOverviewSummaryQuery extends AdminOverviewQuery {}
 
 export interface AdminUser {
   id: string;
@@ -243,12 +267,201 @@ export interface AdminServicePackageRequest {
   features: string[];
 }
 
+export interface AdminOverviewKpiCards {
+  totalUsers: number;
+  verifiedUsers: number;
+  newUsersThisWindow: number;
+  totalBuddies: number;
+  activeBuddies: number;
+  buddiesWithSubscription: number;
+  totalTrips: number;
+  openTrips: number;
+  totalIncidents: number;
+  unresolvedIncidents: number;
+}
+
+export interface AdminOverviewTrendWeek {
+  weekLabel: string;
+  weekStart: string | null;
+  weekEnd: string | null;
+  totalTrips: number;
+  openTrips: number;
+}
+
+export interface AdminOverviewTripDemandTrend {
+  weeks: AdminOverviewTrendWeek[];
+}
+
+export interface AdminOverviewBuddyGrowthWeek {
+  weekLabel: string;
+  weekStart: string | null;
+  weekEnd: string | null;
+  newBuddies: number;
+  newSubscriptions: number;
+  completedBookings: number;
+}
+
+export interface AdminOverviewBuddyGrowthTrend {
+  weeks: AdminOverviewBuddyGrowthWeek[];
+}
+
+export interface AdminOverviewBuddySubscriptionDistributionPackage {
+  packageId: string;
+  packageName: string;
+  pricePerMonth: number;
+  currency: string;
+  commissionRate: number;
+  activeCount: number;
+  percentage: number;
+}
+
+export interface AdminOverviewBuddySubscriptionDistribution {
+  totalSubscribed: number;
+  totalFree: number;
+  packages: AdminOverviewBuddySubscriptionDistributionPackage[];
+}
+
+export interface AdminOverviewTopBuddy {
+  buddyId: string;
+  fullName: string | null;
+  profilePicture: string | null;
+  totalEarnings: number;
+  completedBookings: number;
+  rating: number;
+  currentPackage: string | null;
+}
+
+export interface AdminOverviewRecentRegistration {
+  buddyId: string;
+  fullName: string | null;
+  email: string | null;
+  registeredAt: string | null;
+}
+
+export interface AdminOverviewRecentBuddyBooking {
+  bookingId: string;
+  buddyName: string | null;
+  travelerName: string | null;
+  statusName: string | null;
+  totalAmount: number;
+  createdAt: string | null;
+}
+
+export interface AdminOverviewRecentSubscription {
+  buddyId: string;
+  buddyName: string | null;
+  packageName: string | null;
+  amountPaid: number;
+  currency: string | null;
+  paidAt: string | null;
+}
+
+export interface AdminOverviewBuddyRecentActivity {
+  recentRegistrations: AdminOverviewRecentRegistration[];
+  recentBookings: AdminOverviewRecentBuddyBooking[];
+  recentSubscriptions: AdminOverviewRecentSubscription[];
+}
+
+export interface AdminOverviewBookingMixItem {
+  statusName: string;
+  count: number;
+  percentage: number;
+}
+
+export interface AdminOverviewBookingMix {
+  totalBookings: number;
+  statusBreakdown: AdminOverviewBookingMixItem[];
+}
+
+export interface AdminOverviewBottomStats {
+  totalRevenue: number;
+  platformFeeRevenue: number;
+  currency: string | null;
+  totalActiveBookings: number;
+  directBookings: number;
+  resolutionRate: number;
+  resolvedIncidents: number;
+  closedIncidents: number;
+}
+
+export interface AdminOverviewRevenueOverview {
+  totalBookingRevenue: number;
+  totalPlatformFees: number;
+  totalSubscriptionRevenue: number;
+  totalCombinedRevenue: number;
+  revenueThisMonth: number;
+  revenueLastMonth: number;
+  growthPercentage: number;
+}
+
+export interface AdminOverviewRecentBooking {
+  id: string;
+  travelerName: string | null;
+  buddyName: string | null;
+  statusName: string | null;
+  totalAmount: number;
+  createdAt: string | null;
+}
+
+export interface AdminOverviewRecentIncident {
+  id: string;
+  typeName: string | null;
+  statusName: string | null;
+  reporterName: string | null;
+  createdAt: string | null;
+}
+
+export interface AdminOverviewRecentUser {
+  id: string;
+  fullName: string | null;
+  email: string | null;
+  isEmailVerified: boolean;
+  createdAt: string | null;
+}
+
+export interface AdminOverviewRecentActivity {
+  recentBookings: AdminOverviewRecentBooking[];
+  recentIncidents: AdminOverviewRecentIncident[];
+  recentUsers: AdminOverviewRecentUser[];
+}
+
+export interface AdminOverviewSubscriptionByPackage {
+  packageName: string;
+  count: number;
+}
+
+export interface AdminOverviewPlatformHealth {
+  userVerificationRate: number;
+  inactiveUsers: number;
+  averageBuddyRating: number;
+  buddiesWithoutBookings: number;
+  bookingCompletionRate: number;
+  averageBookingValue: number;
+  cancelledBookingsThisMonth: number;
+  activeSubscriptions: number;
+  pendingPaymentSubscriptions: number;
+  subscriptionByPackage: AdminOverviewSubscriptionByPackage[];
+  averageReviewRating: number;
+  totalReviews: number;
+}
+
+export interface AdminOverviewSummary {
+  kpiCards: AdminOverviewKpiCards;
+  tripDemandTrend: AdminOverviewTripDemandTrend;
+  bookingMix: AdminOverviewBookingMix;
+  bottomStats: AdminOverviewBottomStats;
+  revenueOverview: AdminOverviewRevenueOverview;
+  recentActivity: AdminOverviewRecentActivity;
+  platformHealth: AdminOverviewPlatformHealth;
+}
+
 export type AdminUserListResponse = ApiResponse<PaginatedResult<AdminUser>>;
 export type AdminUserResponse = ApiResponse<AdminUser>;
 export type AdminBuddyListResponse = ApiResponse<PaginatedResult<AdminBuddy>>;
 export type AdminBuddyResponse = ApiResponse<AdminBuddy>;
 export type AdminTripListResponse = ApiResponse<PaginatedResult<AdminTrip>>;
 export type AdminTripResponse = ApiResponse<AdminTrip>;
+export type AdminBookingListResponse = ApiResponse<PaginatedResult<AdminBooking>>;
 export type AdminTripBookingListResponse = ApiResponse<AdminBooking[]>;
 export type AdminBookingResponse = ApiResponse<AdminBooking>;
 export type AdminReviewResponse = ApiResponse<AdminReview | null>;
@@ -257,3 +470,15 @@ export type AdminBookingIncidentListResponse = ApiResponse<AdminIncident[]>;
 export type AdminIncidentResponse = ApiResponse<AdminIncident>;
 export type AdminServicePackageListResponse = ApiResponse<AdminServicePackage[]>;
 export type AdminServicePackageResponse = ApiResponse<AdminServicePackage>;
+export type AdminOverviewKpiCardsResponse = ApiResponse<AdminOverviewKpiCards>;
+export type AdminOverviewTripDemandTrendResponse = ApiResponse<AdminOverviewTripDemandTrend>;
+export type AdminOverviewBookingMixResponse = ApiResponse<AdminOverviewBookingMix>;
+export type AdminOverviewBottomStatsResponse = ApiResponse<AdminOverviewBottomStats>;
+export type AdminOverviewRevenueOverviewResponse = ApiResponse<AdminOverviewRevenueOverview>;
+export type AdminOverviewBuddyGrowthTrendResponse = ApiResponse<AdminOverviewBuddyGrowthTrend>;
+export type AdminOverviewBuddySubscriptionDistributionResponse =
+  ApiResponse<AdminOverviewBuddySubscriptionDistribution>;
+export type AdminOverviewTopBuddiesResponse = ApiResponse<AdminOverviewTopBuddy[]>;
+export type AdminOverviewBuddyRecentActivityResponse =
+  ApiResponse<AdminOverviewBuddyRecentActivity>;
+export type AdminOverviewSummaryResponse = ApiResponse<AdminOverviewSummary>;

@@ -68,7 +68,7 @@ export function DestinationTimingStep({
   const selectedDateObject = selectedDate ? new Date(selectedDate) : undefined;
   const normalizedLocationQuery = locationQuery.trim().toLowerCase();
   const unifiedFieldClass =
-    "border-input bg-background text-foreground hover:bg-primary";
+    "border-input bg-background text-foreground hover:bg-primary ";
 
   const filteredLocationGroups = React.useMemo(() => {
     if (!normalizedLocationQuery) {
@@ -143,10 +143,14 @@ export function DestinationTimingStep({
                               setLocationQuery("");
                               setLocationOpen(false);
                             }}
-                            className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
+                            className={`group flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                              selected
+                                ? "bg-accent text-accent-foreground"
+                                : "hover:bg-accent hover:text-accent-foreground"
+                            }`}
                           >
                             <div className="min-w-0">
-                              <div className="font-medium text-foreground">
+                              <div className="font-medium text-inherit">
                                 {ward}
                               </div>
                               {/* <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -155,7 +159,7 @@ export function DestinationTimingStep({
                               </div> */}
                             </div>
                             {selected ? (
-                              <Check className="h-4 w-4 shrink-0 text-primary" />
+                              <Check className="h-4 w-4 shrink-0 text-current" />
                             ) : null}
                           </button>
                         );
@@ -268,13 +272,17 @@ export function DestinationTimingStep({
                         onDurationHoursChange(hours);
                         setDurationOpen(false);
                       }}
-                      className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm text-foreground transition-colors hover:bg-accent"
+                      className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                        selected
+                          ? "bg-accent text-accent-foreground"
+                          : "text-foreground hover:bg-accent hover:text-accent-foreground"
+                      }`}
                     >
                       <span>
                         {hours} {hours === 1 ? "hour" : "hours"}
                       </span>
                       {selected ? (
-                        <Check className="h-4 w-4 shrink-0 text-primary" />
+                        <Check className="h-4 w-4 shrink-0 text-current" />
                       ) : null}
                     </button>
                   );

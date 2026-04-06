@@ -15,13 +15,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -265,15 +258,17 @@ export function ServicePackagesClient() {
   return (
     <>
       <div className="space-y-6">
-        <Card className="border-border/70">
-          <CardHeader>
-            <CardTitle>Service package management</CardTitle>
-            <CardDescription>
+        <div className="booking-muted-panel">
+          <div className="space-y-1.5 p-6">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Service package management
+            </h2>
+            <p className="text-sm text-muted-foreground">
               Create, update and soft-delete monetization packages from
               `/api/ServicePackages`.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+            </p>
+          </div>
+          <div className="grid gap-4 px-6 pb-6 md:grid-cols-[minmax(0,1fr)_220px]">
             <div className="space-y-2">
               <Label htmlFor="service-package-search">Search</Label>
               <Input
@@ -296,19 +291,21 @@ export function ServicePackagesClient() {
                 New package
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle>Service packages</CardTitle>
-              <CardDescription>
+          <div className="booking-muted-panel">
+            <div className="space-y-1.5 p-6">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                Service packages
+              </h2>
+              <p className="text-sm text-muted-foreground">
                 {sortedPackages.length} / {servicePackages.length} packages
                 visible.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
+              </p>
+            </div>
+            <div className="px-0">
               {sortedPackages.length ? (
                 <Table>
                   <TableHeader>
@@ -403,16 +400,18 @@ export function ServicePackagesClient() {
                   />
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="border-border/70">
-            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="booking-muted-panel">
+            <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>Selected package</CardTitle>
-                <CardDescription>
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                  Selected package
+                </h2>
+                <p className="text-sm text-muted-foreground">
                   Detail data loaded from `GET /api/ServicePackages/{"{id}"}`.
-                </CardDescription>
+                </p>
               </div>
               <Button
                 variant="outline"
@@ -425,8 +424,8 @@ export function ServicePackagesClient() {
               >
                 <Pencil className="h-4 w-4" />
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="px-6 pb-6">
               {selectedPackage ? (
                 <div className="grid grid-cols-2 gap-3">
                   <DetailItem label="Name" value={selectedPackage.name} />
@@ -509,8 +508,8 @@ export function ServicePackagesClient() {
                   description="Select a service package row to inspect full details."
                 />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 

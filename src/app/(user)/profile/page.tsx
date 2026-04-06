@@ -2,7 +2,6 @@ import { ProfileBookingsSection } from "./components/profile-bookings-section";
 import { ProfileNotificationsSection } from "./components/profile-notifications-section";
 import { ProfileOverviewSection } from "./components/profile-overview-section";
 import { ProfileSecuritySection } from "./components/profile-security-section";
-import { ProfileServicesSection } from "./components/profile-services-section";
 import { MyTripsSection } from "./components/my-trips-section";
 import { ProfileSummaryCard } from "./components/profile-summary-card";
 
@@ -25,14 +24,10 @@ export default async function ProfilePage({
         return <ProfileNotificationsSection />;
       case "security":
         return <ProfileSecuritySection />;
-      case "services":
-        return <ProfileServicesSection />;
       default:
         return <ProfileOverviewSection />;
     }
   })();
 
-  return (
-    <main className="space-y-4">{content}</main>
-  );
+  return <main className="space-y-4">{content}</main>;
 }

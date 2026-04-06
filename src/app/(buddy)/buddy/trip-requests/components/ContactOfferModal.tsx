@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, DollarSign, Send, Inbox, MessageSquare } from "lucide-react";
+import { DollarSign, Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -71,38 +71,99 @@ export function ContactOfferModal({
     guestLabel = `${groupSize} ${guestNoun}`;
   }
 
+  const durationLabel = formatDuration(durationHours) || null;
   const subtitleParts = [
     city,
     guestLabel,
-    formatDuration(durationHours) || null,
+    durationLabel,
   ].filter(Boolean);
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && handleClose()}>
-      <DialogContent className="w-full max-w-sm sm:max-w-md rounded-2xl p-0 border-0 shadow-2xl max-h-[90dvh] overflow-y-auto">
+      <DialogContent
+        showCloseButton={true}
+        className="w-full max-w-sm sm:max-w-md rounded-2xl p-0 border-0 shadow-2xl max-h-[90dvh] overflow-y-auto [&>[data-slot=dialog-close]]:top-3.5 [&>[data-slot=dialog-close]]:right-3.5 [&>[data-slot=dialog-close]]:inline-flex [&>[data-slot=dialog-close]]:h-8 [&>[data-slot=dialog-close]]:w-8 [&>[data-slot=dialog-close]]:items-center [&>[data-slot=dialog-close]]:justify-center [&>[data-slot=dialog-close]]:rounded-full [&>[data-slot=dialog-close]]:bg-white/15 [&>[data-slot=dialog-close]]:text-white [&>[data-slot=dialog-close]]:opacity-100 [&>[data-slot=dialog-close]]:ring-1 [&>[data-slot=dialog-close]]:ring-white/35 [&>[data-slot=dialog-close]]:ring-offset-0 [&>[data-slot=dialog-close]]:transition-colors [&>[data-slot=dialog-close]]:hover:bg-white/25 [&>[data-slot=dialog-close]]:hover:text-white [&>[data-slot=dialog-close]]:focus-visible:ring-2 [&>[data-slot=dialog-close]]:focus-visible:ring-white/60 [&>[data-slot=dialog-close]]:data-[state=open]:bg-white/15 [&>[data-slot=dialog-close]]:data-[state=open]:text-white"
+      >
         {/* ── Header gradient banner ── */}
-        <div className="relative bg-linear-to-br from-slate-800 via-slate-700 to-slate-900 px-5 pt-5 pb-6">
-          {/* Close button */}
-          <button
-            type="button"
-            aria-label="Close"
-            onClick={handleClose}
-            className="absolute right-4 top-4 rounded-full bg-white/10 hover:bg-white/20 p-1.5 transition-colors"
-          >
-            <X className="h-4 w-4 text-white" />
-          </button>
-
+        <div className="relative bg-linear-to-br from-slate-800 via-slate-700 to-slate-900 pl-5 pr-14 pt-5 pb-6">
           <DialogHeader className="text-left space-y-1">
             <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">
               Send an Offer
             </p>
             <DialogTitle className="text-xl font-bold text-white leading-tight">
-              Contact to {travelerName || "Traveler"}
+              Contact to{" "}
+              <span
+                className="font-semibold italic"
+                style={{ color: "#d4705a", fontFamily: "Georgia, serif" }}
+              >
+                {travelerName || "Traveler"}
+              </span>
             </DialogTitle>
             {subtitleParts.length > 0 && (
-              <p className="text-sm text-slate-300">
-                {subtitleParts.join(" · ")}
-              </p>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-300">
+                {city && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-slate-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"
+                      />
+                    </svg>
+                    <span>{city}</span>
+                  </span>
+                )}
+                {guestLabel && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-slate-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                      />
+                    </svg>
+                    <span>{guestLabel}</span>
+                  </span>
+                )}
+                {durationLabel && (
+                  <span className="inline-flex items-center gap-1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4 text-slate-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span>{durationLabel}</span>
+                  </span>
+                )}
+              </div>
             )}
           </DialogHeader>
         </div>
@@ -120,43 +181,25 @@ export function ContactOfferModal({
               </span>
             </label>
 
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-medium text-sm select-none">
-                $
-              </span>
-              <input
-                type="number"
-                min={0}
-                step={0.01}
-                placeholder="Leave empty to reply in inbox"
-                value={priceRaw}
-                onChange={(e) => setPriceRaw(e.target.value)}
-                className="w-full pl-7 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all"
-              />
-            </div>
+            <input
+              type="number"
+              min={0}
+              step={0.01}
+              placeholder="Enter your offer price"
+              value={priceRaw}
+              onChange={(e) => setPriceRaw(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all"
+            />
 
             {/* Contextual hint */}
-            <div
-              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium transition-all duration-200 ${isInboxOnly
-                ? "bg-amber-50 text-amber-700 border border-amber-200"
-                : "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                }`}
-            >
-              {isInboxOnly ? (
-                <>
-                  <Inbox className="h-3.5 w-3.5 shrink-0" />
-                  <span>No price set — this will be an inbox-only message</span>
-                </>
-              ) : (
-                <>
-                  <DollarSign className="h-3.5 w-3.5 shrink-0" />
-                  <span>
-                    You&apos;re offering{" "}
-                    <strong>{Number.parseFloat(priceRaw).toFixed(2)}</strong> to the traveler
-                  </span>
-                </>
-              )}
-            </div>
+            {!isInboxOnly && (
+              <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700 transition-all duration-200">
+                <span>
+                  You&apos;re offering{" "}
+                  <strong>${priceRaw}</strong> to the traveler
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Note / Message field */}
@@ -167,7 +210,7 @@ export function ContactOfferModal({
             </label>
             <textarea
               rows={4}
-              placeholder="Hi bạn, tôi có thể giúp gì ?"
+              placeholder="Hi! I'd love to be your local buddy. Let's plan your tour together."
               value={note}
               onChange={(e) => setNote(e.target.value)}
               className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-800 focus:border-transparent transition-all"

@@ -7,6 +7,10 @@ export interface LoginGoogleRequest {
   idToken: string;
 }
 
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
 export interface LoginResponse {
   email: string;
   fullName: string;

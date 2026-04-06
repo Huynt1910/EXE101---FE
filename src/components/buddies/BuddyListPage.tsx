@@ -82,10 +82,11 @@ function BuddyCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
           </div>
         </div>
         <div className="absolute bottom-5 left-5 right-5 flex items-end gap-4">
-          <Avatar className="h-16 w-16 border-2 border-white/80 bg-white/20 shadow-lg">
+          <Avatar className="h-16 w-16 shrink-0 overflow-hidden border-2 border-white/80 bg-white/20 shadow-lg">
             <AvatarImage
               src={buddy.profilePicture ?? undefined}
               alt={buddy.fullName ?? "Buddy"}
+              className="h-full w-full object-cover object-center"
             />
             <AvatarFallback className="bg-white text-primary">
               {getInitials(buddy.fullName)}

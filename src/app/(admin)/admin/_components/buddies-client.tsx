@@ -15,14 +15,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -259,15 +251,17 @@ export function BuddiesClient() {
   return (
     <>
       <div className="space-y-6">
-        <Card className="border-border/70">
-          <CardHeader>
-            <CardTitle>Buddy management</CardTitle>
-            <CardDescription>
+        <div className="booking-muted-panel">
+          <div className="space-y-1.5 p-6">
+            <h2 className="text-xl font-semibold tracking-tight text-foreground">
+              Buddy management
+            </h2>
+            <p className="text-sm text-muted-foreground">
               Search, sort and inspect supply-side profiles from the admin buddy
               endpoints.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            </p>
+          </div>
+          <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-2">
               <Label htmlFor="buddy-search">Search</Label>
               <Input
@@ -313,18 +307,20 @@ export function BuddiesClient() {
                 Register buddy
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle>Buddy profiles</CardTitle>
-              <CardDescription>
+          <div className="booking-muted-panel">
+            <div className="space-y-1.5 p-6">
+              <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                Buddy profiles
+              </h2>
+              <p className="text-sm text-muted-foreground">
                 {totalBuddies} buddy records available.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-0">
+              </p>
+            </div>
+            <div className="px-0">
               {buddies.length ? (
                 <Table>
                   <TableHeader>
@@ -416,7 +412,7 @@ export function BuddiesClient() {
                   />
                 </div>
               )}
-            </CardContent>
+            </div>
             <PaginationControls
               page={buddiesQuery.data?.data.page ?? 1}
               totalPages={buddiesQuery.data?.data.totalPages ?? 1}
@@ -431,15 +427,17 @@ export function BuddiesClient() {
                 )
               }
             />
-          </Card>
+          </div>
 
-          <Card className="border-border/70">
-            <CardHeader className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="booking-muted-panel">
+            <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>Selected buddy</CardTitle>
-                <CardDescription>
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                  Selected buddy
+                </h2>
+                <p className="text-sm text-muted-foreground">
                   Inspect detailed buddy profile data from the detail endpoint.
-                </CardDescription>
+                </p>
               </div>
               <Button
                 variant="outline"
@@ -449,8 +447,8 @@ export function BuddiesClient() {
                 <Pencil className="mr-2 h-4 w-4" />
                 Edit selected buddy
               </Button>
-            </CardHeader>
-            <CardContent>
+            </div>
+            <div className="px-6 pb-6">
               {selectedBuddy ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 items-center gap-4">
@@ -567,8 +565,8 @@ export function BuddiesClient() {
                   description="Choose a buddy row to inspect the detailed buddy profile."
                 />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
 

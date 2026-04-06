@@ -32,6 +32,7 @@ export function useChatRoomMessages(roomId?: string, params?: GetRoomMessagesQue
     queryFn: () => chatApi.getRoomMessages(roomId ?? "", params),
     enabled: Boolean(roomId),
     staleTime: 5 * 1000,
+    refetchInterval: roomId ? 1000 : false,
   });
 }
 
