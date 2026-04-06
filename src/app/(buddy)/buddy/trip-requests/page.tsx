@@ -85,7 +85,7 @@ export default function BuddyTripRequestsPage() {
   const [appliedIds, setAppliedIds] = useState<string[]>([]);
 
   const { openTripsQuery, submitOfferMutation } = useTripRequest({
-    openTripsParams: { PageSize: 12, Page: currentPage },
+    openTripsParams: { PageSize: 8, Page: currentPage },
     enableOpenTrips: true,
   });
   const paginationData = openTripsQuery.data?.data;
@@ -93,7 +93,7 @@ export default function BuddyTripRequestsPage() {
     paginationData?.totalPages ??
     Math.max(
       1,
-      Math.ceil((paginationData?.totalCount ?? 0) / (paginationData?.pageSize ?? 12)),
+      Math.ceil((paginationData?.totalCount ?? 0) / (paginationData?.pageSize ?? 8)),
     );
   const tripItems = openTripsQuery.data?.data.items ?? [];
 
@@ -236,7 +236,7 @@ export default function BuddyTripRequestsPage() {
 
   return (
     <main className="min-h-[calc(100vh-84px)] bg-[linear-gradient(180deg,#f4f7f6_0%,#f7f7f8_55%,#f8f6f2_100%)]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-6 md:px-6 md:py-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 px-4 py-6 pb-24 md:px-6 md:py-8 md:pb-8">
         {/* Page heading */}
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Trip Requests</h1>
@@ -259,25 +259,27 @@ export default function BuddyTripRequestsPage() {
           onApplyContact={handleApplyContact}
         />
 
-        <div className="flex justify-center pt-2">
-          <Pagination
-            showControls
-            initialPage={1}
-            page={currentPage}
-            total={Math.max(1, totalPages)}
-            onChange={setCurrentPage}
-            isDisabled={totalPages <= 1}
-            classNames={{
-              item:
-                "transition-colors hover:bg-orange-100 hover:text-orange-700",
-              prev:
-                "transition-colors hover:bg-orange-100 hover:text-orange-700",
-              next:
-                "transition-colors hover:bg-orange-100 hover:text-orange-700",
-              cursor: "bg-orange-600 text-white",
-            }}
-          />
-        </div>
+        {/* Pagination — only render when there are multiple pages */}
+        {totalPages > 1 && (
+          <div className="flex justify-center pt-2">
+            <Pagination
+              showControls
+              initialPage={1}
+              page={currentPage}
+              total={totalPages}
+              onChange={setCurrentPage}
+              classNames={{
+                item:
+                  "transition-colors hover:bg-orange-100 hover:text-orange-700",
+                prev:
+                  "transition-colors hover:bg-orange-100 hover:text-orange-700",
+                next:
+                  "transition-colors hover:bg-orange-100 hover:text-orange-700",
+                cursor: "bg-orange-600 text-white",
+              }}
+            />
+          </div>
+        )}
       </div>
     </main>
   );

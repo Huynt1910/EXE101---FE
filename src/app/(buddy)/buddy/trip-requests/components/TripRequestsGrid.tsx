@@ -216,7 +216,8 @@ function RequestCard({
 
           {/* Description */}
           <p className="text-[13px] leading-5 text-slate-500 line-clamp-2">
-            Note: {description}
+            <span className="font-semibold text-slate-700 text-sm">Note:</span>{" "}
+            {description}
           </p>
 
           {/* Tags */}

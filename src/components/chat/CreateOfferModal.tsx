@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useCreateBookingMutation } from "@/features/booking/hooks/useCreateBookingOffer";
+import { chatQueryKeys } from "@/features/chat/api/chat.query-key";
 
 type OfferForm = {
   bookedDate: string;
@@ -76,6 +78,7 @@ export default function CreateOfferModal({
 }: Readonly<Props>) {
   const [form, setForm] = useState<OfferForm>(INITIAL_FORM);
   const [sent, setSent] = useState(false);
+  const queryClient = useQueryClient();
   const createBookingMutation = useCreateBookingMutation();
 
   const isSending = createBookingMutation.isPending;
@@ -131,6 +134,25 @@ export default function CreateOfferModal({
           excludes: form.excludes.trim(),
           noteForCustomer: form.noteForCustomer.trim(),
         },
+      });
+
+      const createdBookingRoomId = response.data?.data?.chatRoomId ?? chatRoomId ?? null;
+
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.rooms() }),
+        queryClient.invalidateQueries({ queryKey: chatQueryKeys.unreadSummary() }),
+        createdBookingRoomId
+          ? queryClient.invalidateQueries({
+              queryKey: [...chatQueryKeys.messages(), createdBookingRoomId],
+            })
+          : queryClient.invalidateQueries({ queryKey: chatQueryKeys.messages() }),
+      ]);
+
+      await queryClient.refetchQueries({
+        queryKey: createdBookingRoomId
+          ? [...chatQueryKeys.messages(), createdBookingRoomId]
+          : chatQueryKeys.messages(),
+        type: "active",
       });
 
       setSent(true);
@@ -415,7 +437,7 @@ export default function CreateOfferModal({
                   value={form.price}
                   onChange={(e) => handleChange("price", e.target.value)}
                   autoComplete="off"
-                  className="flex-1 rounded-xl border border-primary/20 bg-background px-4 py-3 text-2xl font-bold text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                  className="min-w-0 flex-1 rounded-xl border border-primary/20 bg-background px-4 py-3 text-2xl font-bold text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
                 <select
                   id="offer-currency"
