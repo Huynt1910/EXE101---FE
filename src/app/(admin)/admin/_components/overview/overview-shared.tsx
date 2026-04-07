@@ -9,6 +9,7 @@ export const OVERVIEW_DONUT_COLORS = [
   "#0891b2",
   "#dc2626",
   "#7c3aed",
+  "#FFD700",
 ];
 
 export function formatOverviewPercent(value?: number | null) {
@@ -42,11 +43,7 @@ export function getOverviewGrowthTone(value?: number | null) {
   return "text-muted-foreground";
 }
 
-export function OverviewSectionSkeleton({
-  className,
-}: {
-  className: string;
-}) {
+export function OverviewSectionSkeleton({ className }: { className: string }) {
   return <div className={`booking-card animate-pulse ${className}`} />;
 }
 
@@ -82,7 +79,9 @@ export function OverviewMiniStat({
     <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
       <p className="text-sm text-muted-foreground">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-foreground">{value}</p>
-      {helper ? <div className="mt-1 text-sm text-muted-foreground">{helper}</div> : null}
+      {helper ? (
+        <div className="mt-1 text-sm text-muted-foreground">{helper}</div>
+      ) : null}
     </div>
   );
 }
