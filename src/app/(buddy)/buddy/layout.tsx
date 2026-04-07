@@ -1,6 +1,5 @@
 import type React from 'react';
 import type { Metadata } from 'next';
-import '@/app/globals.css';
 import HeaderBuddy from '@/components/layouts/HeaderBuddy';
 import { requireRouteAccess } from '@/lib/auth/server-route-guard';
 

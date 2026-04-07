@@ -197,8 +197,8 @@ export default function PaymentSuccessPage() {
         <div className="flex flex-col gap-3 px-8 pb-8">
           {bookingId && (
             <Button asChild className="w-full rounded-full bg-[#1a2b4a] py-5 text-base hover:bg-[#16243d]">
-              <Link href={`/booking/${bookingId}`}>
-                View booking <ChevronRight className="h-4 w-4" />
+              <Link href="/profile?section=bookings">
+                View bookings <ChevronRight className="h-4 w-4" />
               </Link>
             </Button>
           )}

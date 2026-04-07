@@ -256,7 +256,7 @@ export default function HeaderHosting() {
           <div className="hidden md:flex items-center justify-between relative">
             {/* Logo Section */}
             <div className="flex items-center shrink-0">
-              <Link href="/" className="flex items-center">
+              <Link href="/buddy" className="flex items-center">
                 <Image
                   src="/bonddy_logo.png"
                   alt="Bonddy icon"
