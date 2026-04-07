@@ -9,6 +9,7 @@ import {
   type AdminBuddy,
   type AdminBuddySubscription,
   type AdminBuddiesQuery,
+  type AdminBuddiesWithSubscriptionQuery,
   type AdminBuddiesWithSubscriptionResponse,
   type AdminBuddyListResponse,
   type AdminBuddyRegisterRequest,
@@ -227,6 +228,44 @@ function normalizeBookingPagePayload(
   const value = payload as Partial<PaginatedResult<AdminBooking>>;
   return {
     items: ensureArray<unknown>(value.items).map(normalizeBooking),
+    totalCount: typeof value.totalCount === "number" ? value.totalCount : 0,
+    page: typeof value.page === "number" ? value.page : 1,
+    pageSize: typeof value.pageSize === "number" ? value.pageSize : 10,
+    totalPages: typeof value.totalPages === "number" ? value.totalPages : 0,
+    hasPreviousPage:
+      typeof value.hasPreviousPage === "boolean" ? value.hasPreviousPage : false,
+    hasNextPage:
+      typeof value.hasNextPage === "boolean" ? value.hasNextPage : false,
+  };
+}
+
+function normalizeUser(item: unknown): AdminUser {
+  const value = item as Partial<AdminUser>;
+  return {
+    id: normalizeText(value.id) ?? "",
+    email: normalizeText(value.email),
+    fullName: normalizeText(value.fullName),
+    gender: normalizeText(value.gender) ?? "Other",
+    roles: Array.isArray(value.roles)
+      ? value.roles.filter((role): role is string => typeof role === "string")
+      : null,
+    phoneNumber: normalizeText(value.phoneNumber),
+    address: normalizeText(value.address),
+    dateOfBirth: normalizeDate(value.dateOfBirth),
+    aboutMe: normalizeText(value.aboutMe),
+    profilePicture: normalizeText(value.profilePicture),
+    isEmailVerified: value.isEmailVerified === true,
+    isActive:
+      typeof value.isActive === "boolean" ? value.isActive : true,
+    createdAt: normalizeDate(value.createdAt) ?? "",
+    updatedAt: normalizeDate(value.updatedAt),
+  };
+}
+
+function normalizeUserPagePayload(payload: unknown): PaginatedResult<AdminUser> {
+  const value = payload as Partial<PaginatedResult<AdminUser>>;
+  return {
+    items: ensureArray<unknown>(value.items).map(normalizeUser),
     totalCount: typeof value.totalCount === "number" ? value.totalCount : 0,
     page: typeof value.page === "number" ? value.page : 1,
     pageSize: typeof value.pageSize === "number" ? value.pageSize : 10,
@@ -592,14 +631,20 @@ export const adminApi = {
       `${ADMIN_BASE_PATH}/users`,
       params,
     );
-    return res.data;
+    return {
+      ...res.data,
+      data: normalizeUserPagePayload(res.data.data),
+    };
   },
 
   async getUserById(id: string) {
     const res = await httpClient.get<AdminUserResponse>(
       `${ADMIN_BASE_PATH}/users/${id}`,
     );
-    return res.data;
+    return {
+      ...res.data,
+      data: normalizeUser(res.data.data),
+    };
   },
 
   async updateUser(id: string, payload: AdminUserUpdateRequest) {
@@ -607,14 +652,20 @@ export const adminApi = {
       `${ADMIN_BASE_PATH}/users/${id}`,
       payload,
     );
-    return res.data;
+    return {
+      ...res.data,
+      data: normalizeUser(res.data.data),
+    };
   },
 
   async toggleUserStatus(id: string) {
     const res = await httpClient.patch<AdminUserResponse>(
       `${ADMIN_BASE_PATH}/users/${id}/toggle-status`,
     );
-    return res.data;
+    return {
+      ...res.data,
+      data: normalizeUser(res.data.data),
+    };
   },
 
   async getBuddies(params?: AdminBuddiesQuery) {
@@ -638,14 +689,15 @@ export const adminApi = {
     };
   },
 
-  async getBuddiesWithSubscription() {
+  async getBuddiesWithSubscription(params?: AdminBuddiesWithSubscriptionQuery) {
     const res = await httpClient.get<AdminBuddiesWithSubscriptionResponse>(
       `${ADMIN_BASE_PATH}/buddies/with-subscription`,
+      params,
     );
 
     return {
       ...res.data,
-      data: normalizeBuddyListPayload(res.data.data),
+      data: normalizeBuddyPagePayload(res.data.data),
     };
   },
 

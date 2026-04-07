@@ -27,8 +27,19 @@ import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AvatarCropDialog } from "@/components/common/avatar-crop-dialog";
 import { BuddySubscriptionAvatar } from "@/components/buddies/buddy-subscription-avatar";
+import { BuddySubscriptionPanelFrame } from "@/components/buddies/buddy-subscription-panel-frame";
 import {
   BookingPanel,
   BookingPanelContent,
@@ -50,7 +61,10 @@ import type {
   BuddyProfile,
   UpdateBuddyProfileRequest,
 } from "@/features/buddy/type";
-import { useMyServiceSubscriptionQuery } from "@/features/service-package/hooks/useServicePackage";
+import {
+  useMyServiceSubscriptionQuery,
+  useUnsubscribeMyServicePackageMutation,
+} from "@/features/service-package/hooks/useServicePackage";
 import type { ServicePackageSubscription } from "@/features/service-package/type";
 import { handleApiError } from "@/lib/error-handler";
 import { cn } from "@/lib/utils";
@@ -187,6 +201,19 @@ function normalizeGender(value?: string | null) {
   }
 
   return "Other";
+}
+
+function getPackageNameTextClass(packageName?: string | null) {
+  switch (packageName?.trim().toLowerCase()) {
+    case "founder":
+      return "text-amber-600";
+    case "pro":
+      return "text-red-600";
+    case "starter":
+      return "text-sky-600";
+    default:
+      return "text-foreground";
+  }
 }
 
 function getInitialDraft(profile?: BuddyProfile | null): BuddyProfileFormState {
@@ -460,9 +487,9 @@ function MultiSelectField({
 
 function BuddyProfileSummarySkeleton() {
   return (
-    <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-      <BookingPanel>
-        <BookingPanelContent className="space-y-6">
+    <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)] xl:items-start">
+      <BookingPanel className="self-start">
+        <BookingPanelContent className="space-y-5 p-5">
           <div className="flex flex-col items-center gap-4 text-center">
             <Skeleton className="h-28 w-28 rounded-full" />
             <div className="space-y-2">
@@ -519,10 +546,12 @@ type BuddyProfileEditorProps = {
   isUploadingAvatar: boolean;
   isSubscriptionError: boolean;
   isSubscriptionLoading: boolean;
+  isUnsubscribing: boolean;
   onFieldChange: <K extends keyof BuddyProfileFormState>(
     key: K,
     value: BuddyProfileFormState[K],
   ) => void;
+  onOpenUnsubscribeDialog: () => void;
   profile: BuddyProfile;
   subscription: ServicePackageSubscription | null;
 };
@@ -541,150 +570,180 @@ function BuddyProfileEditor({
   isUploadingAvatar,
   isSubscriptionError,
   isSubscriptionLoading,
+  isUnsubscribing,
   onFieldChange,
+  onOpenUnsubscribeDialog,
   profile,
   subscription,
 }: Readonly<BuddyProfileEditorProps>) {
   return (
-    <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)]">
-      <BookingPanel>
-        <BookingPanelContent className="space-y-6">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="relative">
-              <BuddySubscriptionAvatar
-                profilePicture={avatarSrc}
-                fullName={profile.fullName || "Buddy avatar"}
-                initials={getInitials(profile)}
-                packageName={subscription?.packageName}
-                avatarClassName="h-28 w-28 bg-secondary"
-                fallbackClassName="bg-secondary text-lg font-semibold text-muted-foreground"
-              />
-              <span
-                className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center"
-                aria-label={profile.isActive ? "Active" : "Inactive"}
-                title={profile.isActive ? "Active" : "Inactive"}
-              >
-                {profile.isActive && (
-                  <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
-                )}
+    <div className="grid gap-4 xl:grid-cols-[320px_minmax(0,1fr)] xl:items-start">
+      <BuddySubscriptionPanelFrame
+        packageName={subscription?.packageName}
+        className="self-start"
+      >
+        <BookingPanel className="self-start border-transparent bg-transparent shadow-none">
+          <BookingPanelContent className="space-y-5 p-5">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="relative">
+                <BuddySubscriptionAvatar
+                  profilePicture={avatarSrc}
+                  fullName={profile.fullName || "Buddy avatar"}
+                  initials={getInitials(profile)}
+                  packageName={subscription?.packageName}
+                  avatarClassName="h-28 w-28 bg-secondary"
+                  fallbackClassName="bg-secondary text-lg font-semibold text-muted-foreground"
+                />
                 <span
-                  className={cn(
-                    "relative h-3 w-3 rounded-full border-2 border-card",
-                    profile.isActive ? "bg-green-500" : "bg-slate-400",
+                  className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center"
+                  aria-label={profile.isActive ? "Active" : "Inactive"}
+                  title={profile.isActive ? "Active" : "Inactive"}
+                >
+                  {profile.isActive && (
+                    <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
                   )}
-                />
-              </span>
+                  <span
+                    className={cn(
+                      "relative h-3 w-3 rounded-full border-2 border-card",
+                      profile.isActive ? "bg-green-500" : "bg-slate-400",
+                    )}
+                  />
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="inline-flex items-center gap-1.5 text-xl font-semibold leading-none text-foreground">
+                  <span
+                    className={cn(
+                      "leading-none",
+                      getPackageNameTextClass(subscription?.packageName),
+                    )}
+                  >
+                    {profile.fullName || "Buddy profile"}
+                  </span>
+                  <CheckBadgeIcon
+                    className="h-5 w-5 shrink-0 text-sky-500"
+                    aria-hidden="true"
+                  />
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {profile.email || "No email"}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap justify-center gap-2">
+                <Badge variant="secondary" className="rounded-full">
+                  <Star className="mr-1 h-3.5 w-3.5" />
+                  {typeof profile.rate === "number" && profile.rate > 0
+                    ? profile.rate.toFixed(1)
+                    : "No rating"}
+                </Badge>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full rounded-xl"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+              >
+                {isUploadingAvatar ? (
+                  <LoaderCircle className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
+                {isUploadingAvatar ? "Uploading..." : "Change photo"}
+              </Button>
             </div>
 
-            <div className="space-y-2">
-              <h2 className="inline-flex items-center gap-1.5 text-xl font-semibold leading-none text-foreground">
-                <span className="leading-none">{profile.fullName || "Buddy profile"}</span>
-                <CheckBadgeIcon
-                  className="h-5 w-5 shrink-0 text-sky-500"
-                  aria-hidden="true"
-                />
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {profile.email || "No email"}
-              </p>
+            <div className="space-y-4 rounded-2xl border border-border/70 p-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <Mail className="h-4 w-4 text-primary" />
+                  Email
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {profile.email || "No email"}
+                </p>
+              </div>
+
+              <div className="space-y-1 text-sm text-muted-foreground">
+                <p>Joined {formatDateLabel(profile.createdAt)}</p>
+                <p>Last update {formatDateLabel(profile.updatedAt)}</p>
+                <p>Birthday {formatDateLabel(profile.dateOfBirth)}</p>
+              </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-2">
-              <Badge variant="secondary" className="rounded-full">
-                <Star className="mr-1 h-3.5 w-3.5" />
-                {typeof profile.rate === "number" && profile.rate > 0
-                  ? profile.rate.toFixed(1)
-                  : "No rating"}
-              </Badge>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleAvatarUpload}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full rounded-xl"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUploadingAvatar}
-            >
-              {isUploadingAvatar ? (
-                <LoaderCircle className="h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="h-4 w-4" />
-              )}
-              {isUploadingAvatar ? "Uploading..." : "Change photo"}
-            </Button>
-          </div>
-
-          <div className="space-y-4 rounded-2xl border border-border/70 p-4">
-            <div className="space-y-1">
+            <div className="space-y-4 rounded-2xl border border-border/70 p-4">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <Mail className="h-4 w-4 text-primary" />
-                Email
+                <Package className="h-4 w-4 text-primary" />
+                Current package
               </div>
-              <p className="text-sm text-muted-foreground">
-                {profile.email || "No email"}
-              </p>
+              {isSubscriptionLoading ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                  <Skeleton className="h-4 w-2/3" />
+                </div>
+              ) : isSubscriptionError ? (
+                <p className="text-sm text-destructive">
+                  Unable to load current package information.
+                </p>
+              ) : subscription ? (
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="font-medium text-foreground">
+                      {subscription.packageName}
+                    </p>
+                    {subscription.isCancelledAtEndOfCycle ? (
+                      <Badge
+                        variant="outline"
+                        className="border-amber-200 bg-amber-50 text-amber-700"
+                      >
+                        Scheduled
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Paid at: {formatDateTime(subscription.paidAt)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    End date: {formatDateTime(subscription.endDate)}
+                  </p>
+                  {subscription.isCancelledAtEndOfCycle ? (
+                    <p className="text-sm text-amber-700">
+                      This package will stay active until the current billing
+                      cycle ends.
+                    </p>
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-2 w-full rounded-xl border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-700"
+                      onClick={onOpenUnsubscribeDialog}
+                      disabled={isUnsubscribing}
+                    >
+                      {isUnsubscribing ? "Unsubscribing..." : "Unsubscribe"}
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  No active package yet. Open the package page to choose one.
+                </p>
+              )}
             </div>
-
-            <div className="space-y-1 text-sm text-muted-foreground">
-              <p>Joined {formatDateLabel(profile.createdAt)}</p>
-              <p>Last update {formatDateLabel(profile.updatedAt)}</p>
-              <p>Birthday {formatDateLabel(profile.dateOfBirth)}</p>
-            </div>
-          </div>
-
-          <div className="space-y-4 rounded-2xl border border-border/70 p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Package className="h-4 w-4 text-primary" />
-              Current package
-            </div>
-            {isSubscriptionLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-5/6" />
-                <Skeleton className="h-4 w-2/3" />
-              </div>
-            ) : isSubscriptionError ? (
-              <p className="text-sm text-destructive">
-                Unable to load current package information.
-              </p>
-            ) : subscription ? (
-              <div className="space-y-2">
-                <p className="font-medium text-foreground">
-                  {subscription.packageName}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Start date: {formatDateTime(subscription.startDate)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  End date: {formatDateTime(subscription.endDate)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Status: {subscription.status || "N/A"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Paid at: {formatDateTime(subscription.paidAt)}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Amount paid: {formatNumber(subscription.amountPaid)}{" "}
-                  {subscription.currency || ""}
-                </p>
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No active package yet. Open the package page to choose one.
-              </p>
-            )}
-          </div>
-        </BookingPanelContent>
-      </BookingPanel>
+          </BookingPanelContent>
+        </BookingPanel>
+      </BuddySubscriptionPanelFrame>
 
       <BookingPanel className="py-2">
         <BookingPanelHeader className="border-b border-border/70 py-5 text-center text-foreground text-4xl font-semibold">
@@ -903,13 +962,17 @@ export function BuddyProfileSummaryCard() {
   const appliedDraftSnapshotRef = useRef<string | null>(null);
   const profileQuery = useBuddyMeQuery();
   const subscriptionQuery = useMyServiceSubscriptionQuery();
+  const unsubscribePackageMutation = useUnsubscribeMyServicePackageMutation();
   const { updateBuddyProfileMutation, uploadBuddyAvatarMutation } =
     useBuddyProfileMutations();
   const [draft, setDraft] = useState<BuddyProfileFormState>(getInitialDraft());
   const [errors, setErrors] = useState<BuddyProfileErrors>({});
   const [avatarPreviewUrl, setAvatarPreviewUrl] = useState<string | null>(null);
   const [pendingAvatarFile, setPendingAvatarFile] = useState<File | null>(null);
-  const [cropDialogImageSrc, setCropDialogImageSrc] = useState<string | null>(null);
+  const [isUnsubscribeDialogOpen, setIsUnsubscribeDialogOpen] = useState(false);
+  const [cropDialogImageSrc, setCropDialogImageSrc] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     const profile = profileQuery.data?.data;
@@ -939,6 +1002,7 @@ export function BuddyProfileSummaryCard() {
   const isDirty = normalizedDraftSnapshot !== appliedDraftSnapshotRef.current;
   const isSavingProfile = updateBuddyProfileMutation.isPending;
   const isUploadingAvatar = uploadBuddyAvatarMutation.isPending;
+  const isUnsubscribing = unsubscribePackageMutation.isPending;
 
   const closeCropDialog = () => {
     revokeObjectUrl(cropDialogImageSrc);
@@ -967,6 +1031,22 @@ export function BuddyProfileSummaryCard() {
       await updateBuddyProfileMutation.mutateAsync(toUpdatePayload(draft));
       appliedDraftSnapshotRef.current = normalizedDraftSnapshot;
       toast.success("Buddy profile updated successfully.");
+    } catch (error) {
+      handleApiError(error, { showTitle: false });
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      const response = await unsubscribePackageMutation.mutateAsync();
+      toast.success(
+        response.message ||
+          "Your package will remain active until the current billing cycle ends.",
+        {
+          description: "Unsubscribe scheduled",
+        },
+      );
+      setIsUnsubscribeDialogOpen(false);
     } catch (error) {
       handleApiError(error, { showTitle: false });
     }
@@ -1075,11 +1155,36 @@ export function BuddyProfileSummaryCard() {
         isUploadingAvatar={isUploadingAvatar}
         isSubscriptionError={subscriptionQuery.isError}
         isSubscriptionLoading={subscriptionQuery.isLoading}
+        isUnsubscribing={isUnsubscribing}
         onFieldChange={updateDraftField}
+        onOpenUnsubscribeDialog={() => setIsUnsubscribeDialogOpen(true)}
         profile={profile}
         subscription={subscription}
         aboutMeLength={draft.aboutMe.length}
       />
+      <AlertDialog
+        open={isUnsubscribeDialogOpen}
+        onOpenChange={setIsUnsubscribeDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsubscribe from current package</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your current package will stay active until the end date, then it
+              will stop renewing automatically.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep package</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnsubscribe}
+              disabled={isUnsubscribing}
+            >
+              Confirm unsubscribe
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <AvatarCropDialog
         open={Boolean(cropDialogImageSrc)}
         imageSrc={cropDialogImageSrc}

@@ -591,9 +591,8 @@ export function ServicePackagesClient() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete service package</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will soft-delete{" "}
-              {deleteTarget?.label || "the selected package"}. It will remain
-              queryable from `/api/ServicePackages/all`.
+              This action will delete{" "}
+              {deleteTarget?.label || "the selected package"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,6 +1,7 @@
 import type {
   AdminBookingsQuery,
   AdminBuddiesQuery,
+  AdminBuddiesWithSubscriptionQuery,
   AdminIncidentsQuery,
   AdminOverviewQuery,
   AdminOverviewSummaryQuery,
@@ -16,8 +17,8 @@ export const adminQueryKeys = {
   buddies: (params?: AdminBuddiesQuery) =>
     [...adminQueryKeys.all, "buddies", params ?? {}] as const,
   buddyDetail: (id: string) => [...adminQueryKeys.all, "buddies", id] as const,
-  buddiesWithSubscription: () =>
-    [...adminQueryKeys.all, "buddies-with-subscription"] as const,
+  buddiesWithSubscription: (params?: AdminBuddiesWithSubscriptionQuery) =>
+    [...adminQueryKeys.all, "buddies-with-subscription", params ?? {}] as const,
   trips: (params?: AdminTripsQuery) => [...adminQueryKeys.all, "trips", params ?? {}] as const,
   tripDetail: (id: string) => [...adminQueryKeys.all, "trips", id] as const,
   tripBookings: (tripId: string) => [...adminQueryKeys.all, "trip-bookings", tripId] as const,

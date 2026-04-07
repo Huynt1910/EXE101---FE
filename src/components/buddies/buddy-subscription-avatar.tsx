@@ -28,7 +28,7 @@ function getSubscriptionTone(
     case "starter":
       return {
         badgeClassName:
-          "border-orange-300 bg-sky-50 text-sky-700 shadow-sky-200/80",
+          "border-sky-300 bg-sky-50 text-sky-700 shadow-sky-200/80",
         frameClassName: "bg-sky-400 shadow-sky-200/80",
       };
     default:

@@ -171,6 +171,32 @@ export function countResolvedIncidents(incidents: AdminIncident[]) {
   ).length;
 }
 
+const STATUS_LABEL_MAP: Record<string, string> = {
+  PendingCustomerConfirm: "Pending customer confirm",
+  PendingPayment: "Pending payment",
+  InProgress: "In progress",
+  CancelledByTimeout: "Cancelled by timeout",
+  InReview: "In review",
+  NoShow: "No show",
+  LateArrival: "Late arrival",
+  QualityIssue: "Quality issue",
+  SafetyIssue: "Safety issue",
+  PaymentIssue: "Payment issue",
+};
+
+export function formatStatusLabel(label?: string | null) {
+  if (!label) return "Unknown";
+
+  const mappedLabel = STATUS_LABEL_MAP[label];
+  if (mappedLabel) return mappedLabel;
+
+  return label
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function getStatusTone(status?: string | null) {
   switch (status) {
     case "Completed":
@@ -204,7 +230,7 @@ export function StatusPill({ label }: { label?: string | null }) {
       variant="outline"
       className={cn("font-medium", getStatusTone(label))}
     >
-      {label ?? "Unknown"}
+      {formatStatusLabel(label)}
     </Badge>
   );
 }
@@ -248,6 +274,7 @@ export function PaginationControls({
   totalPages,
   hasPreviousPage,
   hasNextPage,
+  totalCount,
   onPrevious,
   onNext,
 }: {
@@ -255,14 +282,28 @@ export function PaginationControls({
   totalPages: number;
   hasPreviousPage: boolean;
   hasNextPage: boolean;
+  totalCount?: number;
   onPrevious: () => void;
   onNext: () => void;
 }) {
+  const safePage = Math.max(page, 1);
+  const safeTotalPages = Math.max(totalPages, 1);
+  const startItem =
+    typeof totalCount === "number" && totalCount > 0
+      ? (safePage - 1) * 10 + 1
+      : null;
+  const endItem =
+    typeof totalCount === "number" && totalCount > 0
+      ? Math.min(safePage * 10, totalCount)
+      : null;
+
   return (
     <div className="flex items-center justify-between gap-3 border-t border-border/70 px-6 py-4">
-      <p className="text-sm text-muted-foreground">
-        Page {page} of {Math.max(totalPages, 1)}
-      </p>
+      <div className="space-y-1">
+        <p className="text-sm text-muted-foreground">
+          Page {safePage} of {safeTotalPages}
+        </p>
+      </div>
       <div className="flex items-center gap-2">
         <Button
           size="sm"

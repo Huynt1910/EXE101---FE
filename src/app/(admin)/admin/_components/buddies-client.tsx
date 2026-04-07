@@ -358,13 +358,29 @@ export function BuddiesClient() {
   };
 
   const renderBuddyIdentity = (buddy: AdminBuddy | BuddyProfile) => (
-    <div className="min-w-0">
-      <p className="truncate font-medium text-foreground">
-        {getBuddyDisplayName(buddy)}
-      </p>
-      <p className="truncate text-xs text-muted-foreground">
-        {buddy.email || buddy.userId || "No user link"}
-      </p>
+    <div className="flex items-center gap-3">
+      <div className="relative h-10 w-10 overflow-hidden rounded-full border border-border/70 bg-background">
+        {buddy.profilePicture ? (
+          <Image
+            src={buddy.profilePicture}
+            alt={getBuddyDisplayName(buddy)}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-foreground">
+            {getInitials(getBuddyDisplayName(buddy) || buddy.email)}
+          </div>
+        )}
+      </div>
+      <div className="min-w-0">
+        <p className="truncate font-medium text-foreground">
+          {getBuddyDisplayName(buddy)}
+        </p>
+        <p className="truncate text-xs text-muted-foreground">
+          {buddy.email || buddy.userId || "No user link"}
+        </p>
+      </div>
     </div>
   );
 
@@ -446,6 +462,23 @@ export function BuddiesClient() {
               }
             />
           ) : null}
+          <DetailItem
+            label="Profile picture"
+            value={
+              selectedBuddy.profilePicture ? (
+                <a
+                  href={selectedBuddy.profilePicture}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-primary hover:underline"
+                >
+                  Open image
+                </a>
+              ) : (
+                "No profile picture"
+              )
+            }
+          />
           <DetailItem
             label="Activities"
             value={formatStringList(selectedBuddy.activities) || "N/A"}

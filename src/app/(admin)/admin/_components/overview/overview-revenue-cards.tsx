@@ -12,7 +12,7 @@ import { useAdminOverviewRevenue } from "@/features/admin/hooks/useAdmin";
 const REVENUE_CARDS = [
   {
     key: "booking",
-    title: "Booking revenue",
+    title: "Paypal platform",
     currency: "USD",
     valueKey: "totalBookingRevenue",
     helper: "Direct booking-side revenue in the current window",
@@ -23,7 +23,7 @@ const REVENUE_CARDS = [
   },
   {
     key: "subscription",
-    title: "Subscription revenue",
+    title: "PayOS platform",
     currency: "VNĐ",
     valueKey: "totalSubscriptionRevenue",
     helper: "Revenue generated from service packages",
@@ -64,11 +64,7 @@ export function OverviewRevenueCards() {
         const value = revenue[card.valueKey];
 
         return (
-          <Link
-            key={card.key}
-            href={card.href}
-            className="group block h-full"
-          >
+          <Link key={card.key} href={card.href} className="group block h-full">
             <div
               className={`flex h-full min-h-[104px] items-start gap-4 rounded-[16px] border px-5 py-4 transition-transform duration-200 group-hover:-translate-y-0.5 ${card.tone}`}
             >

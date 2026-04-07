@@ -19,6 +19,7 @@ import {
 import {
   DetailItem,
   EmptyState,
+  PaginationControls,
   StatusPill,
   formatCurrency,
   getErrorMessage,
@@ -41,13 +42,20 @@ export function ServicePackageSubscribersPanel() {
   const deferredSearch = useDeferredValue(search);
   const [packageFilter, setPackageFilter] = useState("all");
   const [selectedBuddyId, setSelectedBuddyId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
-  const buddiesWithSubscriptionQuery = useAdminBuddiesWithSubscription();
+  const buddiesWithSubscriptionQuery = useAdminBuddiesWithSubscription({
+    IsActive: true,
+    Search: deferredSearch.trim() || undefined,
+    Page: page,
+    PageSize: pageSize,
+    SortBy: "PaidAt",
+    SortOrder: "desc",
+  });
 
-  const buddies = useMemo(
-    () => buddiesWithSubscriptionQuery.data?.data ?? [],
-    [buddiesWithSubscriptionQuery.data?.data],
-  );
+  const buddiesPage = buddiesWithSubscriptionQuery.data?.data;
+  const buddies = useMemo(() => buddiesPage?.items ?? [], [buddiesPage?.items]);
 
   const packageOptions = useMemo(
     () =>
@@ -62,8 +70,6 @@ export function ServicePackageSubscribersPanel() {
   );
 
   const filteredBuddies = useMemo(() => {
-    const keyword = deferredSearch.trim().toLowerCase();
-
     return buddies
       .filter((buddy) => {
         const packageName = buddy.subscription?.packageName ?? "";
@@ -72,22 +78,7 @@ export function ServicePackageSubscribersPanel() {
           return false;
         }
 
-        if (!keyword) return true;
-
-        const haystacks = [
-          buddy.fullName,
-          buddy.email,
-          buddy.userId,
-          buddy.phoneNumber,
-          buddy.address,
-          packageName,
-          ...(buddy.languages ?? []),
-          ...(buddy.activities ?? []),
-        ];
-
-        return haystacks
-          .filter((value): value is string => typeof value === "string")
-          .some((value) => value.toLowerCase().includes(keyword));
+        return true;
       })
       .sort((left, right) => {
         const rightTimestamp = new Date(
@@ -99,7 +90,7 @@ export function ServicePackageSubscribersPanel() {
 
         return rightTimestamp - leftTimestamp;
       });
-  }, [buddies, deferredSearch, packageFilter]);
+  }, [buddies, packageFilter]);
 
   const selectedBuddy = useMemo(
     () =>
@@ -122,13 +113,17 @@ export function ServicePackageSubscribersPanel() {
         ?.currency ?? "VND";
 
     return {
-      total: buddies.length,
+      total: buddiesPage?.totalCount ?? buddies.length,
       activeCount,
       packageCount: packageOptions.length,
       totalRevenue,
       currency,
     };
-  }, [buddies, packageOptions.length]);
+  }, [buddies, buddiesPage?.totalCount, packageOptions.length]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [deferredSearch, pageSize]);
 
   useEffect(() => {
     const firstBuddyId = filteredBuddies[0]?.id ?? null;
@@ -173,17 +168,13 @@ export function ServicePackageSubscribersPanel() {
   return (
     <div className="space-y-6">
       <div className="booking-muted-panel">
-        <div className="space-y-1.5 p-6">
+        <div className="space-y-1.5 p-4">
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Buddy package subscribers
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Inspect buddies who have purchased a service package and review
-            their current subscription details.
-          </p>
         </div>
 
-        <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_minmax(260px,320px)] xl:items-end">
+        <div className="grid gap-4 px-6 pb-4 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_minmax(260px,320px)] xl:items-end">
           <div className="space-y-2">
             <Label htmlFor="subscription-buddy-search">Search</Label>
             <Input
@@ -210,17 +201,6 @@ export function ServicePackageSubscribersPanel() {
               ))}
             </select>
           </div>
-
-          <div className="space-y-2 xl:justify-self-end xl:w-full xl:max-w-xs">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-              Subscription revenue
-            </p>
-            <div className="rounded-xl border border-border/70 bg-background px-5 py-4">
-              <p className="text-2xl font-semibold text-foreground">
-                {formatCurrency(summary.totalRevenue, summary.currency)}
-              </p>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -240,7 +220,7 @@ export function ServicePackageSubscribersPanel() {
               Purchased buddies
             </h2>
             <p className="text-sm text-muted-foreground">
-              {filteredBuddies.length} / {buddies.length} buddies visible.
+              {buddiesPage?.totalCount ?? 0} buddies.
             </p>
           </div>
           <div className="px-0">
@@ -315,6 +295,19 @@ export function ServicePackageSubscribersPanel() {
                 />
               </div>
             )}
+            <PaginationControls
+              page={buddiesPage?.page ?? 1}
+              totalPages={buddiesPage?.totalPages ?? 1}
+              totalCount={buddiesPage?.totalCount ?? 0}
+              hasPreviousPage={buddiesPage?.hasPreviousPage ?? false}
+              hasNextPage={buddiesPage?.hasNextPage ?? false}
+              onPrevious={() => setPage((current) => Math.max(current - 1, 1))}
+              onNext={() =>
+                setPage((current) =>
+                  buddiesPage?.hasNextPage ? current + 1 : current,
+                )
+              }
+            />
           </div>
         </div>
 

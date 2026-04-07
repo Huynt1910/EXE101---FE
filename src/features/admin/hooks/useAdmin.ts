@@ -8,6 +8,7 @@ import type {
   AdminBookingsQuery,
   AdminBookingStatusUpdateRequest,
   AdminBuddiesQuery,
+  AdminBuddiesWithSubscriptionQuery,
   AdminBuddyRegisterRequest,
   AdminBuddyUpdateRequest,
   AdminIncidentsQuery,
@@ -53,10 +54,13 @@ export function useAdminBuddyDetail(id?: string | null) {
   });
 }
 
-export function useAdminBuddiesWithSubscription() {
+export function useAdminBuddiesWithSubscription(
+  params?: AdminBuddiesWithSubscriptionQuery,
+) {
   return useQuery({
-    queryKey: adminQueryKeys.buddiesWithSubscription(),
-    queryFn: () => adminApi.getBuddiesWithSubscription(),
+    queryKey: adminQueryKeys.buddiesWithSubscription(params),
+    queryFn: () => adminApi.getBuddiesWithSubscription(params),
+    placeholderData: (previous) => previous,
   });
 }
 

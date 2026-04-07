@@ -35,6 +35,7 @@ import {
   PaginationControls,
   StatusPill,
   countResolvedIncidents,
+  formatStatusLabel,
   getErrorMessage,
   selectClassName,
 } from "@/app/(admin)/admin/_components/admin-shared";
@@ -161,7 +162,7 @@ export function IncidentsClient() {
                 <option value="">All statuses</option>
                 {INCIDENT_STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {formatStatusLabel(status)}
                   </option>
                 ))}
               </select>
@@ -180,7 +181,7 @@ export function IncidentsClient() {
                 <option value="">All types</option>
                 {INCIDENT_TYPE_OPTIONS.map((type) => (
                   <option key={type} value={type}>
-                    {type}
+                    {formatStatusLabel(type)}
                   </option>
                 ))}
               </select>
@@ -239,7 +240,9 @@ export function IncidentsClient() {
                         <TableCell className="px-6">
                           <div className="min-w-0">
                             <p className="truncate font-medium text-foreground">
-                              {incident.typeName || incident.type}
+                              {formatStatusLabel(
+                                incident.typeName || incident.type,
+                              )}
                             </p>
                             <p className="truncate text-xs text-muted-foreground">
                               {incident.description || "No description"}
@@ -328,7 +331,9 @@ export function IncidentsClient() {
                 <div className="grid gap-3">
                   <DetailItem
                     label="Type"
-                    value={selectedIncident.typeName || selectedIncident.type}
+                    value={formatStatusLabel(
+                      selectedIncident.typeName || selectedIncident.type,
+                    )}
                   />
                   <DetailItem
                     label="Status"
@@ -416,7 +421,7 @@ export function IncidentsClient() {
               >
                 {INCIDENT_STATUS_OPTIONS.map((status) => (
                   <option key={status} value={status}>
-                    {status}
+                    {formatStatusLabel(status)}
                   </option>
                 ))}
               </select>

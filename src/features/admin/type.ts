@@ -68,6 +68,15 @@ export interface AdminBuddiesQuery extends RequestParams {
   SortOrder?: string;
 }
 
+export interface AdminBuddiesWithSubscriptionQuery extends RequestParams {
+  IsActive?: boolean;
+  Search?: string;
+  Page?: number;
+  PageSize?: number;
+  SortBy?: string;
+  SortOrder?: string;
+}
+
 export interface AdminIncidentsQuery extends RequestParams {
   Status?: AdminIncidentStatus;
   Type?: AdminIncidentType;
@@ -474,7 +483,8 @@ export type AdminUserListResponse = ApiResponse<PaginatedResult<AdminUser>>;
 export type AdminUserResponse = ApiResponse<AdminUser>;
 export type AdminBuddyListResponse = ApiResponse<PaginatedResult<AdminBuddy>>;
 export type AdminBuddyResponse = ApiResponse<AdminBuddy>;
-export type AdminBuddiesWithSubscriptionResponse = ApiResponse<AdminBuddy[]>;
+export type AdminBuddiesWithSubscriptionResponse =
+  ApiResponse<PaginatedResult<AdminBuddy>>;
 export type AdminTripListResponse = ApiResponse<PaginatedResult<AdminTrip>>;
 export type AdminTripResponse = ApiResponse<AdminTrip>;
 export type AdminBookingListResponse = ApiResponse<PaginatedResult<AdminBooking>>;
