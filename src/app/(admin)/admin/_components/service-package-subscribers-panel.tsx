@@ -183,7 +183,7 @@ export function ServicePackageSubscribersPanel() {
           </p>
         </div>
 
-        <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_220px_minmax(260px,320px)] xl:items-end">
           <div className="space-y-2">
             <Label htmlFor="subscription-buddy-search">Search</Label>
             <Input
@@ -210,13 +210,16 @@ export function ServicePackageSubscribersPanel() {
               ))}
             </select>
           </div>
-          <div className="rounded-xl border border-border/70 bg-background p-4">
+
+          <div className="space-y-2 xl:justify-self-end xl:w-full xl:max-w-xs">
             <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
               Subscription revenue
             </p>
-            <p className="mt-2 text-2xl font-semibold text-foreground">
-              {formatCurrency(summary.totalRevenue, summary.currency)}
-            </p>
+            <div className="rounded-xl border border-border/70 bg-background px-5 py-4">
+              <p className="text-2xl font-semibold text-foreground">
+                {formatCurrency(summary.totalRevenue, summary.currency)}
+              </p>
+            </div>
           </div>
         </div>
       </div>

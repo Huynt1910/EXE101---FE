@@ -25,6 +25,10 @@ export function isBuddyDashboardPath(pathname: string) {
   return pathname === "/buddy" || pathname.startsWith("/buddy/");
 }
 
+export function isBuddyAllowedPath(pathname: string) {
+  return isBuddyDashboardPath(pathname) || pathname === "/auth/session-sync";
+}
+
 export function isAdminDashboardPath(pathname: string) {
   return (
     pathname === "/admin" ||
