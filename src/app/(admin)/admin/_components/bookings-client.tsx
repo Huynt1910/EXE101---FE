@@ -151,10 +151,6 @@ export function BookingsClient() {
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Booking management
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Query `/api/admin/bookings` directly with search, filters, sorting,
-            and pagination from one screen.
-          </p>
         </div>
         <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2">

@@ -610,9 +610,9 @@ export const adminApi = {
     return res.data;
   },
 
-  async deleteUser(id: string) {
-    const res = await httpClient.delete<ApiResponse<null>>(
-      `${ADMIN_BASE_PATH}/users/${id}`,
+  async toggleUserStatus(id: string) {
+    const res = await httpClient.patch<AdminUserResponse>(
+      `${ADMIN_BASE_PATH}/users/${id}/toggle-status`,
     );
     return res.data;
   },

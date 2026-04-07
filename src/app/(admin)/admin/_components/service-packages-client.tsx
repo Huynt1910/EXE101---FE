@@ -203,9 +203,8 @@ export function ServicePackagesClient() {
 
   const handleCreatePackage = async () => {
     try {
-      const response = await createServicePackageMutation.mutateAsync(
-        buildPayload(),
-      );
+      const response =
+        await createServicePackageMutation.mutateAsync(buildPayload());
       toast({
         title: "Service package created",
         description:
@@ -232,8 +231,7 @@ export function ServicePackagesClient() {
       });
       toast({
         title: "Service package updated",
-        description:
-          response.message || "The selected package has been saved.",
+        description: response.message || "The selected package has been saved.",
       });
       setIsEditDialogOpen(false);
     } catch (error) {
@@ -278,9 +276,6 @@ export function ServicePackagesClient() {
                 <h2 className="text-xl font-semibold tracking-tight text-foreground">
                   Service package management
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Manage your service packages.
-                </p>
               </div>
               <div className="grid gap-4 px-6 pb-6 md:grid-cols-[minmax(0,1fr)_220px]">
                 <div className="space-y-2">
@@ -309,10 +304,7 @@ export function ServicePackagesClient() {
             </div>
 
             <SegmentedTabsList className="mt-1">
-              <SegmentedTabsTrigger
-                value="packages"
-                className="min-w-[160px]"
-              >
+              <SegmentedTabsTrigger value="packages" className="min-w-[160px]">
                 Packages
               </SegmentedTabsTrigger>
               <SegmentedTabsTrigger

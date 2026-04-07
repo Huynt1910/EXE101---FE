@@ -159,7 +159,7 @@ export function BuddyAllProfilesPanel({
               Selected buddy
             </h2>
             <p className="text-sm text-muted-foreground">
-              Inspect detailed buddy profile data from the detail endpoint.
+              Inspect detailed buddy profile.
             </p>
           </div>
           <Button

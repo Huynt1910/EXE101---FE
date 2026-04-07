@@ -28,6 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AvatarCropDialog } from "@/components/common/avatar-crop-dialog";
+import { BuddySubscriptionAvatar } from "@/components/buddies/buddy-subscription-avatar";
 import {
   BookingPanel,
   BookingPanelContent,
@@ -550,16 +551,14 @@ function BuddyProfileEditor({
         <BookingPanelContent className="space-y-6">
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="relative">
-              <Avatar className="h-28 w-28 border border-border/70 bg-secondary">
-                <AvatarImage
-                  src={avatarSrc}
-                  alt={profile.fullName || "Buddy avatar"}
-                  className="object-cover"
-                />
-                <AvatarFallback className="bg-secondary text-lg font-semibold text-muted-foreground">
-                  {getInitials(profile) || <UserRound className="h-8 w-8" />}
-                </AvatarFallback>
-              </Avatar>
+              <BuddySubscriptionAvatar
+                profilePicture={avatarSrc}
+                fullName={profile.fullName || "Buddy avatar"}
+                initials={getInitials(profile)}
+                packageName={subscription?.packageName}
+                avatarClassName="h-28 w-28 bg-secondary"
+                fallbackClassName="bg-secondary text-lg font-semibold text-muted-foreground"
+              />
               <span
                 className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center"
                 aria-label={profile.isActive ? "Active" : "Inactive"}

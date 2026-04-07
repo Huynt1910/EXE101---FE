@@ -271,8 +271,7 @@ export function BuddiesClient() {
       toast({
         title: "Buddy profile created",
         description:
-          response.message ||
-          "The selected user is now registered as a buddy.",
+          response.message || "The selected user is now registered as a buddy.",
       });
       setIsRegisterBuddyDialogOpen(false);
       setBuddyForm(emptyBuddyForm);
@@ -346,8 +345,7 @@ export function BuddiesClient() {
       if (selectedBuddyId === deleteTarget.id) setSelectedBuddyId(null);
       toast({
         title: "Buddy deleted",
-        description:
-          response.message || "The buddy profile has been removed.",
+        description: response.message || "The buddy profile has been removed.",
       });
       setDeleteTarget(null);
     } catch (error) {
@@ -510,10 +508,6 @@ export function BuddiesClient() {
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               Buddy management
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Search, sort and inspect supply-side profiles from the admin buddy
-              endpoints.
-            </p>
           </div>
           <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-2">

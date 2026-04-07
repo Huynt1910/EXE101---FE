@@ -109,6 +109,7 @@ export function UsersClient() {
   const [deleteTarget, setDeleteTarget] = useState<{
     id: string;
     label: string;
+    isActive: boolean;
   } | null>(null);
   const [userForm, setUserForm] = useState<UserFormState>(emptyUserForm);
   const [buddyForm, setBuddyForm] = useState<BuddyFormState>(emptyBuddyForm);
@@ -247,11 +248,12 @@ export function UsersClient() {
     if (!deleteTarget) return;
 
     try {
-      await deleteUserMutation.mutateAsync(deleteTarget.id);
+      const response = await deleteUserMutation.mutateAsync(deleteTarget.id);
       if (selectedUserId === deleteTarget.id) setSelectedUserId(null);
       toast({
-        title: "User deleted",
-        description: "The user record has been removed.",
+        title: deleteTarget.isActive ? "User deactivated" : "User activated",
+        description:
+          response.message || "The user status has been updated successfully.",
       });
       setDeleteTarget(null);
     } catch (error) {
@@ -271,10 +273,6 @@ export function UsersClient() {
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               User management
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Search and maintain customer accounts through the admin user
-              endpoints.
-            </p>
           </div>
           <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-2">
@@ -345,7 +343,8 @@ export function UsersClient() {
                 Users
               </h2>
               <p className="text-sm text-muted-foreground">
-                {totalUsers} total users.
+                {totalUsers} total users. {verifiedUsersOnPage} verified on this
+                page.
               </p>
             </div>
             <div className="px-0">
@@ -356,6 +355,7 @@ export function UsersClient() {
                       <TableHead className="px-6">Customer</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Roles</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
@@ -394,6 +394,13 @@ export function UsersClient() {
                             )}
                           </div>
                         </TableCell>
+                        <TableCell>
+                          <StatusPill
+                            label={
+                              user.isActive === false ? "Inactive" : "Active"
+                            }
+                          />
+                        </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatDateTime(user.createdAt)}
                         </TableCell>
@@ -418,6 +425,7 @@ export function UsersClient() {
                                   id: user.id,
                                   label:
                                     user.fullName || user.email || "this user",
+                                  isActive: user.isActive !== false,
                                 });
                               }}
                             >
@@ -509,6 +517,18 @@ export function UsersClient() {
                               </Badge>
                             ))}
                           </div>
+                        }
+                      />
+                      <DetailItem
+                        label="Status"
+                        value={
+                          <StatusPill
+                            label={
+                              selectedUser.isActive === false
+                                ? "Inactive"
+                                : "Active"
+                            }
+                          />
                         }
                       />
                       <DetailItem
@@ -769,17 +789,19 @@ export function UsersClient() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete user</AlertDialogTitle>
+            <AlertDialogTitle>
+              {deleteTarget?.isActive ? "Deactivate user" : "Activate user"}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action will remove{" "}
-              {deleteTarget?.label || "the selected record"} from the admin
-              dataset. This cannot be undone.
+              This action will{" "}
+              {deleteTarget?.isActive ? "deactivate" : "reactivate"}{" "}
+              {deleteTarget?.label || "the selected record"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteUser}>
-              Delete permanently
+              {deleteTarget?.isActive ? "Deactivate user" : "Activate user"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
