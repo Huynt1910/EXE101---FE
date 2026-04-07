@@ -1,16 +1,21 @@
 "use client";
 
 import React, { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Toaster } from "sonner";
 import { httpClient } from "@/lib/http/client";
+import { hasRole, isBuddyAllowedPath } from "@/lib/auth/route-access";
 import { QueryProvider } from "./queryProvider";
-import { authStore } from "@/lib/store/authStore";
+import { authStore, useAuthStore } from "@/lib/store/authStore";
 
 export default function AppProviders({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const authState = useAuthStore();
+
   useEffect(() => {
     authStore.restoreAuth();
 
@@ -27,6 +32,19 @@ export default function AppProviders({
       httpClient.setOnUnauthorized();
     };
   }, []);
+
+  useEffect(() => {
+    if (globalThis.window === undefined) return;
+    if (!authState.isAuthenticated || !authState.user) return;
+
+    const roles = authState.user.roles ?? [];
+    const isBuddyOnly = hasRole(roles, "Buddy") && !hasRole(roles, "Admin");
+
+    if (!isBuddyOnly) return;
+    if (isBuddyAllowedPath(pathname)) return;
+
+    globalThis.location.replace("/buddy");
+  }, [authState.isAuthenticated, authState.user, pathname]);
 
   return (
     <QueryProvider>
