@@ -352,8 +352,8 @@ function MultiSelectField({
   };
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+    <div className="space-y-2.5">
+      <div className="flex items-center justify-between gap-3 px-0.5">
         <label className="text-sm font-medium text-foreground">{label}</label>
         <span className="text-xs text-muted-foreground">
           {values.length} selected
@@ -362,7 +362,7 @@ function MultiSelectField({
 
       <div
         className={cn(
-          "flex min-h-12 flex-wrap gap-2 rounded-2xl border bg-background p-3",
+          "flex min-h-11 flex-wrap items-center gap-2 rounded-2xl border bg-background px-3 py-2.5",
           error ? "border-destructive/60" : "border-border/70",
         )}
       >
@@ -394,7 +394,7 @@ function MultiSelectField({
           <Button
             type="button"
             variant="outline"
-            className="w-full justify-between rounded-xl"
+            className="h-10 w-full justify-between rounded-xl px-3"
           >
             Select {label.toLowerCase()}
             <ChevronDown className="h-4 w-4" />
@@ -549,16 +549,33 @@ function BuddyProfileEditor({
       <BookingPanel>
         <BookingPanelContent className="space-y-6">
           <div className="flex flex-col items-center gap-4 text-center">
-            <Avatar className="h-28 w-28 border border-border/70 bg-secondary">
-              <AvatarImage
-                src={avatarSrc}
-                alt={profile.fullName || "Buddy avatar"}
-                className="object-cover"
-              />
-              <AvatarFallback className="bg-secondary text-lg font-semibold text-muted-foreground">
-                {getInitials(profile) || <UserRound className="h-8 w-8" />}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="h-28 w-28 border border-border/70 bg-secondary">
+                <AvatarImage
+                  src={avatarSrc}
+                  alt={profile.fullName || "Buddy avatar"}
+                  className="object-cover"
+                />
+                <AvatarFallback className="bg-secondary text-lg font-semibold text-muted-foreground">
+                  {getInitials(profile) || <UserRound className="h-8 w-8" />}
+                </AvatarFallback>
+              </Avatar>
+              <span
+                className="absolute bottom-0 right-0 flex h-4 w-4 items-center justify-center"
+                aria-label={profile.isActive ? "Active" : "Inactive"}
+                title={profile.isActive ? "Active" : "Inactive"}
+              >
+                {profile.isActive && (
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                )}
+                <span
+                  className={cn(
+                    "relative h-3 w-3 rounded-full border-2 border-card",
+                    profile.isActive ? "bg-green-500" : "bg-slate-400",
+                  )}
+                />
+              </span>
+            </div>
 
             <div className="space-y-2">
               <h2 className="inline-flex items-center gap-1.5 text-xl font-semibold leading-none text-foreground">
@@ -574,9 +591,6 @@ function BuddyProfileEditor({
             </div>
 
             <div className="flex flex-wrap justify-center gap-2">
-              <Badge variant="secondary" className="rounded-full">
-                {profile.isActive ? "Active" : "Inactive"}
-              </Badge>
               <Badge variant="secondary" className="rounded-full">
                 <Star className="mr-1 h-3.5 w-3.5" />
                 {typeof profile.rate === "number" && profile.rate > 0
@@ -678,10 +692,10 @@ function BuddyProfileEditor({
           Profile details
         </BookingPanelHeader>
 
-        <BookingPanelContent>
+        <BookingPanelContent className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label className="px-0.5 text-sm font-medium text-foreground">
                 Full name
               </label>
               <Input
@@ -701,7 +715,7 @@ function BuddyProfileEditor({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label className="px-0.5 text-sm font-medium text-foreground">
                 Gender
               </label>
               <select
@@ -726,7 +740,7 @@ function BuddyProfileEditor({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label className="px-0.5 text-sm font-medium text-foreground">
                 Email
               </label>
               <Input
@@ -737,7 +751,7 @@ function BuddyProfileEditor({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label className="px-0.5 text-sm font-medium text-foreground">
                 Phone number
               </label>
               <div className="relative">
@@ -760,7 +774,7 @@ function BuddyProfileEditor({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label className="px-0.5 text-sm font-medium text-foreground">
                 Date of birth
               </label>
               <Input
@@ -774,7 +788,7 @@ function BuddyProfileEditor({
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <label className="px-0.5 text-sm font-medium text-foreground">
                 Cost per hour
               </label>
               <Input
@@ -798,7 +812,7 @@ function BuddyProfileEditor({
           </div>
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 px-0.5">
               <label className="text-sm font-medium text-foreground">
                 Address
               </label>
@@ -810,7 +824,7 @@ function BuddyProfileEditor({
               <MapPin className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
               <Textarea
                 className={cn(
-                  "min-h-24 bg-background pl-9",
+                  "min-h-24 bg-background pl-9 pt-2.5",
                   errors.address && "border-destructive/60",
                 )}
                 value={draft.address}
@@ -844,7 +858,7 @@ function BuddyProfileEditor({
           />
 
           <div className="space-y-2">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-3 px-0.5">
               <label className="text-sm font-medium text-foreground">Bio</label>
               <span className="text-xs text-muted-foreground">
                 {bioLength}/1000

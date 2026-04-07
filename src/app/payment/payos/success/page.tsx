@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { CheckCircle2, CreditCard, Home, ReceiptText } from "lucide-react";
+import { CheckCircle2, Home, ReceiptText } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import ConfettiEffect from "./ConfettiEffect";
 
 type PayosSuccessPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -15,15 +16,15 @@ function getSearchParam(
 }
 
 function formatPaymentStatus(status?: string, isCancelled?: boolean) {
-  if (isCancelled) return "Đã hủy";
-  if (!status) return "Thành công";
-  if (status === "PAID") return "Đã thanh toán";
+  if (isCancelled) return "Cancelled";
+  if (!status) return "Success";
+  if (status === "PAID") return "Paid";
   return status;
 }
 
 export default async function PayosPaymentSuccessPage({
   searchParams,
-}: PayosSuccessPageProps) {
+}: Readonly<PayosSuccessPageProps>) {
   const params = await searchParams;
   const orderCode = getSearchParam(params, "orderCode");
   const transactionId = getSearchParam(params, "id");
@@ -32,26 +33,27 @@ export default async function PayosPaymentSuccessPage({
   const isSuccess = !isCancelled && status === "PAID";
 
   const details = [
-    { label: "Mã đơn hàng", value: orderCode || "N/A" },
-    { label: "Mã giao dịch", value: transactionId || "N/A" },
-    { label: "Trạng thái", value: formatPaymentStatus(status, isCancelled) },
+    { label: "Order code", value: orderCode || "N/A" },
+    { label: "Transaction ID", value: transactionId || "N/A" },
+    { label: "Status", value: formatPaymentStatus(status, isCancelled) },
   ];
 
   return (
     <section className="bg-secondary/30 px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl rounded-[2rem] border border-border bg-card p-8 text-center shadow-sm sm:p-10">
+      {isSuccess && <ConfettiEffect />}
+      <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-card p-8 text-center shadow-sm sm:p-10">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
           <CheckCircle2 className="h-11 w-11" />
         </div>
 
         <h1 className="mt-6 text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-          Thanh toán PayOS thành công
+          PayOS Payment Successful
         </h1>
 
         <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
           {isSuccess
-            ? "Gói dịch vụ của bạn đã được ghi nhận thanh toán. Bạn có thể quay lại Bonddy để tiếp tục sử dụng dịch vụ."
-            : "Bonddy đã nhận được phản hồi từ PayOS. Vui lòng kiểm tra lại thông tin giao dịch bên dưới."}
+            ? "Your service package payment has been confirmed. You can return to Bonddy and continue using the service."
+            : "Bonddy has received a response from PayOS. Please review the transaction details below."}
         </p>
 
         <div className="mt-10 overflow-hidden rounded-3xl border border-border bg-background text-left">
@@ -59,7 +61,7 @@ export default async function PayosPaymentSuccessPage({
             <div
               key={item.label}
               className={`flex flex-col gap-1 px-6 py-4 sm:flex-row sm:items-center sm:justify-between ${
-                index !== details.length - 1 ? "border-b border-border" : ""
+                index < details.length - 1 ? "border-b border-border" : ""
               }`}
             >
               <span className="text-sm font-medium text-muted-foreground">
@@ -76,7 +78,7 @@ export default async function PayosPaymentSuccessPage({
           <Button asChild size="lg" className="rounded-2xl px-8">
             <Link href="/buddy">
               <Home className="h-5 w-5" />
-              Về trang chủ
+              Go to home
             </Link>
           </Button>
           <Button
@@ -87,7 +89,7 @@ export default async function PayosPaymentSuccessPage({
           >
             <Link href="/buddy/package">
               <ReceiptText className="h-5 w-5" />
-              Xem gói dịch vụ
+              View service package
             </Link>
           </Button>
         </div>

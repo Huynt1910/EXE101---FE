@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import SignUpForm from "@/app/(auth)/components/signup-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSignup } from "@/features/auth/hooks/useSignup";
-import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
+import { signInWithGoogleAndGetIdToken, isGooglePopupCancelError, checkGoogleRedirectResult } from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface SignUpModalProps {
@@ -49,13 +49,24 @@ export default function SignUpModal({
       const idToken = await signInWithGoogleAndGetIdToken();
       googleLoginMutation.mutate({ idToken });
     } catch (error) {
-      handleApiError(error);
+      if (!isGooglePopupCancelError(error)) {
+        handleApiError(error);
+      }
     }
   };
 
   // ============================================================================
   // Effects
   // ============================================================================
+
+  // Pick up Google redirect result on mobile
+  useEffect(() => {
+    checkGoogleRedirectResult().then((idToken) => {
+      if (idToken) {
+        googleLoginMutation.mutate({ idToken });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle successful signup: show toast and navigate to verify-email
   useEffect(() => {
