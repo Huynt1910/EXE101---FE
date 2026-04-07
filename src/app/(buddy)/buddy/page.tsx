@@ -646,7 +646,7 @@ export default function BuddyOverviewPage() {
 
   return (
     <div className="flex h-full flex-col">
-      <main className="flex-1 w-full overflow-auto px-4 py-4 scrollbar-hide sm:px-6 sm:py-6 pb-24 md:pb-6">
+      <main className="flex-1 w-full overflow-auto px-4 py-4 scrollbar-hide sm:px-6 sm:py-6 pb-24 md:pb-6 bg-[#f2f2f2]">
         <div className="mx-auto max-w-400 space-y-6 sm:space-y-8">
 
           {/* Header */}
