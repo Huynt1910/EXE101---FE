@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowUpRight, CheckCircle2, Star, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
+  useMyServiceSubscriptionQuery,
   useServicePackages,
   useSubscribeServicePackageMutation,
 } from "@/features/service-package/hooks/useServicePackage";
@@ -28,6 +29,7 @@ type Plan = {
 
 type PricingSectionProps = {
   embedded?: boolean;
+  buddyUpgradeMode?: boolean;
 };
 
 const REDIRECT_NOTICE_DELAY_MS = 1800;
@@ -136,6 +138,19 @@ function mapServicePackageToPlan(servicePackage: ServicePackage): Plan {
   };
 }
 
+function getPackageRank(name?: string | null) {
+  switch (name?.trim().toLowerCase()) {
+    case "starter":
+      return 0;
+    case "pro":
+      return 1;
+    case "founder":
+      return 2;
+    default:
+      return -1;
+  }
+}
+
 function getSubscribeRedirectUrl(payload: unknown): string | null {
   if (typeof payload === "string" && payload.startsWith("http")) {
     return payload;
@@ -190,6 +205,7 @@ function getSubscribeResponseMessage(
 
 export default function PricingSection({
   embedded = false,
+  buddyUpgradeMode = false,
 }: Readonly<PricingSectionProps>) {
   const router = useRouter();
   const { isAuthenticated, user } = useAuthStore();
@@ -197,11 +213,21 @@ export default function PricingSection({
 
   const servicePackagesQuery = useServicePackages();
   const subscribePackageMutation = useSubscribeServicePackageMutation();
+  const mySubscriptionQuery = useMyServiceSubscriptionQuery(
+    buddyUpgradeMode && isAuthenticated && hasRole(userRoles, "Buddy"),
+  );
 
-  const plans = (servicePackagesQuery.data?.data ?? [])
+  const currentPackageName = mySubscriptionQuery.data?.data?.packageName ?? null;
+  const currentPackageRank = getPackageRank(currentPackageName);
+
+  const allPlans = (servicePackagesQuery.data?.data ?? [])
     .filter((servicePackage) => servicePackage.isActive)
     .sort((left, right) => left.sortOrder - right.sortOrder)
     .map(mapServicePackageToPlan);
+
+  const plans = buddyUpgradeMode
+    ? allPlans.filter((plan) => getPackageRank(plan.name) > currentPackageRank)
+    : allPlans;
 
   const handleChoosePackage = async (plan: Plan) => {
     if (!isAuthenticated) {
@@ -275,7 +301,20 @@ export default function PricingSection({
 
   const content = (
     <div className="mx-auto max-w-5xl">
-      <div className="grid gap-5 lg:grid-cols-3">
+      {buddyUpgradeMode && currentPackageRank === 2 ? (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-10 text-center shadow-sm">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-700">
+            Founder plan
+          </p>
+          <h3 className="mt-3 text-3xl font-bold text-slate-900">
+            Your package is already the highest plan.
+          </h3>
+          <p className="mt-3 text-base text-slate-600">
+            You are using Founder. There is no higher upgrade available right now.
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-5 lg:grid-cols-3">
         {plans.map((plan) => (
           <article
             key={plan.name}
@@ -355,7 +394,8 @@ export default function PricingSection({
             </ul>
           </article>
         ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 

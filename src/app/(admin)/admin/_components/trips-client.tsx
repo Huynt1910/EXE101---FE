@@ -72,10 +72,6 @@ export function TripsClient() {
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Trip management
           </h2>
-          <p className="text-sm text-muted-foreground">
-            Monitor demand from `/api/admin/trips` on a dedicated trip
-            operations page.
-          </p>
         </div>
         <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
           <div className="space-y-2">

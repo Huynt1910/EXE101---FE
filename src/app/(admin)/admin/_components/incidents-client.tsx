@@ -13,10 +13,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import { useAdminIncidents, useAdminMutations } from "@/features/admin/hooks/useAdmin";
+import {
+  useAdminIncidents,
+  useAdminMutations,
+} from "@/features/admin/hooks/useAdmin";
 import {
   DetailItem,
   EmptyState,
@@ -45,8 +55,11 @@ export function IncidentsClient() {
   const [incidentStatusFilter, setIncidentStatusFilter] = useState("");
   const [incidentTypeFilter, setIncidentTypeFilter] = useState("");
   const [incidentsPage, setIncidentsPage] = useState(1);
-  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
-  const [isResolveIncidentDialogOpen, setIsResolveIncidentDialogOpen] = useState(false);
+  const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(
+    null,
+  );
+  const [isResolveIncidentDialogOpen, setIsResolveIncidentDialogOpen] =
+    useState(false);
   const [incidentResolveForm, setIncidentResolveForm] =
     useState<IncidentResolveFormState>(emptyIncidentResolveForm);
 
@@ -61,7 +74,8 @@ export function IncidentsClient() {
 
   const incidents = incidentsQuery.data?.data.items ?? [];
   const totalIncidents = incidentsQuery.data?.data.totalCount ?? 0;
-  const selectedIncident = incidents.find((incident) => incident.id === selectedIncidentId) ?? null;
+  const selectedIncident =
+    incidents.find((incident) => incident.id === selectedIncidentId) ?? null;
   const unresolvedIncidentsOnPage = incidents.filter(
     (incident) => incident.status === "Open" || incident.status === "InReview",
   ).length;
@@ -69,7 +83,8 @@ export function IncidentsClient() {
 
   useEffect(() => {
     const firstIncidentId = incidents[0]?.id ?? null;
-    if (!selectedIncidentId && firstIncidentId) setSelectedIncidentId(firstIncidentId);
+    if (!selectedIncidentId && firstIncidentId)
+      setSelectedIncidentId(firstIncidentId);
   }, [incidents, selectedIncidentId]);
 
   useEffect(() => {
@@ -77,7 +92,8 @@ export function IncidentsClient() {
 
     setIncidentResolveForm({
       status:
-        selectedIncident.status === "Resolved" || selectedIncident.status === "Closed"
+        selectedIncident.status === "Resolved" ||
+        selectedIncident.status === "Closed"
           ? selectedIncident.status
           : "InReview",
       resolution: selectedIncident.resolution ?? "",
@@ -117,9 +133,6 @@ export function IncidentsClient() {
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
               Incident management
             </h2>
-            <p className="text-sm text-muted-foreground">
-              Filter the admin incident queue and close the loop on booking issues.
-            </p>
           </div>
           <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-4">
             <div className="space-y-2">
@@ -196,7 +209,7 @@ export function IncidentsClient() {
                 Incident queue
               </h2>
               <p className="text-sm text-muted-foreground">
-                {totalIncidents} incidents returned by `/api/Incidents`.
+                {totalIncidents} incidents returned.
               </p>
             </div>
             <div className="px-0">
@@ -215,7 +228,11 @@ export function IncidentsClient() {
                     {incidents.map((incident) => (
                       <TableRow
                         key={incident.id}
-                        data-state={incident.id === selectedIncidentId ? "selected" : undefined}
+                        data-state={
+                          incident.id === selectedIncidentId
+                            ? "selected"
+                            : undefined
+                        }
                         className="cursor-pointer"
                         onClick={() => setSelectedIncidentId(incident.id)}
                       >
@@ -229,10 +246,16 @@ export function IncidentsClient() {
                             </p>
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono text-xs text-muted-foreground">{incident.bookingId}</TableCell>
-                        <TableCell className="text-muted-foreground">{incident.reportedByName || "Unknown reporter"}</TableCell>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {incident.bookingId}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {incident.reportedByName || "Unknown reporter"}
+                        </TableCell>
                         <TableCell>
-                          <StatusPill label={incident.statusName || incident.status} />
+                          <StatusPill
+                            label={incident.statusName || incident.status}
+                          />
                         </TableCell>
                         <TableCell className="pr-6 text-right">
                           <Button
@@ -253,7 +276,10 @@ export function IncidentsClient() {
                 </Table>
               ) : (
                 <div className="px-6 pb-6">
-                  <EmptyState title="No incidents found" description="The current filters did not return any incident records." />
+                  <EmptyState
+                    title="No incidents found"
+                    description="The current filters did not return any incident records."
+                  />
                 </div>
               )}
             </div>
@@ -261,12 +287,18 @@ export function IncidentsClient() {
               <PaginationControls
                 page={incidentsQuery.data?.data.page ?? 1}
                 totalPages={incidentsQuery.data?.data.totalPages ?? 1}
-                hasPreviousPage={incidentsQuery.data?.data.hasPreviousPage ?? false}
+                hasPreviousPage={
+                  incidentsQuery.data?.data.hasPreviousPage ?? false
+                }
                 hasNextPage={incidentsQuery.data?.data.hasNextPage ?? false}
-                onPrevious={() => setIncidentsPage((current) => Math.max(current - 1, 1))}
+                onPrevious={() =>
+                  setIncidentsPage((current) => Math.max(current - 1, 1))
+                }
                 onNext={() =>
                   setIncidentsPage((current) =>
-                    incidentsQuery.data?.data.hasNextPage ? current + 1 : current,
+                    incidentsQuery.data?.data.hasNextPage
+                      ? current + 1
+                      : current,
                   )
                 }
               />
@@ -283,36 +315,88 @@ export function IncidentsClient() {
                   Investigate context before updating the resolution state.
                 </p>
               </div>
-              <Button variant="outline" onClick={() => setIsResolveIncidentDialogOpen(true)} disabled={!selectedIncident}>
+              <Button
+                variant="outline"
+                onClick={() => setIsResolveIncidentDialogOpen(true)}
+                disabled={!selectedIncident}
+              >
                 Resolve incident
               </Button>
             </div>
             <div className="px-6 pb-6">
               {selectedIncident ? (
                 <div className="grid gap-3">
-                  <DetailItem label="Type" value={selectedIncident.typeName || selectedIncident.type} />
-                  <DetailItem label="Status" value={<StatusPill label={selectedIncident.statusName || selectedIncident.status} />} />
-                  <DetailItem label="Booking ID" value={<code className="text-xs">{selectedIncident.bookingId}</code>} />
-                  <DetailItem label="Reported by" value={selectedIncident.reportedByName || "Unknown reporter"} />
-                  <DetailItem label="Created at" value={formatDateTime(selectedIncident.createdAt)} />
-                  <DetailItem label="Resolved at" value={formatDateTime(selectedIncident.resolvedAt)} />
-                  <DetailItem label="Description" value={selectedIncident.description || "No description provided."} />
-                  <DetailItem label="Resolution" value={selectedIncident.resolution || "No resolution has been saved."} />
+                  <DetailItem
+                    label="Type"
+                    value={selectedIncident.typeName || selectedIncident.type}
+                  />
+                  <DetailItem
+                    label="Status"
+                    value={
+                      <StatusPill
+                        label={
+                          selectedIncident.statusName || selectedIncident.status
+                        }
+                      />
+                    }
+                  />
+                  <DetailItem
+                    label="Booking ID"
+                    value={
+                      <code className="text-xs">
+                        {selectedIncident.bookingId}
+                      </code>
+                    }
+                  />
+                  <DetailItem
+                    label="Reported by"
+                    value={
+                      selectedIncident.reportedByName || "Unknown reporter"
+                    }
+                  />
+                  <DetailItem
+                    label="Created at"
+                    value={formatDateTime(selectedIncident.createdAt)}
+                  />
+                  <DetailItem
+                    label="Resolved at"
+                    value={formatDateTime(selectedIncident.resolvedAt)}
+                  />
+                  <DetailItem
+                    label="Description"
+                    value={
+                      selectedIncident.description || "No description provided."
+                    }
+                  />
+                  <DetailItem
+                    label="Resolution"
+                    value={
+                      selectedIncident.resolution ||
+                      "No resolution has been saved."
+                    }
+                  />
                 </div>
               ) : (
-                <EmptyState title="No incident selected" description="Select an incident row to inspect ticket details and save a resolution." />
+                <EmptyState
+                  title="No incident selected"
+                  description="Select an incident row to inspect ticket details and save a resolution."
+                />
               )}
             </div>
           </div>
         </div>
       </div>
 
-      <Dialog open={isResolveIncidentDialogOpen} onOpenChange={setIsResolveIncidentDialogOpen}>
+      <Dialog
+        open={isResolveIncidentDialogOpen}
+        onOpenChange={setIsResolveIncidentDialogOpen}
+      >
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Resolve incident</DialogTitle>
             <DialogDescription>
-              Save the new status and resolution message through `PATCH /api/admin/incidents/{'{id}'}/resolve`.
+              Save the new status and resolution message through `PATCH
+              /api/admin/incidents/{"{id}"}/resolve`.
             </DialogDescription>
           </DialogHeader>
 
@@ -324,7 +408,10 @@ export function IncidentsClient() {
                 className={selectClassName}
                 value={incidentResolveForm.status}
                 onChange={(event) =>
-                  setIncidentResolveForm((current) => ({ ...current, status: event.target.value }))
+                  setIncidentResolveForm((current) => ({
+                    ...current,
+                    status: event.target.value,
+                  }))
                 }
               >
                 {INCIDENT_STATUS_OPTIONS.map((status) => (
@@ -340,7 +427,10 @@ export function IncidentsClient() {
                 id="resolve-note"
                 value={incidentResolveForm.resolution}
                 onChange={(event) =>
-                  setIncidentResolveForm((current) => ({ ...current, resolution: event.target.value }))
+                  setIncidentResolveForm((current) => ({
+                    ...current,
+                    resolution: event.target.value,
+                  }))
                 }
                 placeholder="Explain how the issue was handled."
                 className="min-h-32"
@@ -349,10 +439,18 @@ export function IncidentsClient() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsResolveIncidentDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsResolveIncidentDialogOpen(false)}
+            >
               Cancel
             </Button>
-            <Button onClick={handleResolveIncident} disabled={resolveIncidentMutation.isPending || !selectedIncidentId}>
+            <Button
+              onClick={handleResolveIncident}
+              disabled={
+                resolveIncidentMutation.isPending || !selectedIncidentId
+              }
+            >
               Save resolution
             </Button>
           </DialogFooter>

@@ -250,9 +250,12 @@ export function useAdminMutations() {
   });
 
   const deleteUserMutation = useMutation({
-    mutationFn: (id: string) => adminApi.deleteUser(id),
-    onSuccess: () => {
+    mutationFn: (id: string) => adminApi.toggleUserStatus(id),
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "users"] });
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.userDetail(id),
+      });
     },
   });
 

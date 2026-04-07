@@ -99,6 +99,7 @@ export interface AdminUser {
   aboutMe: string | null;
   profilePicture: string | null;
   isEmailVerified: boolean;
+  isActive?: boolean | null;
   createdAt: string;
   updatedAt: string | null;
 }

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { BuddySubscriptionAvatar } from "@/components/buddies/buddy-subscription-avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +27,7 @@ import {
 import { motion } from "framer-motion";
 import AnimatedTabs from "@/components/common/AnimatedTabs";
 import { useBuddyMeQuery } from "@/features/buddy/hooks/useBuddy";
+import { useMyServiceSubscriptionQuery } from "@/features/service-package/hooks/useServicePackage";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
 
@@ -227,6 +229,7 @@ export default function HeaderHosting() {
   const { isAuthenticated, user } = useAuthStore();
   const canUseAuthenticatedView = isHydrated && isAuthenticated;
   const buddyMeQuery = useBuddyMeQuery(canUseAuthenticatedView);
+  const mySubscriptionQuery = useMyServiceSubscriptionQuery(canUseAuthenticatedView);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -242,6 +245,10 @@ export default function HeaderHosting() {
   const profilePicture = React.useMemo(
     () => buddyMeQuery.data?.data.profilePicture ?? null,
     [buddyMeQuery.data?.data.profilePicture],
+  );
+  const packageName = React.useMemo(
+    () => mySubscriptionQuery.data?.data?.packageName ?? null,
+    [mySubscriptionQuery.data?.data?.packageName],
   );
 
   const initials = React.useMemo(() => {
@@ -287,23 +294,25 @@ export default function HeaderHosting() {
             <div className="flex items-center gap-2 shrink-0">
               {canUseAuthenticatedView ? (
                 <div className="flex items-center gap-4">
-                  <Button
-                    variant="ghost"
-                    className="relative size-12 rounded-full"
-                  >
-                    <Link href="/buddy/profile">
-                      <Avatar className="size-12">
-                        <AvatarImage
-                          src={profilePicture ?? undefined}
-                          alt={fullName}
-                          className="object-cover"
+                  <div className="flex items-center">
+                    <Button
+                      asChild
+                      variant="ghost"
+                      className="relative h-auto w-auto overflow-visible rounded-full p-0 hover:bg-transparent"
+                    >
+                      <Link href="/buddy/profile" className="inline-flex overflow-visible">
+                        <BuddySubscriptionAvatar
+                          profilePicture={profilePicture}
+                          fullName={fullName}
+                          initials={initials}
+                          packageName={packageName}
+                          className="mr-1"
+                          avatarClassName="size-12"
+                          fallbackClassName="bg-[#849cb1] text-[#0d3b66]"
                         />
-                        <AvatarFallback className="bg-[#849cb1] text-[#0d3b66]">
-                          {initials}
-                        </AvatarFallback>
-                      </Avatar>
-                    </Link>
-                  </Button>
+                      </Link>
+                    </Button>
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button
