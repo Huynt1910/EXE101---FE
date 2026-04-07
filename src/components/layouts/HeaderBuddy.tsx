@@ -96,7 +96,9 @@ function BottomNavigation({
       label: "Account",
       href: "#",
       active:
-        isActiveNavItem("/buddy/profile") || isActiveNavItem("/buddy/package"),
+        isActiveNavItem("/buddy/profile") ||
+        isActiveNavItem("/buddy/package") ||
+        isActiveNavItem("/buddy/appointment"),
       isAccount: true,
     },
   ];
@@ -174,6 +176,14 @@ function BottomNavigation({
                         <Link href="/buddy/messages" className="cursor-pointer">
                           <MessageSquare className="mr-2 h-4 w-4" />
                           Messages
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/buddy/appointment" className="cursor-pointer">
+                          <CalendarIcon className="mr-1 h-5 w-5" />
+                          <span className="text-sm font-medium">
+                            Appointments
+                          </span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
@@ -365,6 +375,17 @@ export default function HeaderHosting() {
                             <MessageSquare className="mr-1 h-5 w-5" />
                             <span className="text-sm font-medium">
                               Messages
+                            </span>
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href="/buddy/appointment"
+                            className="cursor-pointer"
+                          >
+                            <CalendarIcon className="mr-1 h-5 w-5" />
+                            <span className="text-sm font-medium">
+                              Appointments
                             </span>
                           </Link>
                         </DropdownMenuItem>
