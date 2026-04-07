@@ -8,6 +8,7 @@ import {
   type ChangeEvent,
   type RefObject,
 } from "react";
+import { CheckBadgeIcon } from "@heroicons/react/24/solid";
 import {
   Camera,
   Check,
@@ -31,7 +32,6 @@ import {
   BookingPanel,
   BookingPanelContent,
   BookingPanelHeader,
-  BookingPanelTitle,
 } from "@/components/ui/booking-panel";
 import { Input } from "@/components/ui/input";
 import {
@@ -527,7 +527,6 @@ type BuddyProfileEditorProps = {
 };
 
 function BuddyProfileEditor({
-  aboutMeLength,
   addressLength,
   avatarSrc,
   bioLength,
@@ -562,8 +561,12 @@ function BuddyProfileEditor({
             </Avatar>
 
             <div className="space-y-2">
-              <h2 className="text-xl font-semibold text-foreground">
-                {profile.fullName || "Buddy profile"}
+              <h2 className="inline-flex items-center gap-1.5 text-xl font-semibold leading-none text-foreground">
+                <span className="leading-none">{profile.fullName || "Buddy profile"}</span>
+                <CheckBadgeIcon
+                  className="h-5 w-5 shrink-0 text-sky-500"
+                  aria-hidden="true"
+                />
               </h2>
               <p className="text-sm text-muted-foreground">
                 {profile.email || "No email"}
@@ -861,7 +864,7 @@ function BuddyProfileEditor({
             ) : null}
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end mt-4">
             <Button
               type="button"
               onClick={handleSave}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import {
   useBookingDetailQuery,
@@ -30,6 +30,7 @@ function formatCurrency(amount: number | string, currency: string) {
 
 export default function PaymentPage() {
   const params = useParams();
+  const router = useRouter();
   const bookingId = typeof params.id === 'string' ? params.id : null;
 
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>('paypal');
@@ -97,8 +98,139 @@ export default function PaymentPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10">
-      <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-        {/* ── Left: Choose payment ── */}
+      {/* Back button */}
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="mb-4 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm hover:bg-gray-50 active:scale-95 transition-transform"
+        aria-label="Go back"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      {/* Mobile: summary first → payment below. Desktop: flex-row-reverse → payment left, summary right */}
+      <div className="flex flex-col gap-8 lg:flex-row-reverse lg:items-start">
+        {/* ── Right on desktop / Bottom on mobile: Booking summary card ── */}
+        <div className="w-full lg:w-90 lg:shrink-0">
+          <div className="rounded-3xl border border-gray-200 bg-white shadow-lg">
+            {/* Image banner */}
+            <div className="relative h-36 overflow-hidden rounded-t-3xl bg-linear-to-br from-[#1a2b4a] to-[#2d6a4f]">
+              {booking.buddyAvatar ? (
+                <img
+                  src={booking.buddyAvatar}
+                  alt={booking.buddyName}
+                  className="h-full w-full object-cover opacity-60"
+                />
+              ) : null}
+              <div className="absolute left-3 top-3 rounded-full bg-[#2d6a4f] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                Instantly confirmed
+              </div>
+            </div>
+
+            {/* Buddy avatar — outside overflow-hidden so it's not clipped */}
+            <div className="relative flex justify-center">
+              <div className="absolute -top-7 h-14 w-14 overflow-hidden rounded-full border-4 border-white bg-gray-200 shadow-md">
+                {booking.buddyAvatar ? (
+                  <img
+                    src={booking.buddyAvatar}
+                    alt={booking.buddyName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-[#1a2b4a] text-lg font-bold text-white">
+                    {booking.buddyName?.[0] ?? '?'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="px-5 pb-5 pt-10">
+              {/* Trip title */}
+              <div className="text-center">
+                <h2 className="text-lg font-bold leading-tight text-gray-900">{tripTitle}</h2>
+                <p
+                  className="mt-0.5 font-semibold italic"
+                  style={{ color: '#d4705a', fontFamily: 'Georgia, serif' }}
+                >
+                  with {booking.buddyName}
+                </p>
+              </div>
+
+              {/* Details row */}
+              <div className="mt-4 flex items-center justify-center gap-4 text-sm text-gray-600">
+                <span className="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {formatBookingDate(booking.bookedDate)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {formatTime(booking.bookedStartTime)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
+                  {totalPeople} {totalPeople === 1 ? 'person' : 'people'}
+                </span>
+              </div>
+
+              <div className="mt-4 border-t border-gray-100 pt-4 space-y-2">
+                {/* Subtotal */}
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span>Subtotal ({formatCurrency(booking.price, booking.currency)} pp)</span>
+                  <span>{formatCurrency(booking.price, booking.currency)}</span>
+                </div>
+
+                {/* Service fee */}
+                <div className="flex items-center justify-between text-sm text-gray-700">
+                  <span className="flex items-center gap-1">
+                    Service fee
+                    <span className="group relative inline-flex">
+                      <button type="button" className="flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 text-[10px] text-gray-400 hover:border-gray-400">
+                        ?
+                      </button>
+                      <div className="pointer-events-none absolute left-0 top-6 z-50 w-64 rounded-2xl border border-gray-100 bg-white px-4 py-3 text-xs text-gray-700 shadow-2xl opacity-0 transition-opacity group-hover:opacity-100">
+                        <p>This helps us run our platform and offer services like support on your trip</p>
+                        <p className="mt-1">It includes VAT</p>
+                      </div>
+                    </span>
+                  </span>
+                  <span>{formatCurrency(booking.platformFeeAmount, booking.currency)}</span>
+                </div>
+
+                {/* Total */}
+                <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-sm font-bold text-gray-900">
+                  <span>Total</span>
+                  <span>{formatCurrency(booking.totalAmount, booking.currency)}</span>
+                </div>
+              </div>
+
+              {/* Redeem coupon */}
+              <button type="button" className="mt-3 text-sm font-medium text-[#2d6a4f] hover:underline">
+                + Redeem your coupon
+              </button>
+
+              <div className="mt-4 border-t border-gray-100 pt-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-gray-600">Pay online now:</span>
+                  <span className="font-semibold text-gray-900">{formatCurrency(booking.totalAmount, booking.currency)}</span>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
+                  <button type="button" className="hover:underline">cancellation policy</button>
+                  <span>Prices in {booking.currency}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Left on desktop / Top on mobile: Choose payment ── */}
         <div className="flex-1">
           <h1 className="mb-6 text-2xl font-bold text-gray-900">Choose payment</h1>
 
@@ -249,136 +381,6 @@ export default function PaymentPage() {
           </p>
         </div>
 
-        {/* ── Right: Booking summary card ── */}
-        <div className="w-full lg:w-90 lg:shrink-0">
-          <div className="rounded-3xl border border-gray-200 bg-white shadow-lg">
-            {/* Image banner */}
-            <div className="relative h-36 overflow-hidden rounded-t-3xl bg-linear-to-br from-[#1a2b4a] to-[#2d6a4f]">
-              {booking.buddyAvatar ? (
-                <img
-                  src={booking.buddyAvatar}
-                  alt={booking.buddyName}
-                  className="h-full w-full object-cover opacity-60"
-                />
-              ) : null}
-              <div className="absolute left-3 top-3 rounded-full bg-[#2d6a4f] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                Instantly confirmed
-              </div>
-            </div>
-
-            {/* Buddy avatar — outside overflow-hidden so it's not clipped */}
-            <div className="relative flex justify-center">
-              <div className="absolute -top-7 h-14 w-14 overflow-hidden rounded-full border-4 border-white bg-gray-200 shadow-md">
-                {booking.buddyAvatar ? (
-                  <img
-                    src={booking.buddyAvatar}
-                    alt={booking.buddyName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-[#1a2b4a] text-lg font-bold text-white">
-                    {booking.buddyName?.[0] ?? '?'}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="px-5 pb-5 pt-10">
-              {/* Trip title */}
-              <div className="text-center">
-                <h2 className="text-lg font-bold leading-tight text-gray-900">{tripTitle}</h2>
-                <p
-                  className="mt-0.5 font-semibold italic"
-                  style={{ color: '#d4705a', fontFamily: 'Georgia, serif' }}
-                >
-                  with {booking.buddyName}
-                </p>
-              </div>
-
-              {/* Details row */}
-              <div className="mt-4 flex items-center justify-center gap-4 text-sm text-gray-600">
-                <span className="flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {formatBookingDate(booking.bookedDate)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  {formatTime(booking.bookedStartTime)}
-                </span>
-                <span className="flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                  {totalPeople} {totalPeople === 1 ? 'person' : 'people'}
-                </span>
-              </div>
-
-              <div className="mt-4 border-t border-gray-100 pt-4 space-y-2">
-                {/* Subtotal */}
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span>
-                    Subtotal ({formatCurrency(booking.price, booking.currency)} pp)
-                  </span>
-                  <span>
-                    {formatCurrency(booking.price, booking.currency)}
-                  </span>
-                </div>
-
-                {/* Service fee */}
-                <div className="flex items-center justify-between text-sm text-gray-700">
-                  <span className="flex items-center gap-1">
-                    Service fee
-                    <span className="group relative inline-flex">
-                      <button type="button" className="flex h-4 w-4 items-center justify-center rounded-full border border-gray-300 text-[10px] text-gray-400 hover:border-gray-400">
-                        ?
-                      </button>
-                      <div className="pointer-events-none absolute left-0 top-6 z-50 w-64 rounded-2xl border border-gray-100 bg-white px-4 py-3 text-xs text-gray-700 shadow-2xl opacity-0 transition-opacity group-hover:opacity-100">
-                        <p>This helps us run our platform and offer services like support on your trip</p>
-                        <p className="mt-1">It includes VAT</p>
-                      </div>
-                    </span>
-                  </span>
-                  <span>
-                    {formatCurrency(booking.platformFeeAmount, booking.currency)}
-                  </span>
-                </div>
-
-                {/* Total */}
-                <div className="flex items-center justify-between border-t border-gray-100 pt-2 text-sm font-bold text-gray-900">
-                  <span>Total</span>
-                  <span>
-                    {formatCurrency(booking.totalAmount, booking.currency)}
-                  </span>
-                </div>
-              </div>
-
-              {/* Redeem coupon */}
-              <button
-                type="button"
-                className="mt-3 text-sm font-medium text-[#2d6a4f] hover:underline"
-              >
-                + Redeem your coupon
-              </button>
-
-              <div className="mt-4 border-t border-gray-100 pt-4">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">Pay online now:</span>
-                  <span className="font-semibold text-gray-900">
-                    {formatCurrency(booking.totalAmount, booking.currency)}
-                  </span>
-                </div>
-                <div className="mt-2 flex items-center justify-between text-xs text-gray-400">
-                  <button type="button" className="hover:underline">cancellation policy</button>
-                  <span>Prices in {booking.currency}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

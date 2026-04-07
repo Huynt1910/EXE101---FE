@@ -17,22 +17,62 @@ import {
   type ContactOfferPayload,
 } from "./ContactOfferModal";
 
-// ─── City cover images (Unsplash) ──────────────────────────────────────────────
-const CITY_COVERS: Record<string, string[]> = {
-  "Ho Chi Minh": [
-    "https://images.unsplash.com/photo-1583417319070-4a69db38a482?w=600&q=80",
-    "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
-  ],
-  "Ha Long": [
-    "https://images.unsplash.com/photo-1528360983277-13d401cdc186?w=600&q=80",
-    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  ],
-};
-
-const FALLBACK_COVERS = [
-  "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&q=80",
-  "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=600&q=80",
+// ─── City cover images (local districts) ───────────────────────────────────────
+const DISTRICT_COVERS: Array<{ pattern: RegExp; covers: string[] }> = [
+  {
+    pattern: /\b(quan\s*1|district\s*1|q\.?\s*1)\b/i,
+    covers: ["/trip-request/district_1.jpg", "/trip-request/district_1_a.jpg"],
+  },
+  {
+    pattern: /\b(quan\s*2|district\s*2|q\.?\s*2)\b/i,
+    covers: ["/trip-request/district_2_a.jpg", "/trip-request/district_2.png"],
+  },
+  {
+    pattern: /\b(quan\s*3|district\s*3|q\.?\s*3)\b/i,
+    covers: ["/trip-request/district_3.jpg"],
+  },
+  {
+    pattern: /\b(quan\s*4|district\s*4|q\.?\s*4)\b/i,
+    covers: ["/trip-request/district_4.jpg"],
+  },
+  {
+    pattern: /\b(quan\s*5|district\s*5|q\.?\s*5)\b/i,
+    covers: ["/trip-request/district_5.webp"],
+  },
+  {
+    pattern: /\b(quan\s*6|district\s*6|q\.?\s*6)\b/i,
+    covers: ["/trip-request/district_6.jpg"],
+  },
+  {
+    pattern: /\b(quan\s*7|district\s*7|q\.?\s*7)\b/i,
+    covers: ["/trip-request/district_7.jpg"],
+  },
+  {
+    pattern: /\b(quan\s*9|district\s*9|q\.?\s*9)\b/i,
+    covers: ["/trip-request/district_9.jpg"],
+  },
+  {
+    pattern: /\b(thu\s*duc|tp\.?\s*thu\s*duc)\b/i,
+    covers: ["/trip-request/thu_duc_district.jpg"],
+  },
 ];
+
+const FALLBACK_COVERS = ["/trip-request/district_1.jpg"];
+
+function normalizeCityName(value: string) {
+  return value
+    .normalize("NFD")
+    .replaceAll(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function getCoversByCity(city: string) {
+  const normalizedCity = normalizeCityName(city);
+  const match = DISTRICT_COVERS.find(({ pattern }) =>
+    pattern.test(normalizedCity),
+  );
+  return match?.covers ?? FALLBACK_COVERS;
+}
 
 // ─── Tag colours ───────────────────────────────────────────────────────────────
 const TAG_COLORS: Record<string, string> = {
@@ -88,7 +128,7 @@ function RequestCard({
   ) => Promise<void> | void;
 }>) {
   const router = useRouter();
-  const covers = CITY_COVERS[request.city] ?? FALLBACK_COVERS;
+  const covers = getCoversByCity(request.city);
   const [imgIdx, setImgIdx] = useState(0);
   const [modalOpen, setModalOpen] = useState(false);
   const groupSize = request.adults + request.children;

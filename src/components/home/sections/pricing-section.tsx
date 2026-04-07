@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowUpRight, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, Star, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   useServicePackages,
@@ -274,105 +274,85 @@ export default function PricingSection({
   };
 
   const content = (
-    <div className="mx-auto max-w-7xl">
-      <div className="mt-12 grid gap-6 lg:grid-cols-3">
+    <div className="mx-auto max-w-5xl">
+      <div className="grid gap-5 lg:grid-cols-3">
         {plans.map((plan) => (
           <article
             key={plan.name}
-            className={`flex min-h-[40rem] flex-col rounded-[2rem] border p-7 shadow-sm transition-all ${
+            className={`relative flex flex-col rounded-2xl bg-white px-7 py-12 shadow-sm transition-shadow hover:shadow-md ${
               plan.featured
-                ? "border-primary bg-primary text-primary-foreground shadow-[0_0_0_2px_color-mix(in_srgb,var(--primary)_28%,transparent)]"
-                : "border-border bg-card text-foreground"
+                ? "border-2 border-amber-400"
+                : "border border-slate-200"
             }`}
           >
-            <div>
-              <p className="text-lg font-semibold">{plan.name}</p>
-              <div className="mt-3 flex items-end gap-2">
-                <span className="text-5xl font-semibold leading-none">
-                  {plan.price}
-                </span>
-                <span
-                  className={`pb-1 text-xl font-medium ${
-                    plan.featured
-                      ? "text-primary-foreground/75"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  VND / month
+            {/* Most Popular badge */}
+            {plan.featured && (
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-400 px-3 py-0.5 text-[11px] font-semibold text-white shadow-sm">
+                  <Star className="h-3 w-3 fill-white" />
+                  Most Popular
                 </span>
               </div>
-              <p
-                className={`mt-4 max-w-xs text-lg leading-9 ${
-                  plan.featured
-                    ? "text-primary-foreground/75"
-                    : "text-muted-foreground"
-                }`}
-              >
+            )}
+
+            {/* Plan name + description */}
+            <div>
+              <h3 className="text-4xl font-bold text-slate-900">{plan.name}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
                 {plan.description}
               </p>
             </div>
 
-            <div
-              className={`my-8 h-px ${
-                plan.featured ? "bg-primary-foreground/10" : "bg-border"
-              }`}
-            />
+            {/* Price */}
+            <div className="mt-5">
+              <div className="flex items-end gap-0.5">
+                <span className="text-4xl font-extrabold leading-none text-slate-900">
+                  {plan.price}
+                  <sup className="text-base font-semibold align-super">đ</sup>
+                </span>
+                <span className="mb-1 font-bold text-sm text-slate-900">/mo</span>
+              </div>
+            </div>
 
-            <ul className="space-y-4">
+            {/* CTA */}
+            <button
+              type="button"
+              onClick={() => handleChoosePackage(plan)}
+              disabled={subscribePackageMutation.isPending}
+              className={`mt-5 inline-flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition ${
+                plan.featured
+                  ? "bg-primary text-primary-foreground hover:opacity-90"
+                  : "bg-primary text-primary-foreground hover:opacity-90"
+              } disabled:cursor-not-allowed disabled:opacity-60`}
+            >
+              {plan.cta}
+            </button>
+
+            {/* Divider */}
+            <div className="my-5 h-px bg-slate-100" />
+
+            {/* Features */}
+            <ul className="space-y-3">
               {plan.features.map((feature, featureIndex) => (
                 <li
                   key={`${plan.name}-${feature.label}-${featureIndex}`}
-                  className="flex items-start gap-3 text-lg font-medium leading-9"
+                  className="flex items-start gap-2.5"
                 >
                   {feature.included ? (
-                    <CheckCircle2
-                      className={`mt-1 h-5 w-5 shrink-0 ${
-                        plan.featured
-                          ? "text-accent-foreground"
-                          : "text-primary"
-                      }`}
-                    />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   ) : (
-                    <XCircle
-                      className={`mt-1 h-5 w-5 shrink-0 ${
-                        plan.featured
-                          ? "text-primary-foreground/40"
-                          : "text-muted-foreground"
-                      }`}
-                    />
+                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
                   )}
                   <span
-                    className={
-                      feature.included
-                        ? plan.featured
-                          ? "text-primary-foreground"
-                          : "text-foreground"
-                        : plan.featured
-                          ? "text-primary-foreground/65"
-                          : "text-muted-foreground"
-                    }
+                    className={`text-sm leading-5 ${
+                      feature.included ? "text-black" : "text-slate-300"
+                    }`}
                   >
                     {feature.label}
                   </span>
                 </li>
               ))}
             </ul>
-
-            <div className="mt-auto pt-10">
-              <button
-                type="button"
-                onClick={() => handleChoosePackage(plan)}
-                disabled={subscribePackageMutation.isPending}
-                className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl border px-5 py-4 text-2xl font-semibold transition ${
-                  plan.featured
-                    ? "border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/8"
-                    : "border-border bg-secondary text-secondary-foreground hover:bg-background"
-                } disabled:cursor-not-allowed disabled:opacity-70`}
-              >
-                {plan.cta}
-                <ArrowUpRight className="h-5 w-5" />
-              </button>
-            </div>
           </article>
         ))}
       </div>
@@ -384,7 +364,7 @@ export default function PricingSection({
   }
 
   return (
-    <section id="pricing" className="px-4 py-16 sm:px-6 lg:px-8">
+    <section id="pricing" className="bg-slate-50 px-4 py-16 sm:px-6 lg:px-8">
       {content}
     </section>
   );
