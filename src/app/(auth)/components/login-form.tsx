@@ -65,60 +65,10 @@ export default function LoginForm({
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-primary">
             Welcome back
           </h1>
-          <p className="text-sm sm:text-lg text-muted-foreground">
-            Log in to your account
-          </p>
         </div>
       )}
 
       <div>
-        <div className="flex gap-3 sm:gap-4">
-          <button
-            type="button"
-            className={cn(
-              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
-              "bg-black text-white hover:opacity-90",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-            )}
-            aria-label="Continue with Apple"
-          >
-            <FaApple className="h-7 w-7" />
-          </button>
-
-          <button
-            type="button"
-            className={cn(
-              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
-              "bg-[#1877F2] text-white hover:brightness-110",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-            )}
-            aria-label="Continue with Facebook"
-          >
-            <FaFacebook className="h-7 w-7" />
-          </button>
-
-          <button
-            type="button"
-            onClick={onGoogleSignIn}
-            disabled={isGoogleLoading}
-            className={cn(
-              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
-              "bg-white border border-border hover:bg-neutral-100",
-              "disabled:opacity-60 disabled:cursor-not-allowed",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-            )}
-            aria-label="Continue with Google"
-          >
-            <FcGoogle className="h-7 w-7" />
-          </button>
-        </div>
-
-        <div className="my-4 sm:my-4 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-md text-muted-foreground">or</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
         <p className="text-center text-primary font-semibold text-sm sm:text-sm mb-2">
           Log in with your email address
         </p>
@@ -177,7 +127,11 @@ export default function LoginForm({
           </button>
         </div>
 
-        <button type="submit" className="btn-primary w-full h-12 sm:h-14 text-md" disabled={isLoading}>
+        <button
+          type="submit"
+          className="btn-primary w-full h-12 sm:h-14 text-md"
+          disabled={isLoading}
+        >
           {isLoading ? "Logging in..." : "Log in"}
         </button>
       </form>
@@ -192,6 +146,52 @@ export default function LoginForm({
           Sign up
         </button>
       </p>
+
+      <div className="my-4 sm:my-4 flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-md text-muted-foreground">or</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+      <div className="flex justify-center gap-3 sm:gap-4">
+        {/* <button
+            type="button"
+            className={cn(
+              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
+              "bg-black text-white hover:opacity-90",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            )}
+            aria-label="Continue with Apple"
+          >
+            <FaApple className="h-7 w-7" />
+          </button>
+
+          <button
+            type="button"
+            className={cn(
+              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
+              "bg-[#1877F2] text-white hover:brightness-110",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            )}
+            aria-label="Continue with Facebook"
+          >
+            <FaFacebook className="h-7 w-7" />
+          </button> */}
+
+        <button
+          type="button"
+          onClick={onGoogleSignIn}
+          disabled={isGoogleLoading}
+          className={cn(
+            "flex h-11 w-full items-center justify-center rounded-lg shadow-sm transition sm:h-12",
+            "bg-white border border-border hover:bg-neutral-100",
+            "disabled:opacity-60 disabled:cursor-not-allowed",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+          )}
+          aria-label="Continue with Google"
+        >
+          <FcGoogle className="h-7 w-7" />
+        </button>
+      </div>
     </div>
   );
 }

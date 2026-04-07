@@ -46,7 +46,7 @@ export default function SignUpForm({
   const [showPassword, setShowPassword] = useState(false);
 
   const isPage = mode === "page";
-  
+
   let containerAlign = "text-left";
   if (!isPage && centered) {
     containerAlign = "text-center";
@@ -82,64 +82,10 @@ export default function SignUpForm({
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-primary">
             Create an account
           </h1>
-          <p className="text-sm sm:text-lg text-muted-foreground">
-            Sign up to get started
-          </p>
         </div>
       )}
 
       <div>
-        <div className="flex gap-3 sm:gap-4">
-          <button
-            type="button"
-            disabled={isLoading}
-            className={cn(
-              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
-              "bg-black text-white hover:opacity-90",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-              isLoading && "opacity-50 cursor-not-allowed"
-            )}
-            aria-label="Continue with Apple"
-          >
-            <FaApple className="h-7 w-7" />
-          </button>
-
-          <button
-            type="button"
-            disabled={isLoading}
-            className={cn(
-              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
-              "bg-[#1877F2] text-white hover:brightness-110",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-              isLoading && "opacity-50 cursor-not-allowed"
-            )}
-            aria-label="Continue with Facebook"
-          >
-            <FaFacebook className="h-7 w-7" />
-          </button>
-
-          <button
-            type="button"
-            onClick={onGoogleSignIn}
-            disabled={isGoogleLoading}
-            className={cn(
-              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
-              "bg-white border border-border hover:bg-neutral-100",
-              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
-              isGoogleLoading && "opacity-50 cursor-not-allowed"
-            )}
-            aria-label="Continue with Google"
-          >
-            <FcGoogle className="h-7 w-7" />
-          </button>
-        </div>
-
-        <div className="my-4 sm:my-4 flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-md text-muted-foreground">or</span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
         <p className="text-center text-primary font-semibold text-sm sm:text-sm mb-3">
           Sign up with your email address
         </p>
@@ -237,7 +183,7 @@ export default function SignUpForm({
             "btn-primary w-full h-12 sm:h-13 text-md transition-all",
             isLoading || isGoogleLoading
               ? "opacity-50 cursor-not-allowed"
-              : "hover:opacity-90 active:scale-95"
+              : "hover:opacity-90 active:scale-95",
           )}
         >
           {isLoading ? "Creating account..." : "Sign up"}
@@ -254,6 +200,56 @@ export default function SignUpForm({
           Log in
         </button>
       </p>
+
+      <div className="my-4 sm:my-4 flex items-center gap-3">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-md text-muted-foreground">or</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+      <div className="flex justify-center gap-3 sm:gap-4">
+        {/* <button
+            type="button"
+            disabled={isLoading}
+            className={cn(
+              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
+              "bg-black text-white hover:opacity-90",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+              isLoading && "opacity-50 cursor-not-allowed"
+            )}
+            aria-label="Continue with Apple"
+          >
+            <FaApple className="h-7 w-7" />
+          </button>
+
+          <button
+            type="button"
+            disabled={isLoading}
+            className={cn(
+              "w-full h-11 sm:h-12 rounded-lg flex items-center justify-center shadow-sm transition",
+              "bg-[#1877F2] text-white hover:brightness-110",
+              "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+              isLoading && "opacity-50 cursor-not-allowed"
+            )}
+            aria-label="Continue with Facebook"
+          >
+            <FaFacebook className="h-7 w-7" />
+          </button> */}
+
+        <button
+          type="button"
+          onClick={onGoogleSignIn}
+          disabled={isGoogleLoading}
+          className={cn(
+            "flex h-11 w-full items-center justify-center rounded-lg shadow-sm transition sm:h-12",
+            "bg-white border border-border hover:bg-neutral-100",
+            "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+            isGoogleLoading && "opacity-50 cursor-not-allowed",
+          )}
+          aria-label="Continue with Google"
+        >
+          <FcGoogle className="h-7 w-7" />
+        </button>
+      </div>
     </div>
   );
 }

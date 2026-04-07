@@ -9,7 +9,11 @@ import { toast } from "sonner";
 import SignUpForm from "@/app/(auth)/components/signup-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSignup } from "@/features/auth/hooks/useSignup";
-import { signInWithGoogleAndGetIdToken, isGooglePopupCancelError, checkGoogleRedirectResult } from "@/lib/config/firebase-google";
+import {
+  signInWithGoogleAndGetIdToken,
+  isGooglePopupCancelError,
+  checkGoogleRedirectResult,
+} from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface SignUpModalProps {
@@ -71,9 +75,12 @@ export default function SignUpModal({
   // Handle successful signup: show toast and navigate to verify-email
   useEffect(() => {
     if (signupMutation.isSuccess && submittedEmail) {
-      toast.success("Account created! Check your email for verification code.", {
-        duration: SUCCESS_TOAST_DURATION_MS,
-      });
+      toast.success(
+        "Account created! Check your email for verification code.",
+        {
+          duration: SUCCESS_TOAST_DURATION_MS,
+        },
+      );
       router.replace(
         `${VERIFY_EMAIL_PATH}?email=${encodeURIComponent(submittedEmail)}`,
       );
@@ -155,11 +162,6 @@ export default function SignUpModal({
           <h2 className="text-lg font-extrabold text-primary sm:text-xl">
             Create an account
           </h2>
-
-          {/* Subtitle */}
-          <p className="mt-1 text-xs text-muted-foreground sm:text-sm lg:text-base">
-            Let&apos;s get you started! Please enter your details.
-          </p>
         </div>
 
         {/* ===== Form Section ===== */}
