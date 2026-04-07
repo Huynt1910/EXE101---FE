@@ -426,3 +426,25 @@ html {
 .no-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
+
+/* Thin scrollbar, visible only on hover */
+.scrollbar-hover {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+.scrollbar-hover:hover {
+  scrollbar-color: rgba(180, 180, 180, 0.5) transparent;
+}
+.scrollbar-hover::-webkit-scrollbar {
+  width: 4px;
+}
+.scrollbar-hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-hover::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 4px;
+}
+.scrollbar-hover:hover::-webkit-scrollbar-thumb {
+  background: rgba(180, 180, 180, 0.5);
+}
