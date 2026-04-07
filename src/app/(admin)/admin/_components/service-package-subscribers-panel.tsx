@@ -5,6 +5,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+} from "@/components/ui/segmented-tabs";
+import {
   Table,
   TableBody,
   TableCell,
@@ -12,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DetailItem,
   EmptyState,
@@ -38,8 +41,6 @@ export function ServicePackageSubscribersPanel() {
   const deferredSearch = useDeferredValue(search);
   const [packageFilter, setPackageFilter] = useState("all");
   const [selectedBuddyId, setSelectedBuddyId] = useState<string | null>(null);
-  const tabsListClassName =
-    "h-auto flex-wrap rounded-2xl border border-border/70 bg-background p-1";
 
   const buddiesWithSubscriptionQuery = useAdminBuddiesWithSubscription();
 
@@ -220,14 +221,14 @@ export function ServicePackageSubscribersPanel() {
         </div>
       </div>
 
-      <TabsList className={tabsListClassName}>
-        <TabsTrigger value="packages" className="min-w-[160px]">
+      <SegmentedTabsList className="mt-1">
+        <SegmentedTabsTrigger value="packages" className="min-w-[160px]">
           Packages
-        </TabsTrigger>
-        <TabsTrigger value="subscribers" className="min-w-[180px]">
+        </SegmentedTabsTrigger>
+        <SegmentedTabsTrigger value="subscribers" className="min-w-[180px]">
           Subscribed buddies
-        </TabsTrigger>
-      </TabsList>
+        </SegmentedTabsTrigger>
+      </SegmentedTabsList>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
         <div className="booking-muted-panel">

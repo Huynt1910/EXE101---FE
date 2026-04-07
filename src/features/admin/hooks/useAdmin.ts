@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminQueryKeys } from "@/features/admin/api/admin.query-key";
+import { buddyQueryKeys } from "@/features/buddy/api/buddy.query-key";
 import { adminApi } from "@/features/admin/api/admin.services";
 import type {
   AdminBookingsQuery,
@@ -282,11 +283,21 @@ export function useAdminMutations() {
 
   const approveBuddyMutation = useMutation({
     mutationFn: (id: string) => adminApi.approveBuddy(id),
-    onSuccess: (_, id) => {
-      queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "buddies"] });
-      queryClient.invalidateQueries({
-        queryKey: adminQueryKeys.buddyDetail(id),
-      });
+    onSuccess: async (_, id) => {
+      await Promise.all([
+        queryClient.invalidateQueries({
+          queryKey: [...adminQueryKeys.all, "buddies"],
+          refetchType: "active",
+        }),
+        queryClient.invalidateQueries({
+          queryKey: adminQueryKeys.buddyDetail(id),
+          refetchType: "active",
+        }),
+        queryClient.invalidateQueries({
+          queryKey: buddyQueryKeys.pendingApplicants(),
+          refetchType: "active",
+        }),
+      ]);
     },
   });
 
