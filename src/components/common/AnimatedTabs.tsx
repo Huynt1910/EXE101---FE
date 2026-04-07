@@ -23,6 +23,11 @@ const tabs = [
     link: "/buddy/messages",
   },
   {
+    name: "Appointments",
+    value: "appointment",
+    link: "/buddy/appointment",
+  },
+  {
     name: "Package",
     value: "package",
     link: "/buddy/package",
