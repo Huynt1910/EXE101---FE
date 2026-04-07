@@ -11,7 +11,11 @@ import {
   resolveAuthenticatedRedirectPath,
 } from "@/lib/auth/route-access";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
-import { signInWithGoogleAndGetIdToken, isGooglePopupCancelError, checkGoogleRedirectResult } from "@/lib/config/firebase-google";
+import {
+  signInWithGoogleAndGetIdToken,
+  isGooglePopupCancelError,
+  checkGoogleRedirectResult,
+} from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface LoginModalProps {
@@ -152,9 +156,6 @@ export default function LoginModal({
           <h2 className="mt-2 text-lg sm:text-2xl font-extrabold text-primary">
             Welcome back
           </h2>
-          <p className="text-xs sm:text-sm lg:text-md text-muted-foreground">
-            Log in to your account
-          </p>
         </div>
 
         <div className="px-10 py-8 sm:px-14 sm:py-8">
