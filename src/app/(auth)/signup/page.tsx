@@ -7,7 +7,7 @@ import SignUpForm from "@/app/(auth)/components/signup-form";
 import { useAuth } from "@/features/auth/hooks/useAuth";
 import { useSignup } from "@/features/auth/hooks/useSignup";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
-import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
+import { signInWithGoogleAndGetIdToken, isGooglePopupCancelError, checkGoogleRedirectResult } from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export default function SignUpPage() {
@@ -37,9 +37,20 @@ export default function SignUpPage() {
       const idToken = await signInWithGoogleAndGetIdToken();
       googleLoginMutation.mutate({ idToken });
     } catch (error) {
-      handleApiError(error);
+      if (!isGooglePopupCancelError(error)) {
+        handleApiError(error);
+      }
     }
   };
+
+  // Pick up Google redirect result on mobile
+  useEffect(() => {
+    checkGoogleRedirectResult().then((idToken) => {
+      if (idToken) {
+        googleLoginMutation.mutate({ idToken });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {

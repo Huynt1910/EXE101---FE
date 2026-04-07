@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import AnimatedTabs from "@/components/common/AnimatedTabs";
+import { useBuddyMeQuery } from "@/features/buddy/hooks/useBuddy";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
 
@@ -33,10 +34,12 @@ function BottomNavigation({
   canUseAuthenticatedView,
   initials,
   fullName,
+  profilePicture,
 }: Readonly<{
   canUseAuthenticatedView: boolean;
   initials: string;
   fullName: string;
+  profilePicture: string | null;
 }>) {
   const [isAccountOpen, setIsAccountOpen] = React.useState(false);
   const pathname = usePathname();
@@ -132,7 +135,7 @@ function BottomNavigation({
                         className={`size-7 ${item.active ? "ring-2 ring-red-500/70 ring-offset-2" : ""}`}
                       >
                         <AvatarImage
-                          src=""
+                          src={profilePicture ?? undefined}
                           alt={fullName}
                           className="object-cover"
                         />
@@ -223,6 +226,7 @@ export default function HeaderHosting() {
   const isHydrated = useHydratedStore();
   const { isAuthenticated, user } = useAuthStore();
   const canUseAuthenticatedView = isHydrated && isAuthenticated;
+  const buddyMeQuery = useBuddyMeQuery(canUseAuthenticatedView);
   const router = useRouter();
 
   const handleLogout = () => {
@@ -233,6 +237,11 @@ export default function HeaderHosting() {
   const fullName = React.useMemo(
     () => user?.fullName ?? user?.email?.split("@")[0] ?? "Buddy",
     [user?.email, user?.fullName],
+  );
+
+  const profilePicture = React.useMemo(
+    () => buddyMeQuery.data?.data.profilePicture ?? null,
+    [buddyMeQuery.data?.data.profilePicture],
   );
 
   const initials = React.useMemo(() => {
@@ -285,7 +294,7 @@ export default function HeaderHosting() {
                     <Link href="/buddy/profile">
                       <Avatar className="size-12">
                         <AvatarImage
-                          src=""
+                          src={profilePicture ?? undefined}
                           alt={fullName}
                           className="object-cover"
                         />
@@ -386,6 +395,7 @@ export default function HeaderHosting() {
         canUseAuthenticatedView={canUseAuthenticatedView}
         initials={initials}
         fullName={fullName}
+        profilePicture={profilePicture}
       />
     </>
   );

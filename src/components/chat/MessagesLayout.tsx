@@ -53,6 +53,7 @@ function mapRoomToConversation(room: ChatRoom): Conversation {
     id: room.id,
     tripRequestId: room.tripRequestId,
     name,
+    avatar: room.otherUserProfilePicture ?? undefined,
     lastMessage: room.lastMessage ?? room.roomType ?? "No messages yet",
     lastMessageAt: room.lastMessageAt ?? null,
     lastMessageTime: formatRelativeLastMessageAt(room.lastMessageAt),
