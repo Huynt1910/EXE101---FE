@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
-import { BadgeCheck, Pencil, Trash2, UserRoundPlus } from "lucide-react";
+import { UserRoundPlus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,31 +25,25 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+} from "@/components/ui/segmented-tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
+import { BuddyAllProfilesPanel } from "@/app/(admin)/admin/_components/buddy-all-profiles-panel";
+import { PendingBuddyApplicationsPanel } from "@/app/(admin)/admin/_components/pending-buddy-applications-panel";
 import {
   useAdminBuddies,
   useAdminBuddyDetail,
   useAdminMutations,
 } from "@/features/admin/hooks/useAdmin";
+import type { AdminBuddy } from "@/features/admin/type";
 import { usePendingApplicantsQuery } from "@/features/buddy/hooks/useBuddy";
+import type { BuddyProfile } from "@/features/buddy/type";
 import {
   DetailItem,
   EmptyState,
-  PaginationControls,
   StatusPill,
   getErrorMessage,
   getInitials,
@@ -123,11 +117,21 @@ function compareNullableDate(left?: string | null, right?: string | null) {
 
 function getBuddyDisplayName(
   buddy:
-    | { fullName?: string | null; name?: string | null }
-    | { fullName?: string | null },
+    | AdminBuddy
+    | BuddyProfile
+    | { fullName?: string | null; name?: string | null; email?: string | null },
 ) {
-  const withOptionalName = buddy as { fullName?: string | null; name?: string | null };
-  return withOptionalName.fullName || withOptionalName.name || "Unnamed buddy";
+  const withOptionalName = buddy as {
+    fullName?: string | null;
+    name?: string | null;
+    email?: string | null;
+  };
+  return (
+    withOptionalName.fullName ||
+    withOptionalName.name ||
+    withOptionalName.email ||
+    "Unnamed buddy"
+  );
 }
 
 export function BuddiesClient() {
@@ -137,6 +141,7 @@ export function BuddiesClient() {
   const [buddySortValue, setBuddySortValue] = useState(
     `${BUDDY_SORT_OPTIONS[0].sortBy}:${BUDDY_SORT_OPTIONS[0].sortOrder}`,
   );
+
   const [buddiesPage, setBuddiesPage] = useState(1);
   const [selectedBuddyId, setSelectedBuddyId] = useState<string | null>(null);
   const [isRegisterBuddyDialogOpen, setIsRegisterBuddyDialogOpen] =
@@ -200,8 +205,14 @@ export function BuddiesClient() {
     });
 
     return filtered;
-  }, [deferredBuddySearch, pendingApplicantsQuery.data?.data, sortBy, sortOrder]);
-  const displayedBuddies = activeTab === "pending" ? pendingApplicants : buddies;
+  }, [
+    deferredBuddySearch,
+    pendingApplicantsQuery.data?.data,
+    sortBy,
+    sortOrder,
+  ]);
+  const displayedBuddies =
+    activeTab === "pending" ? pendingApplicants : buddies;
   const selectedBuddy =
     buddyDetailQuery.data?.data ??
     displayedBuddies.find((buddy) => buddy.id === selectedBuddyId) ??
@@ -247,7 +258,7 @@ export function BuddiesClient() {
 
   const handleRegisterBuddy = async () => {
     try {
-      await registerBuddyMutation.mutateAsync({
+      const response = await registerBuddyMutation.mutateAsync({
         userId: buddyForm.userId.trim(),
         payload: {
           activities: splitCsv(buddyForm.activities),
@@ -259,7 +270,9 @@ export function BuddiesClient() {
 
       toast({
         title: "Buddy profile created",
-        description: "The selected user is now registered as a buddy.",
+        description:
+          response.message ||
+          "The selected user is now registered as a buddy.",
       });
       setIsRegisterBuddyDialogOpen(false);
       setBuddyForm(emptyBuddyForm);
@@ -276,7 +289,7 @@ export function BuddiesClient() {
     if (!selectedBuddyId) return;
 
     try {
-      await updateBuddyMutation.mutateAsync({
+      const response = await updateBuddyMutation.mutateAsync({
         id: selectedBuddyId,
         payload: {
           activities: splitCsv(buddyForm.activities),
@@ -292,6 +305,7 @@ export function BuddiesClient() {
       toast({
         title: "Buddy updated",
         description:
+          response.message ||
           "Buddy availability and profile details have been updated.",
       });
       setIsEditBuddyDialogOpen(false);
@@ -306,13 +320,14 @@ export function BuddiesClient() {
 
   const handleApproveBuddy = async (id: string) => {
     try {
-      await approveBuddyMutation.mutateAsync(id);
+      const response = await approveBuddyMutation.mutateAsync(id);
       if (selectedBuddyId === id) {
         setSelectedBuddyId(null);
       }
       toast({
         title: "Buddy approved",
-        description: "The application has been approved successfully.",
+        description:
+          response.message || "The application has been approved successfully.",
       });
     } catch (error) {
       toast({
@@ -327,11 +342,12 @@ export function BuddiesClient() {
     if (!deleteTarget) return;
 
     try {
-      await deleteBuddyMutation.mutateAsync(deleteTarget.id);
+      const response = await deleteBuddyMutation.mutateAsync(deleteTarget.id);
       if (selectedBuddyId === deleteTarget.id) setSelectedBuddyId(null);
       toast({
         title: "Buddy deleted",
-        description: "The buddy profile has been removed.",
+        description:
+          response.message || "The buddy profile has been removed.",
       });
       setDeleteTarget(null);
     } catch (error) {
@@ -343,7 +359,7 @@ export function BuddiesClient() {
     }
   };
 
-  const renderBuddyIdentity = (buddy: (typeof displayedBuddies)[number]) => (
+  const renderBuddyIdentity = (buddy: AdminBuddy | BuddyProfile) => (
     <div className="min-w-0">
       <p className="truncate font-medium text-foreground">
         {getBuddyDisplayName(buddy)}
@@ -358,7 +374,9 @@ export function BuddiesClient() {
     if (!selectedBuddy) {
       return (
         <EmptyState
-          title={mode === "pending" ? "No applicant selected" : "No buddy selected"}
+          title={
+            mode === "pending" ? "No applicant selected" : "No buddy selected"
+          }
           description={
             mode === "pending"
               ? "Choose an applicant row to review the pending buddy profile."
@@ -383,9 +401,7 @@ export function BuddiesClient() {
             {selectedBuddy.profilePicture ? (
               <Image
                 src={selectedBuddy.profilePicture}
-                alt={
-                  getBuddyDisplayName(selectedBuddy) || "Buddy avatar"
-                }
+                alt={getBuddyDisplayName(selectedBuddy) || "Buddy avatar"}
                 fill
                 className="object-cover"
               />
@@ -452,18 +468,12 @@ export function BuddiesClient() {
             label="Phone"
             value={selectedBuddy.phoneNumber || "N/A"}
           />
-          <DetailItem
-            label="Gender"
-            value={selectedBuddy.gender || "N/A"}
-          />
+          <DetailItem label="Gender" value={selectedBuddy.gender || "N/A"} />
           <DetailItem
             label="Date of birth"
             value={formatDate(selectedBuddy.dateOfBirth)}
           />
-          <DetailItem
-            label="Address"
-            value={selectedBuddy.address || "N/A"}
-          />
+          <DetailItem label="Address" value={selectedBuddy.address || "N/A"} />
           <DetailItem
             label="Created"
             value={formatDateTime(selectedBuddy.createdAt)}
@@ -476,6 +486,17 @@ export function BuddiesClient() {
       </div>
     );
   };
+
+  const tabSwitcher = (
+    <SegmentedTabsList className="mt-1">
+      <SegmentedTabsTrigger value="all" className="min-w-[160px]">
+        All buddies
+      </SegmentedTabsTrigger>
+      <SegmentedTabsTrigger value="pending" className="min-w-[180px]">
+        Pending approvals
+      </SegmentedTabsTrigger>
+    </SegmentedTabsList>
+  );
 
   return (
     <>
@@ -493,18 +514,6 @@ export function BuddiesClient() {
               Search, sort and inspect supply-side profiles from the admin buddy
               endpoints.
             </p>
-          </div>
-          <div className="px-6 pb-2">
-            <div className="booking-muted-panel p-3">
-              <TabsList className="h-auto flex-wrap rounded-2xl bg-muted/60 p-1">
-                <TabsTrigger value="all" className="min-w-[160px]">
-                  All buddies
-                </TabsTrigger>
-                <TabsTrigger value="pending" className="min-w-[180px]">
-                  Pending approvals
-                </TabsTrigger>
-              </TabsList>
-            </div>
           </div>
           <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-2">
@@ -556,245 +565,63 @@ export function BuddiesClient() {
           </div>
         </div>
 
-        <TabsContent value="all" className="mt-0">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
-            <div className="booking-muted-panel">
-              <div className="space-y-1.5 p-6">
-                <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                  Buddy profiles
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {totalBuddies} buddy records available.
-                </p>
-              </div>
-              <div className="px-0">
-                {buddies.length ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="px-6">Buddy</TableHead>
-                        <TableHead>Rate</TableHead>
-                        <TableHead>Languages</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-center">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {buddies.map((buddy) => (
-                        <TableRow
-                          key={buddy.id}
-                          data-state={
-                            buddy.id === selectedBuddyId ? "selected" : undefined
-                          }
-                          className="cursor-pointer"
-                          onClick={() => setSelectedBuddyId(buddy.id)}
-                        >
-                          <TableCell className="px-6">
-                            {renderBuddyIdentity(buddy)}
-                          </TableCell>
-                          <TableCell>
-                            {typeof buddy.costPerHour === "number"
-                              ? `${buddy.costPerHour} USD/hr`
-                              : "N/A"}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {formatStringList(buddy.languages) || "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            <StatusPill
-                              label={
-                                buddy.isActive === false ? "Inactive" : "Active"
-                              }
-                            />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <div className="flex justify-center gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  setSelectedBuddyId(buddy.id);
-                                  setBuddyForm(toBuddyFormState(buddy));
-                                  setIsEditBuddyDialogOpen(true);
-                                }}
-                              >
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  setDeleteTarget({
-                                    id: buddy.id,
-                                    label:
-                                      buddy.fullName ||
-                                      buddy.name ||
-                                      buddy.email ||
-                                      "this buddy",
-                                  });
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="px-6 pb-6">
-                    <EmptyState
-                      title="No buddies found"
-                      description="Adjust the current search or sort and try again."
-                    />
-                  </div>
-                )}
-              </div>
-              <PaginationControls
-                page={buddiesQuery.data?.data.page ?? 1}
-                totalPages={buddiesQuery.data?.data.totalPages ?? 1}
-                hasPreviousPage={buddiesQuery.data?.data.hasPreviousPage ?? false}
-                hasNextPage={buddiesQuery.data?.data.hasNextPage ?? false}
-                onPrevious={() =>
-                  setBuddiesPage((current) => Math.max(current - 1, 1))
-                }
-                onNext={() =>
-                  setBuddiesPage((current) =>
-                    buddiesQuery.data?.data.hasNextPage ? current + 1 : current,
-                  )
-                }
-              />
-            </div>
+        {tabSwitcher}
 
-            <div className="booking-muted-panel">
-              <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
-                <div className="space-y-1.5">
-                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                    Selected buddy
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Inspect detailed buddy profile data from the detail endpoint.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  onClick={handleOpenEditBuddy}
-                  disabled={!selectedBuddy}
-                >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit selected buddy
-                </Button>
-              </div>
-              <div className="px-6 pb-6">{renderSelectedBuddyDetail("all")}</div>
-            </div>
-          </div>
+        <TabsContent value="all" className="mt-0">
+          <BuddyAllProfilesPanel
+            buddies={buddies}
+            totalBuddies={totalBuddies}
+            selectedBuddyId={selectedBuddyId}
+            isSelectedBuddyAvailable={Boolean(selectedBuddy)}
+            currentPage={buddiesQuery.data?.data.page ?? 1}
+            totalPages={buddiesQuery.data?.data.totalPages ?? 1}
+            hasPreviousPage={buddiesQuery.data?.data.hasPreviousPage ?? false}
+            hasNextPage={buddiesQuery.data?.data.hasNextPage ?? false}
+            detailContent={renderSelectedBuddyDetail("all")}
+            onSelectBuddy={setSelectedBuddyId}
+            onEditBuddy={(buddy) => {
+              setSelectedBuddyId(buddy.id);
+              setBuddyForm(toBuddyFormState(buddy));
+              setIsEditBuddyDialogOpen(true);
+            }}
+            onDeleteBuddy={(buddy) => {
+              setDeleteTarget({
+                id: buddy.id,
+                label:
+                  buddy.fullName || buddy.name || buddy.email || "this buddy",
+              });
+            }}
+            onPreviousPage={() =>
+              setBuddiesPage((current) => Math.max(current - 1, 1))
+            }
+            onNextPage={() =>
+              setBuddiesPage((current) =>
+                buddiesQuery.data?.data.hasNextPage ? current + 1 : current,
+              )
+            }
+            onEditSelectedBuddy={handleOpenEditBuddy}
+            renderBuddyIdentity={renderBuddyIdentity}
+          />
         </TabsContent>
 
         <TabsContent value="pending" className="mt-0">
-          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
-            <div className="booking-muted-panel">
-              <div className="space-y-1.5 p-6">
-                <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                  Pending buddy applications
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  {pendingApplicants.length} applicants are waiting for approval.
-                </p>
-              </div>
-              <div className="px-0">
-                {pendingApplicantsQuery.isLoading ? (
-                  <div className="px-6 pb-6 text-sm text-muted-foreground">
-                    Loading applicants...
-                  </div>
-                ) : pendingApplicants.length ? (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="px-6">Applicant</TableHead>
-                        <TableHead>Submitted</TableHead>
-                        <TableHead>Languages</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-center">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {pendingApplicants.map((buddy) => (
-                        <TableRow
-                          key={buddy.id}
-                          data-state={
-                            buddy.id === selectedBuddyId ? "selected" : undefined
-                          }
-                          className="cursor-pointer"
-                          onClick={() => setSelectedBuddyId(buddy.id)}
-                        >
-                          <TableCell className="px-6">
-                            {renderBuddyIdentity(buddy)}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {formatDateTime(buddy.createdAt)}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {formatStringList(buddy.languages) || "N/A"}
-                          </TableCell>
-                          <TableCell>
-                            <StatusPill label="Pending" />
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Button
-                              size="sm"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                void handleApproveBuddy(buddy.id);
-                              }}
-                              disabled={approveBuddyMutation.isPending}
-                            >
-                              <BadgeCheck className="mr-2 h-4 w-4" />
-                              Approve
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                ) : (
-                  <div className="px-6 pb-6">
-                    <EmptyState
-                      title="No pending applications"
-                      description="New buddy registrations waiting for approval will appear here."
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="booking-muted-panel">
-              <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
-                <div className="space-y-1.5">
-                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                    Applicant details
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Review the pending buddy profile before approving it.
-                  </p>
-                </div>
-                <Button
-                  onClick={() =>
-                    selectedBuddyId ? void handleApproveBuddy(selectedBuddyId) : undefined
-                  }
-                  disabled={!selectedBuddyId || approveBuddyMutation.isPending}
-                >
-                  <BadgeCheck className="mr-2 h-4 w-4" />
-                  Approve selected applicant
-                </Button>
-              </div>
-              <div className="px-6 pb-6">
-                {renderSelectedBuddyDetail("pending")}
-              </div>
-            </div>
-          </div>
+          <PendingBuddyApplicationsPanel
+            pendingApplicants={pendingApplicants}
+            selectedBuddyId={selectedBuddyId}
+            isLoading={pendingApplicantsQuery.isLoading}
+            isApproving={approveBuddyMutation.isPending}
+            canApproveSelected={Boolean(selectedBuddyId)}
+            detailContent={renderSelectedBuddyDetail("pending")}
+            onSelectBuddy={setSelectedBuddyId}
+            onApproveBuddy={(id) => {
+              void handleApproveBuddy(id);
+            }}
+            onApproveSelectedBuddy={() => {
+              if (!selectedBuddyId) return;
+              void handleApproveBuddy(selectedBuddyId);
+            }}
+            renderBuddyIdentity={renderBuddyIdentity}
+          />
         </TabsContent>
       </Tabs>
 

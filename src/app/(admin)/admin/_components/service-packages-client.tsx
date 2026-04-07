@@ -25,6 +25,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  SegmentedTabsList,
+  SegmentedTabsTrigger,
+} from "@/components/ui/segmented-tabs";
+import {
   Table,
   TableBody,
   TableCell,
@@ -32,7 +36,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import {
@@ -199,10 +203,13 @@ export function ServicePackagesClient() {
 
   const handleCreatePackage = async () => {
     try {
-      await createServicePackageMutation.mutateAsync(buildPayload());
+      const response = await createServicePackageMutation.mutateAsync(
+        buildPayload(),
+      );
       toast({
         title: "Service package created",
-        description: "The new service package has been published.",
+        description:
+          response.message || "The new service package has been published.",
       });
       setIsCreateDialogOpen(false);
       setPackageForm(emptyServicePackageForm);
@@ -219,13 +226,14 @@ export function ServicePackagesClient() {
     if (!selectedPackageId) return;
 
     try {
-      await updateServicePackageMutation.mutateAsync({
+      const response = await updateServicePackageMutation.mutateAsync({
         id: selectedPackageId,
         payload: buildPayload(),
       });
       toast({
         title: "Service package updated",
-        description: "The selected package has been saved.",
+        description:
+          response.message || "The selected package has been saved.",
       });
       setIsEditDialogOpen(false);
     } catch (error) {
@@ -241,11 +249,14 @@ export function ServicePackagesClient() {
     if (!deleteTarget) return;
 
     try {
-      await deleteServicePackageMutation.mutateAsync(deleteTarget.id);
+      const response = await deleteServicePackageMutation.mutateAsync(
+        deleteTarget.id,
+      );
       if (selectedPackageId === deleteTarget.id) setSelectedPackageId(null);
       toast({
         title: "Service package deleted",
-        description: "The package was soft-deleted successfully.",
+        description:
+          response.message || "The package was soft-deleted successfully.",
       });
       setDeleteTarget(null);
     } catch (error) {
@@ -256,9 +267,6 @@ export function ServicePackagesClient() {
       });
     }
   };
-
-  const tabsListClassName =
-    "h-auto flex-wrap rounded-2xl border border-border/70 bg-background p-1";
 
   return (
     <>
@@ -300,14 +308,20 @@ export function ServicePackagesClient() {
               </div>
             </div>
 
-            <TabsList className={tabsListClassName}>
-              <TabsTrigger value="packages" className="min-w-[160px]">
+            <SegmentedTabsList className="mt-1">
+              <SegmentedTabsTrigger
+                value="packages"
+                className="min-w-[160px]"
+              >
                 Packages
-              </TabsTrigger>
-              <TabsTrigger value="subscribers" className="min-w-[180px]">
+              </SegmentedTabsTrigger>
+              <SegmentedTabsTrigger
+                value="subscribers"
+                className="min-w-[180px]"
+              >
                 Subscribed buddies
-              </TabsTrigger>
-            </TabsList>
+              </SegmentedTabsTrigger>
+            </SegmentedTabsList>
 
             <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
               <div className="booking-muted-panel">
