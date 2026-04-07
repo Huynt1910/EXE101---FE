@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useDeferredValue, useEffect, useState } from "react";
-import { Pencil, Trash2, UserRoundPlus } from "lucide-react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { BadgeCheck, Pencil, Trash2, UserRoundPlus } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
 import {
@@ -39,6 +45,7 @@ import {
   useAdminBuddyDetail,
   useAdminMutations,
 } from "@/features/admin/hooks/useAdmin";
+import { usePendingApplicantsQuery } from "@/features/buddy/hooks/useBuddy";
 import {
   DetailItem,
   EmptyState,
@@ -98,7 +105,33 @@ function toBuddyFormState(buddy: {
   };
 }
 
+function compareNullableText(left?: string | null, right?: string | null) {
+  return (left ?? "").localeCompare(right ?? "", undefined, {
+    sensitivity: "base",
+  });
+}
+
+function compareNullableNumber(left?: number | null, right?: number | null) {
+  return (left ?? 0) - (right ?? 0);
+}
+
+function compareNullableDate(left?: string | null, right?: string | null) {
+  const leftTime = left ? new Date(left).getTime() : 0;
+  const rightTime = right ? new Date(right).getTime() : 0;
+  return leftTime - rightTime;
+}
+
+function getBuddyDisplayName(
+  buddy:
+    | { fullName?: string | null; name?: string | null }
+    | { fullName?: string | null },
+) {
+  const withOptionalName = buddy as { fullName?: string | null; name?: string | null };
+  return withOptionalName.fullName || withOptionalName.name || "Unnamed buddy";
+}
+
 export function BuddiesClient() {
+  const [activeTab, setActiveTab] = useState<"all" | "pending">("all");
   const [buddySearch, setBuddySearch] = useState("");
   const deferredBuddySearch = useDeferredValue(buddySearch);
   const [buddySortValue, setBuddySortValue] = useState(
@@ -124,19 +157,58 @@ export function BuddiesClient() {
     SortBy: sortBy || undefined,
     SortOrder: sortOrder || undefined,
   });
+  const pendingApplicantsQuery = usePendingApplicantsQuery();
   const buddyDetailQuery = useAdminBuddyDetail(selectedBuddyId);
-  const { registerBuddyMutation, updateBuddyMutation, deleteBuddyMutation } =
-    useAdminMutations();
+  const {
+    registerBuddyMutation,
+    updateBuddyMutation,
+    approveBuddyMutation,
+    deleteBuddyMutation,
+  } = useAdminMutations();
 
   const buddies = buddiesQuery.data?.data.items ?? [];
   const totalBuddies = buddiesQuery.data?.data.totalCount ?? 0;
+  const pendingApplicants = useMemo(() => {
+    const searchTerm = deferredBuddySearch.trim().toLowerCase();
+    const list = [...(pendingApplicantsQuery.data?.data ?? [])];
+
+    const filtered = searchTerm
+      ? list.filter((buddy) =>
+          [buddy.fullName, buddy.email, buddy.userId]
+            .filter((value): value is string => Boolean(value))
+            .some((value) => value.toLowerCase().includes(searchTerm)),
+        )
+      : list;
+
+    filtered.sort((left, right) => {
+      let result = 0;
+
+      switch (sortBy) {
+        case "fullName":
+          result = compareNullableText(left.fullName, right.fullName);
+          break;
+        case "costPerHour":
+          result = compareNullableNumber(left.costPerHour, right.costPerHour);
+          break;
+        case "createdAt":
+        default:
+          result = compareNullableDate(left.createdAt, right.createdAt);
+          break;
+      }
+
+      return sortOrder === "asc" ? result : -result;
+    });
+
+    return filtered;
+  }, [deferredBuddySearch, pendingApplicantsQuery.data?.data, sortBy, sortOrder]);
+  const displayedBuddies = activeTab === "pending" ? pendingApplicants : buddies;
   const selectedBuddy =
     buddyDetailQuery.data?.data ??
-    buddies.find((buddy) => buddy.id === selectedBuddyId) ??
+    displayedBuddies.find((buddy) => buddy.id === selectedBuddyId) ??
     null;
 
   useEffect(() => {
-    const firstBuddyId = buddies[0]?.id ?? null;
+    const firstBuddyId = displayedBuddies[0]?.id ?? null;
 
     if (!firstBuddyId) {
       setSelectedBuddyId(null);
@@ -145,11 +217,15 @@ export function BuddiesClient() {
 
     if (
       !selectedBuddyId ||
-      !buddies.some((buddy) => buddy.id === selectedBuddyId)
+      !displayedBuddies.some((buddy) => buddy.id === selectedBuddyId)
     ) {
       setSelectedBuddyId(firstBuddyId);
     }
-  }, [buddies, selectedBuddyId]);
+  }, [displayedBuddies, selectedBuddyId]);
+
+  useEffect(() => {
+    setSelectedBuddyId(null);
+  }, [activeTab]);
 
   useEffect(() => {
     if (!selectedBuddy) return;
@@ -228,6 +304,25 @@ export function BuddiesClient() {
     }
   };
 
+  const handleApproveBuddy = async (id: string) => {
+    try {
+      await approveBuddyMutation.mutateAsync(id);
+      if (selectedBuddyId === id) {
+        setSelectedBuddyId(null);
+      }
+      toast({
+        title: "Buddy approved",
+        description: "The application has been approved successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Could not approve buddy",
+        description: getErrorMessage(error),
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeleteBuddy = async () => {
     if (!deleteTarget) return;
 
@@ -248,9 +343,147 @@ export function BuddiesClient() {
     }
   };
 
+  const renderBuddyIdentity = (buddy: (typeof displayedBuddies)[number]) => (
+    <div className="min-w-0">
+      <p className="truncate font-medium text-foreground">
+        {getBuddyDisplayName(buddy)}
+      </p>
+      <p className="truncate text-xs text-muted-foreground">
+        {buddy.email || buddy.userId || "No user link"}
+      </p>
+    </div>
+  );
+
+  const renderSelectedBuddyDetail = (mode: "all" | "pending") => {
+    if (!selectedBuddy) {
+      return (
+        <EmptyState
+          title={mode === "pending" ? "No applicant selected" : "No buddy selected"}
+          description={
+            mode === "pending"
+              ? "Choose an applicant row to review the pending buddy profile."
+              : "Choose a buddy row to inspect the detailed buddy profile."
+          }
+        />
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="grid grid-cols-2 items-center gap-4">
+          <div className="space-y-1">
+            <p className="text-lg font-semibold text-foreground">
+              {getBuddyDisplayName(selectedBuddy)}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {selectedBuddy.email || "No email"}
+            </p>
+          </div>
+          <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border/70 bg-background">
+            {selectedBuddy.profilePicture ? (
+              <Image
+                src={selectedBuddy.profilePicture}
+                alt={
+                  getBuddyDisplayName(selectedBuddy) || "Buddy avatar"
+                }
+                fill
+                className="object-cover"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-sm font-semibold">
+                {getInitials(
+                  getBuddyDisplayName(selectedBuddy) || selectedBuddy.email,
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <DetailItem
+            label={mode === "pending" ? "Application status" : "Profile status"}
+            value={
+              <StatusPill
+                label={
+                  mode === "pending"
+                    ? "Pending"
+                    : selectedBuddy.isActive === false
+                      ? "Inactive"
+                      : "Active"
+                }
+              />
+            }
+          />
+          <DetailItem
+            label="Cost per hour"
+            value={
+              typeof selectedBuddy.costPerHour === "number"
+                ? `${selectedBuddy.costPerHour} USD`
+                : "N/A"
+            }
+          />
+          {mode === "all" ? (
+            <DetailItem
+              label="Rating"
+              value={
+                typeof selectedBuddy.rate === "number"
+                  ? selectedBuddy.rate.toFixed(1)
+                  : "N/A"
+              }
+            />
+          ) : null}
+          <DetailItem
+            label="Activities"
+            value={formatStringList(selectedBuddy.activities) || "N/A"}
+          />
+          <DetailItem
+            label="Languages"
+            value={formatStringList(selectedBuddy.languages) || "N/A"}
+          />
+          <DetailItem
+            label="Bio"
+            value={selectedBuddy.bio || "No biography provided."}
+          />
+          <DetailItem
+            label="About"
+            value={selectedBuddy.aboutMe || "No about me provided."}
+          />
+          <DetailItem
+            label="Phone"
+            value={selectedBuddy.phoneNumber || "N/A"}
+          />
+          <DetailItem
+            label="Gender"
+            value={selectedBuddy.gender || "N/A"}
+          />
+          <DetailItem
+            label="Date of birth"
+            value={formatDate(selectedBuddy.dateOfBirth)}
+          />
+          <DetailItem
+            label="Address"
+            value={selectedBuddy.address || "N/A"}
+          />
+          <DetailItem
+            label="Created"
+            value={formatDateTime(selectedBuddy.createdAt)}
+          />
+          <DetailItem
+            label="Updated"
+            value={formatDateTime(selectedBuddy.updatedAt)}
+          />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
-      <div className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as "all" | "pending")}
+        className="space-y-6"
+      >
         <div className="booking-muted-panel">
           <div className="space-y-1.5 p-6">
             <h2 className="text-xl font-semibold tracking-tight text-foreground">
@@ -260,6 +493,18 @@ export function BuddiesClient() {
               Search, sort and inspect supply-side profiles from the admin buddy
               endpoints.
             </p>
+          </div>
+          <div className="px-6 pb-2">
+            <div className="booking-muted-panel p-3">
+              <TabsList className="h-auto flex-wrap rounded-2xl bg-muted/60 p-1">
+                <TabsTrigger value="all" className="min-w-[160px]">
+                  All buddies
+                </TabsTrigger>
+                <TabsTrigger value="pending" className="min-w-[180px]">
+                  Pending approvals
+                </TabsTrigger>
+              </TabsList>
+            </div>
           </div>
           <div className="grid gap-4 px-6 pb-6 md:grid-cols-2 xl:grid-cols-3">
             <div className="space-y-2">
@@ -302,6 +547,7 @@ export function BuddiesClient() {
                   setBuddyForm(emptyBuddyForm);
                   setIsRegisterBuddyDialogOpen(true);
                 }}
+                disabled={activeTab === "pending"}
               >
                 <UserRoundPlus className="mr-2 h-4 w-4" />
                 Register buddy
@@ -310,265 +556,247 @@ export function BuddiesClient() {
           </div>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
-          <div className="booking-muted-panel">
-            <div className="space-y-1.5 p-6">
-              <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                Buddy profiles
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {totalBuddies} buddy records available.
-              </p>
-            </div>
-            <div className="px-0">
-              {buddies.length ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="px-6">Buddy</TableHead>
-                      <TableHead>Rate</TableHead>
-                      <TableHead>Languages</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {buddies.map((buddy) => (
-                      <TableRow
-                        key={buddy.id}
-                        data-state={
-                          buddy.id === selectedBuddyId ? "selected" : undefined
-                        }
-                        className="cursor-pointer"
-                        onClick={() => setSelectedBuddyId(buddy.id)}
-                      >
-                        <TableCell className="px-6">
-                          <div className="min-w-0">
-                            <p className="truncate font-medium text-foreground">
-                              {buddy.fullName || buddy.name || "Unnamed buddy"}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {buddy.email || buddy.userId || "No user link"}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {typeof buddy.costPerHour === "number"
-                            ? `${buddy.costPerHour} USD/hr`
-                            : "N/A"}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatStringList(buddy.languages) || "N/A"}
-                        </TableCell>
-                        <TableCell>
-                          <StatusPill
-                            label={
-                              buddy.isActive === false ? "Inactive" : "Active"
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex justify-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setSelectedBuddyId(buddy.id);
-                                setBuddyForm(toBuddyFormState(buddy));
-                                setIsEditBuddyDialogOpen(true);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setDeleteTarget({
-                                  id: buddy.id,
-                                  label:
-                                    buddy.fullName ||
-                                    buddy.name ||
-                                    buddy.email ||
-                                    "this buddy",
-                                });
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="px-6 pb-6">
-                  <EmptyState
-                    title="No buddies found"
-                    description="Adjust the current search or sort and try again."
-                  />
-                </div>
-              )}
-            </div>
-            <PaginationControls
-              page={buddiesQuery.data?.data.page ?? 1}
-              totalPages={buddiesQuery.data?.data.totalPages ?? 1}
-              hasPreviousPage={buddiesQuery.data?.data.hasPreviousPage ?? false}
-              hasNextPage={buddiesQuery.data?.data.hasNextPage ?? false}
-              onPrevious={() =>
-                setBuddiesPage((current) => Math.max(current - 1, 1))
-              }
-              onNext={() =>
-                setBuddiesPage((current) =>
-                  buddiesQuery.data?.data.hasNextPage ? current + 1 : current,
-                )
-              }
-            />
-          </div>
-
-          <div className="booking-muted-panel">
-            <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
-              <div className="space-y-1.5">
+        <TabsContent value="all" className="mt-0">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
+            <div className="booking-muted-panel">
+              <div className="space-y-1.5 p-6">
                 <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                  Selected buddy
+                  Buddy profiles
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Inspect detailed buddy profile data from the detail endpoint.
+                  {totalBuddies} buddy records available.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={handleOpenEditBuddy}
-                disabled={!selectedBuddy}
-              >
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit selected buddy
-              </Button>
+              <div className="px-0">
+                {buddies.length ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="px-6">Buddy</TableHead>
+                        <TableHead>Rate</TableHead>
+                        <TableHead>Languages</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {buddies.map((buddy) => (
+                        <TableRow
+                          key={buddy.id}
+                          data-state={
+                            buddy.id === selectedBuddyId ? "selected" : undefined
+                          }
+                          className="cursor-pointer"
+                          onClick={() => setSelectedBuddyId(buddy.id)}
+                        >
+                          <TableCell className="px-6">
+                            {renderBuddyIdentity(buddy)}
+                          </TableCell>
+                          <TableCell>
+                            {typeof buddy.costPerHour === "number"
+                              ? `${buddy.costPerHour} USD/hr`
+                              : "N/A"}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {formatStringList(buddy.languages) || "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <StatusPill
+                              label={
+                                buddy.isActive === false ? "Inactive" : "Active"
+                              }
+                            />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <div className="flex justify-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setSelectedBuddyId(buddy.id);
+                                  setBuddyForm(toBuddyFormState(buddy));
+                                  setIsEditBuddyDialogOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  setDeleteTarget({
+                                    id: buddy.id,
+                                    label:
+                                      buddy.fullName ||
+                                      buddy.name ||
+                                      buddy.email ||
+                                      "this buddy",
+                                  });
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="px-6 pb-6">
+                    <EmptyState
+                      title="No buddies found"
+                      description="Adjust the current search or sort and try again."
+                    />
+                  </div>
+                )}
+              </div>
+              <PaginationControls
+                page={buddiesQuery.data?.data.page ?? 1}
+                totalPages={buddiesQuery.data?.data.totalPages ?? 1}
+                hasPreviousPage={buddiesQuery.data?.data.hasPreviousPage ?? false}
+                hasNextPage={buddiesQuery.data?.data.hasNextPage ?? false}
+                onPrevious={() =>
+                  setBuddiesPage((current) => Math.max(current - 1, 1))
+                }
+                onNext={() =>
+                  setBuddiesPage((current) =>
+                    buddiesQuery.data?.data.hasNextPage ? current + 1 : current,
+                  )
+                }
+              />
             </div>
-            <div className="px-6 pb-6">
-              {selectedBuddy ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 items-center gap-4">
-                    <div className="space-y-1">
-                      <p className="text-lg font-semibold text-foreground">
-                        {selectedBuddy.fullName ||
-                          selectedBuddy.name ||
-                          "Unnamed buddy"}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedBuddy.email || "No email"}
-                      </p>
-                    </div>
-                    <div className="relative h-14 w-14 overflow-hidden rounded-full border border-border/70 bg-background">
-                      {selectedBuddy.profilePicture ? (
-                        <Image
-                          src={selectedBuddy.profilePicture}
-                          alt={
-                            selectedBuddy.fullName ||
-                            selectedBuddy.name ||
-                            "Buddy avatar"
-                          }
-                          fill
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center text-sm font-semibold">
-                          {getInitials(
-                            selectedBuddy.fullName ||
-                              selectedBuddy.name ||
-                              selectedBuddy.email,
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-3">
-                    <DetailItem
-                      label="Profile status"
-                      value={
-                        <StatusPill
-                          label={
-                            selectedBuddy.isActive === false
-                              ? "Inactive"
-                              : "Active"
-                          }
-                        />
-                      }
-                    />
-                    <DetailItem
-                      label="Cost per hour"
-                      value={
-                        typeof selectedBuddy.costPerHour === "number"
-                          ? `${selectedBuddy.costPerHour} USD`
-                          : "N/A"
-                      }
-                    />
-                    <DetailItem
-                      label="Rating"
-                      value={
-                        typeof selectedBuddy.rate === "number"
-                          ? selectedBuddy.rate.toFixed(1)
-                          : "N/A"
-                      }
-                    />
-                    <DetailItem
-                      label="Activities"
-                      value={
-                        formatStringList(selectedBuddy.activities) || "N/A"
-                      }
-                    />
-                    <DetailItem
-                      label="Languages"
-                      value={formatStringList(selectedBuddy.languages) || "N/A"}
-                    />
-                    <DetailItem
-                      label="Bio"
-                      value={selectedBuddy.bio || "No biography provided."}
-                    />
-                    <DetailItem
-                      label="About"
-                      value={selectedBuddy.aboutMe || "No about me provided."}
-                    />
-                    <DetailItem
-                      label="Phone"
-                      value={selectedBuddy.phoneNumber || "N/A"}
-                    />
-                    <DetailItem
-                      label="Gender"
-                      value={selectedBuddy.gender || "N/A"}
-                    />
-                    <DetailItem
-                      label="Date of birth"
-                      value={formatDate(selectedBuddy.dateOfBirth)}
-                    />
-                    <DetailItem
-                      label="Address"
-                      value={selectedBuddy.address || "N/A"}
-                    />
-                    <DetailItem
-                      label="Created"
-                      value={formatDateTime(selectedBuddy.createdAt)}
-                    />
-                    <DetailItem
-                      label="Updated"
-                      value={formatDateTime(selectedBuddy.updatedAt)}
-                    />
-                  </div>
+            <div className="booking-muted-panel">
+              <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
+                <div className="space-y-1.5">
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    Selected buddy
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Inspect detailed buddy profile data from the detail endpoint.
+                  </p>
                 </div>
-              ) : (
-                <EmptyState
-                  title="No buddy selected"
-                  description="Choose a buddy row to inspect the detailed buddy profile."
-                />
-              )}
+                <Button
+                  variant="outline"
+                  onClick={handleOpenEditBuddy}
+                  disabled={!selectedBuddy}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  Edit selected buddy
+                </Button>
+              </div>
+              <div className="px-6 pb-6">{renderSelectedBuddyDetail("all")}</div>
             </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="pending" className="mt-0">
+          <div className="grid gap-6 xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.95fr)]">
+            <div className="booking-muted-panel">
+              <div className="space-y-1.5 p-6">
+                <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                  Pending buddy applications
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {pendingApplicants.length} applicants are waiting for approval.
+                </p>
+              </div>
+              <div className="px-0">
+                {pendingApplicantsQuery.isLoading ? (
+                  <div className="px-6 pb-6 text-sm text-muted-foreground">
+                    Loading applicants...
+                  </div>
+                ) : pendingApplicants.length ? (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="px-6">Applicant</TableHead>
+                        <TableHead>Submitted</TableHead>
+                        <TableHead>Languages</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-center">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pendingApplicants.map((buddy) => (
+                        <TableRow
+                          key={buddy.id}
+                          data-state={
+                            buddy.id === selectedBuddyId ? "selected" : undefined
+                          }
+                          className="cursor-pointer"
+                          onClick={() => setSelectedBuddyId(buddy.id)}
+                        >
+                          <TableCell className="px-6">
+                            {renderBuddyIdentity(buddy)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {formatDateTime(buddy.createdAt)}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {formatStringList(buddy.languages) || "N/A"}
+                          </TableCell>
+                          <TableCell>
+                            <StatusPill label="Pending" />
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Button
+                              size="sm"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                void handleApproveBuddy(buddy.id);
+                              }}
+                              disabled={approveBuddyMutation.isPending}
+                            >
+                              <BadgeCheck className="mr-2 h-4 w-4" />
+                              Approve
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                ) : (
+                  <div className="px-6 pb-6">
+                    <EmptyState
+                      title="No pending applications"
+                      description="New buddy registrations waiting for approval will appear here."
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="booking-muted-panel">
+              <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
+                <div className="space-y-1.5">
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    Applicant details
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Review the pending buddy profile before approving it.
+                  </p>
+                </div>
+                <Button
+                  onClick={() =>
+                    selectedBuddyId ? void handleApproveBuddy(selectedBuddyId) : undefined
+                  }
+                  disabled={!selectedBuddyId || approveBuddyMutation.isPending}
+                >
+                  <BadgeCheck className="mr-2 h-4 w-4" />
+                  Approve selected applicant
+                </Button>
+              </div>
+              <div className="px-6 pb-6">
+                {renderSelectedBuddyDetail("pending")}
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Dialog
         open={isRegisterBuddyDialogOpen}

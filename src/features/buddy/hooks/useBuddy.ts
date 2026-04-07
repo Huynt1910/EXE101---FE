@@ -16,6 +16,14 @@ export function useBuddiesQuery() {
   });
 }
 
+export function usePendingApplicantsQuery() {
+  return useQuery({
+    queryKey: buddyQueryKeys.pendingApplicants(),
+    queryFn: () => buddyApi.getPendingApplicants(),
+    staleTime: 30 * 1000,
+  });
+}
+
 export function useBuddyDetailQuery(id?: string | null) {
   return useQuery({
     queryKey: buddyQueryKeys.detail(id ?? ""),

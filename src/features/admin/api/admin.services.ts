@@ -7,7 +7,9 @@ import {
   type AdminBookingsQuery,
   type AdminBookingStatusUpdateRequest,
   type AdminBuddy,
+  type AdminBuddySubscription,
   type AdminBuddiesQuery,
+  type AdminBuddiesWithSubscriptionResponse,
   type AdminBuddyListResponse,
   type AdminBuddyRegisterRequest,
   type AdminBuddyResponse,
@@ -94,6 +96,32 @@ function normalizeBoolean(value: unknown) {
   return value === true;
 }
 
+function normalizeBuddySubscription(item: unknown): AdminBuddySubscription | null {
+  if (!item || typeof item !== "object") return null;
+
+  const value = item as Partial<AdminBuddySubscription>;
+
+  return {
+    subscriptionId: normalizeText(value.subscriptionId),
+    servicePackageId: normalizeText(value.servicePackageId),
+    packageName: normalizeText(value.packageName),
+    commissionRate:
+      typeof value.commissionRate === "number" &&
+      Number.isFinite(value.commissionRate)
+        ? value.commissionRate
+        : null,
+    status: normalizeText(value.status),
+    startDate: normalizeDate(value.startDate),
+    endDate: normalizeDate(value.endDate),
+    amountPaid:
+      typeof value.amountPaid === "number" && Number.isFinite(value.amountPaid)
+        ? value.amountPaid
+        : null,
+    currency: normalizeText(value.currency),
+    paidAt: normalizeDate(value.paidAt),
+  };
+}
+
 function normalizeBuddy(item: unknown): AdminBuddy {
   const value = item as Partial<AdminBuddy>;
   return {
@@ -123,6 +151,7 @@ function normalizeBuddy(item: unknown): AdminBuddy {
     isActive: value.isActive !== false,
     createdAt: normalizeDate(value.createdAt),
     updatedAt: normalizeDate(value.updatedAt),
+    subscription: normalizeBuddySubscription(value.subscription),
   };
 }
 
@@ -609,6 +638,17 @@ export const adminApi = {
     };
   },
 
+  async getBuddiesWithSubscription() {
+    const res = await httpClient.get<AdminBuddiesWithSubscriptionResponse>(
+      `${ADMIN_BASE_PATH}/buddies/with-subscription`,
+    );
+
+    return {
+      ...res.data,
+      data: normalizeBuddyListPayload(res.data.data),
+    };
+  },
+
   async registerBuddy(userId: string, payload: AdminBuddyRegisterRequest) {
     const res = await httpClient.post<AdminBuddyResponse, AdminBuddyRegisterRequest>(
       `${ADMIN_BASE_PATH}/buddies/${userId}`,
@@ -624,6 +664,16 @@ export const adminApi = {
     const res = await httpClient.put<AdminBuddyResponse, AdminBuddyUpdateRequest>(
       `${ADMIN_BASE_PATH}/buddies/${id}`,
       payload,
+    );
+    return {
+      ...res.data,
+      data: normalizeBuddy(res.data.data),
+    };
+  },
+
+  async approveBuddy(id: string) {
+    const res = await httpClient.patch<AdminBuddyResponse>(
+      `${ADMIN_BASE_PATH}/buddies/${id}/approve`,
     );
     return {
       ...res.data,

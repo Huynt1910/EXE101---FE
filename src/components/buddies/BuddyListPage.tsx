@@ -1,46 +1,26 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
-import {
-  ArrowRight,
-  BadgeCheck,
-  Languages,
-  MapPin,
-  Search,
-  Sparkles,
-  Star,
-  Wallet,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useMemo, useState } from "react";
+import { ArrowUpDown, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  BuddyPackageCard,
+  getBuddyPackagePriority,
+} from "@/components/buddies/buddy-package-cards";
 import { useBuddiesQuery } from "@/features/buddy/hooks/useBuddy";
 import type { BuddyProfile } from "@/features/buddy/type";
 
-function getInitials(name?: string | null) {
-  const source = name?.trim() || "Buddy";
+const SORT_OPTIONS = [
+  { value: "recommended", label: "Recommended" },
+  { value: "name-asc", label: "Name A-Z" },
+  { value: "name-desc", label: "Name Z-A" },
+  { value: "price-asc", label: "Price low to high" },
+  { value: "price-desc", label: "Price high to low" },
+] as const;
 
-  return source
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part[0]?.toUpperCase() ?? "")
-    .join("");
-}
-
-function formatCurrencyPerHour(value?: number | null) {
-  if (typeof value !== "number" || value <= 0) return "Custom pricing";
-  return `$${value.toFixed(0)} / hour`;
-}
-
-function formatRating(value?: number | null) {
-  if (typeof value !== "number" || value <= 0) return "New";
-  return value.toFixed(1);
-}
+type BuddySortValue = (typeof SORT_OPTIONS)[number]["value"];
 
 function matchesSearch(buddy: BuddyProfile, query: string) {
   const normalizedQuery = query.trim().toLowerCase();
@@ -59,106 +39,6 @@ function matchesSearch(buddy: BuddyProfile, query: string) {
     .toLowerCase();
 
   return haystack.includes(normalizedQuery);
-}
-
-function BuddyCard({ buddy }: Readonly<{ buddy: BuddyProfile }>) {
-  const heroImage = buddy.profilePicture || "/buddies-form-bg.png";
-
-  return (
-    <Card className="group overflow-hidden rounded-[2rem] border-border/70 bg-card py-0 shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
-      <div className="relative h-56 overflow-hidden">
-        <Image
-          src={heroImage}
-          alt={buddy.fullName || "Buddy"}
-          fill
-          unoptimized
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {/* <div className="absolute inset-0 bg-gradient-to-t from-primary/70 via-primary/20 to-transparent" /> */}
-        <div className="absolute left-5 right-5 top-5 flex items-start justify-between gap-3">
-          <BadgeCheck className="text-green-500" />
-          <div className="rounded-full border border-white/30 bg-white/15 px-3 py-1 text-sm font-medium text-white backdrop-blur-md">
-            {formatCurrencyPerHour(buddy.costPerHour)}
-          </div>
-        </div>
-        <div className="absolute bottom-5 left-5 right-5 flex items-end gap-4">
-          <Avatar className="h-16 w-16 shrink-0 overflow-hidden border-2 border-white/80 bg-white/20 shadow-lg">
-            <AvatarImage
-              src={buddy.profilePicture ?? undefined}
-              alt={buddy.fullName ?? "Buddy"}
-              className="h-full w-full object-cover object-center"
-            />
-            <AvatarFallback className="bg-white text-primary">
-              {getInitials(buddy.fullName)}
-            </AvatarFallback>
-          </Avatar>
-          <div className="min-w-0 text-white">
-            <h2 className="truncate text-2xl font-semibold tracking-tight">
-              {buddy.fullName || "Local buddy"}
-            </h2>
-            <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-white/90">
-              <span className="inline-flex items-center gap-1.5">
-                <Star className="h-4 w-4 fill-current" />
-                {formatRating(buddy.rate)}
-              </span>
-              {buddy.address ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <MapPin className="h-4 w-4" />
-                  {buddy.address}
-                </span>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <CardContent className="space-y-5 p-6">
-        <p className="line-clamp-3 text-sm leading-6 text-muted-foreground">
-          {buddy.bio ||
-            buddy.aboutMe ||
-            "Friendly local guide ready to help you explore the city like a local."}
-        </p>
-
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Languages className="h-4 w-4 text-primary" />
-              Languages
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {buddy.languages.length > 0
-                ? buddy.languages.join(", ")
-                : "Language details coming soon"}
-            </p>
-          </div>
-          <div className="p-4">
-            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-              <Sparkles className="h-4 w-4 text-primary" />
-              Activities
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {buddy.activities.length > 0
-                ? buddy.activities.join(", ")
-                : "Flexible trip styles"}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Wallet className="h-4 w-4 text-primary" />
-            {formatCurrencyPerHour(buddy.costPerHour)}
-          </div>
-          <Button asChild className="rounded-full">
-            <Link href={`/buddies/${buddy.id}`}>
-              View profile
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
 }
 
 function BuddiesSkeleton() {
@@ -189,50 +69,113 @@ function BuddiesSkeleton() {
 export default function BuddyListPage() {
   const buddiesQuery = useBuddiesQuery();
   const [search, setSearch] = useState("");
+  const [sortValue, setSortValue] = useState<BuddySortValue>("recommended");
   const allBuddies = buddiesQuery.data?.data ?? [];
-  const buddies = allBuddies.filter((buddy) => matchesSearch(buddy, search));
+  const buddies = useMemo(
+    () =>
+      allBuddies
+        .map((buddy, index) => ({ buddy, index }))
+        .filter(({ buddy }) => matchesSearch(buddy, search))
+        .sort((left, right) => {
+          switch (sortValue) {
+            case "name-asc": {
+              const leftName = left.buddy.fullName?.trim() || "";
+              const rightName = right.buddy.fullName?.trim() || "";
+              const diff = leftName.localeCompare(rightName);
+              if (diff !== 0) return diff;
+              break;
+            }
+            case "name-desc": {
+              const leftName = left.buddy.fullName?.trim() || "";
+              const rightName = right.buddy.fullName?.trim() || "";
+              const diff = rightName.localeCompare(leftName);
+              if (diff !== 0) return diff;
+              break;
+            }
+            case "price-asc": {
+              const leftPrice =
+                typeof left.buddy.costPerHour === "number"
+                  ? left.buddy.costPerHour
+                  : Number.POSITIVE_INFINITY;
+              const rightPrice =
+                typeof right.buddy.costPerHour === "number"
+                  ? right.buddy.costPerHour
+                  : Number.POSITIVE_INFINITY;
+              const diff = leftPrice - rightPrice;
+              if (diff !== 0) return diff;
+              break;
+            }
+            case "price-desc": {
+              const leftPrice =
+                typeof left.buddy.costPerHour === "number"
+                  ? left.buddy.costPerHour
+                  : Number.NEGATIVE_INFINITY;
+              const rightPrice =
+                typeof right.buddy.costPerHour === "number"
+                  ? right.buddy.costPerHour
+                  : Number.NEGATIVE_INFINITY;
+              const diff = rightPrice - leftPrice;
+              if (diff !== 0) return diff;
+              break;
+            }
+            default: {
+              const priorityDiff =
+                getBuddyPackagePriority(left.buddy) -
+                getBuddyPackagePriority(right.buddy);
+              if (priorityDiff !== 0) return priorityDiff;
+            }
+          }
+
+          return left.index - right.index;
+        })
+        .map(({ buddy }) => buddy),
+    [allBuddies, search, sortValue],
+  );
 
   return (
     <section className="min-h-screen bg-background px-4 pb-16 pt-32 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="overflow-hidden rounded-[2.5rem] border border-border/70 bg-card shadow-sm">
-          <div className="grid gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1.1fr)_20rem] lg:px-10">
-            <div className="space-y-5">
+          <div className="space-y-6 px-6 py-10 lg:px-10">
+            <div className="space-y-3">
               <Badge className="rounded-full bg-primary/10 px-4 py-1.5 text-primary">
                 Explore local buddies
               </Badge>
-              <div className="space-y-3">
-                <h1 className="max-w-3xl font-serif text-4xl font-medium tracking-tight text-foreground sm:text-5xl">
-                  Browse trusted local buddies before you book your next trip.
-                </h1>
-                <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Compare personalities, languages, trip styles, and hourly
-                  pricing in one place. Open a profile to review public feedback
-                  and prepare a booking request.
-                </p>
-              </div>
             </div>
 
-            <div className="rounded-[2rem] border border-border/70 bg-secondary/40 p-5">
-              <label
-                htmlFor="buddy-search"
-                className="text-sm font-medium text-foreground"
-              >
-                Find a buddy
-              </label>
-              <div className="relative mt-3">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+              <div className="relative flex-1">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <input
                   id="buddy-search"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by name, language, activity..."
+                  placeholder="Search by name, language, activity"
                   className="h-12 w-full rounded-full border border-border bg-background pl-11 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                 />
               </div>
-              <p className="mt-3 text-sm text-muted-foreground">
-                {allBuddies.length} buddies available right now.
-              </p>
+
+              <div className="relative w-full lg:w-[240px]">
+                <ArrowUpDown className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <select
+                  id="buddy-sort"
+                  value={sortValue}
+                  onChange={(event) =>
+                    setSortValue(event.target.value as BuddySortValue)
+                  }
+                  className="h-12 w-full appearance-none rounded-full border border-border bg-background pl-11 pr-10 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              {allBuddies.length} buddies available
             </div>
           </div>
         </div>
@@ -251,7 +194,7 @@ export default function BuddyListPage() {
           buddies.length > 0 ? (
             <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
               {buddies.map((buddy) => (
-                <BuddyCard key={buddy.id} buddy={buddy} />
+                <BuddyPackageCard key={buddy.id} buddy={buddy} />
               ))}
             </div>
           ) : (

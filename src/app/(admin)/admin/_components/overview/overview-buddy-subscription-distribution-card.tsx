@@ -206,11 +206,6 @@ export function OverviewBuddySubscriptionDistributionCard() {
                 </span>
               </div>
               <div className="flex items-center gap-2 text-right">
-                {item.detail ? (
-                  <span className="text-xs text-muted-foreground">
-                    {item.detail}
-                  </span>
-                ) : null}
                 <span className="font-medium text-foreground">
                   {item.count}
                 </span>

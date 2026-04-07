@@ -2,7 +2,6 @@ import {
   Bell,
   BookOpen,
   ClipboardList,
-  LockKeyhole,
   MessageCircle,
   Package,
   Sparkles,
@@ -33,12 +32,6 @@ export const MENU_ITEMS: MenuItem[] = [
     badgeKey: "trips",
   },
   {
-    label: "Service package",
-    icon: Package,
-    href: "/profile?section=services",
-    section: "services",
-  },
-  {
     label: "Notifications",
     icon: Bell,
     href: "/profile?section=notifications",
@@ -46,12 +39,11 @@ export const MENU_ITEMS: MenuItem[] = [
     badgeKey: "notifications",
   },
   {
-    label: "Security",
-    icon: LockKeyhole,
-    href: "/profile?section=security",
-    section: "security",
+    label: "Messages",
+    icon: MessageCircle,
+    href: "/messages",
+    badgeKey: "messages",
   },
-  { label: "Messages", icon: MessageCircle, href: "/messages", badgeKey: "messages" },
 ];
 
 export const COURSES: CourseItem[] = [

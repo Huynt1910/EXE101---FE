@@ -28,7 +28,6 @@ export default async function PayosPaymentSuccessPage({
   const orderCode = getSearchParam(params, "orderCode");
   const transactionId = getSearchParam(params, "id");
   const status = getSearchParam(params, "status");
-  const code = getSearchParam(params, "code");
   const isCancelled = getSearchParam(params, "cancel") === "true";
   const isSuccess = !isCancelled && status === "PAID";
 
@@ -36,7 +35,6 @@ export default async function PayosPaymentSuccessPage({
     { label: "Mã đơn hàng", value: orderCode || "N/A" },
     { label: "Mã giao dịch", value: transactionId || "N/A" },
     { label: "Trạng thái", value: formatPaymentStatus(status, isCancelled) },
-    { label: "Mã phản hồi", value: code || "N/A" },
   ];
 
   return (
@@ -76,7 +74,7 @@ export default async function PayosPaymentSuccessPage({
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:justify-center">
           <Button asChild size="lg" className="rounded-2xl px-8">
-            <Link href="/">
+            <Link href="/buddy">
               <Home className="h-5 w-5" />
               Về trang chủ
             </Link>
@@ -87,7 +85,7 @@ export default async function PayosPaymentSuccessPage({
             variant="outline"
             className="rounded-2xl px-8"
           >
-            <Link href="/profile">
+            <Link href="/buddy/package">
               <ReceiptText className="h-5 w-5" />
               Xem gói dịch vụ
             </Link>

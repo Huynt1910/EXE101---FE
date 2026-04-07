@@ -32,14 +32,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/use-toast";
-import {
-  useAdminMutations,
-  useAdminServicePackageDetail,
-  useAdminServicePackages,
-} from "@/features/admin/hooks/useAdmin";
-import type { AdminServicePackage } from "@/features/admin/type";
 import {
   DetailItem,
   EmptyState,
@@ -49,6 +44,13 @@ import {
   selectClassName,
   splitCsv,
 } from "@/app/(admin)/admin/_components/admin-shared";
+import { ServicePackageSubscribersPanel } from "@/app/(admin)/admin/_components/service-package-subscribers-panel";
+import {
+  useAdminMutations,
+  useAdminServicePackageDetail,
+  useAdminServicePackages,
+} from "@/features/admin/hooks/useAdmin";
+import type { AdminServicePackage } from "@/features/admin/type";
 import { formatDateTime } from "@/utils/formatDateAndTime";
 
 interface ServicePackageFormState {
@@ -255,263 +257,293 @@ export function ServicePackagesClient() {
     }
   };
 
+  const tabsListClassName =
+    "h-auto flex-wrap rounded-2xl border border-border/70 bg-background p-1";
+
   return (
     <>
-      <div className="space-y-6">
-        <div className="booking-muted-panel">
-          <div className="space-y-1.5 p-6">
-            <h2 className="text-xl font-semibold tracking-tight text-foreground">
-              Service package management
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Create, update and soft-delete monetization packages from
-              `/api/ServicePackages`.
-            </p>
-          </div>
-          <div className="grid gap-4 px-6 pb-6 md:grid-cols-[minmax(0,1fr)_220px]">
-            <div className="space-y-2">
-              <Label htmlFor="service-package-search">Search</Label>
-              <Input
-                id="service-package-search"
-                value={packageSearch}
-                onChange={(event) => setPackageSearch(event.target.value)}
-                placeholder="Search by name, description, currency or feature"
-                className="bg-background"
-              />
-            </div>
-            <div className="flex items-end">
-              <Button
-                className="w-full"
-                onClick={() => {
-                  setPackageForm(emptyServicePackageForm);
-                  setIsCreateDialogOpen(true);
-                }}
-              >
-                <PackagePlus className="mr-2 h-4 w-4" />
-                New package
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
-          <div className="booking-muted-panel">
-            <div className="space-y-1.5 p-6">
-              <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                Service packages
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {sortedPackages.length} / {servicePackages.length} packages
-                visible.
-              </p>
-            </div>
-            <div className="px-0">
-              {sortedPackages.length ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="px-6">Package</TableHead>
-                      <TableHead>Monthly price</TableHead>
-                      <TableHead>Slots</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {sortedPackages.map((servicePackage) => (
-                      <TableRow
-                        key={servicePackage.id}
-                        data-state={
-                          servicePackage.id === selectedPackageId
-                            ? "selected"
-                            : undefined
-                        }
-                        className="cursor-pointer"
-                        onClick={() => setSelectedPackageId(servicePackage.id)}
-                      >
-                        <TableCell className="px-6">
-                          <div className="min-w-0">
-                            <p className="truncate font-medium text-foreground">
-                              {servicePackage.name}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {servicePackage.description ||
-                                "No description provided."}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {formatCurrency(
-                            servicePackage.pricePerMonth,
-                            servicePackage.currency,
-                          )}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">
-                          {servicePackage.currentSlots}/
-                          {servicePackage.maxSlots || "∞"}
-                        </TableCell>
-                        <TableCell>
-                          <StatusPill
-                            label={
-                              servicePackage.isActive ? "Active" : "Inactive"
-                            }
-                          />
-                        </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex justify-center gap-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setSelectedPackageId(servicePackage.id);
-                                setPackageForm(
-                                  toServicePackageFormState(servicePackage),
-                                );
-                                setIsEditDialogOpen(true);
-                              }}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                setDeleteTarget({
-                                  id: servicePackage.id,
-                                  label: servicePackage.name,
-                                });
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="px-6 pb-6">
-                  <EmptyState
-                    title="No service packages found"
-                    description="Create a package or adjust the current search keyword."
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="booking-muted-panel">
-            <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
-              <div className="space-y-1.5">
+      <Tabs defaultValue="packages" className="space-y-6">
+        <TabsContent value="packages">
+          <div className="space-y-6">
+            <div className="booking-muted-panel">
+              <div className="space-y-1.5 p-6">
                 <h2 className="text-xl font-semibold tracking-tight text-foreground">
-                  Selected package
+                  Service package management
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Detail data loaded from `GET /api/ServicePackages/{"{id}"}`.
+                  Manage your service packages.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  if (!selectedPackage) return;
-                  setPackageForm(toServicePackageFormState(selectedPackage));
-                  setIsEditDialogOpen(true);
-                }}
-                disabled={!selectedPackage}
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="px-6 pb-6">
-              {selectedPackage ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <DetailItem label="Name" value={selectedPackage.name} />
-                  <DetailItem
-                    label="Status"
-                    value={
-                      <StatusPill
-                        label={selectedPackage.isActive ? "Active" : "Inactive"}
-                      />
-                    }
-                  />
-                  <DetailItem
-                    label="Price"
-                    value={formatCurrency(
-                      selectedPackage.pricePerMonth,
-                      selectedPackage.currency,
-                    )}
-                  />
-                  <DetailItem
-                    label="Commission"
-                    value={`${selectedPackage.commissionRate}%`}
-                  />
-                  <DetailItem
-                    label="Slots"
-                    value={`${selectedPackage.currentSlots}/${selectedPackage.maxSlots || "∞"}`}
-                  />
-                  <DetailItem
-                    label="Sort order"
-                    value={selectedPackage.sortOrder}
-                  />
-                  <DetailItem
-                    label="Access flags"
-                    value={
-                      [
-                        selectedPackage.hasChatAccess && "Chat access",
-                        selectedPackage.hasSearchPriority && "Search priority",
-                        selectedPackage.hasPrioritySupport &&
-                          "Priority support",
-                        selectedPackage.hasProductFeedback &&
-                          "Product feedback",
-                      ]
-                        .filter(Boolean)
-                        .join(", ") || "No feature flags enabled."
-                    }
-                  />
-                  <DetailItem
-                    label="Features"
-                    value={
-                      selectedPackage.features.length ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {selectedPackage.features.map((feature) => (
-                            <Badge key={feature} variant="outline">
-                              {feature}
-                            </Badge>
-                          ))}
-                        </div>
-                      ) : (
-                        "No package features."
-                      )
-                    }
-                  />
-                  <DetailItem
-                    label="Description"
-                    value={
-                      selectedPackage.description || "No description provided."
-                    }
-                  />
-                  <DetailItem
-                    label="Created"
-                    value={formatDateTime(selectedPackage.createdAt)}
-                  />
-                  <DetailItem
-                    label="Updated"
-                    value={formatDateTime(selectedPackage.updatedAt)}
+              <div className="grid gap-4 px-6 pb-6 md:grid-cols-[minmax(0,1fr)_220px]">
+                <div className="space-y-2">
+                  <Label htmlFor="service-package-search">Search</Label>
+                  <Input
+                    id="service-package-search"
+                    value={packageSearch}
+                    onChange={(event) => setPackageSearch(event.target.value)}
+                    placeholder="Search by name, description, currency or feature"
+                    className="bg-background"
                   />
                 </div>
-              ) : (
-                <EmptyState
-                  title="No package selected"
-                  description="Select a service package row to inspect full details."
-                />
-              )}
+                <div className="flex items-end">
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      setPackageForm(emptyServicePackageForm);
+                      setIsCreateDialogOpen(true);
+                    }}
+                  >
+                    <PackagePlus className="mr-2 h-4 w-4" />
+                    New package
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <TabsList className={tabsListClassName}>
+              <TabsTrigger value="packages" className="min-w-[160px]">
+                Packages
+              </TabsTrigger>
+              <TabsTrigger value="subscribers" className="min-w-[180px]">
+                Subscribed buddies
+              </TabsTrigger>
+            </TabsList>
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(340px,0.9fr)]">
+              <div className="booking-muted-panel">
+                <div className="space-y-1.5 p-6">
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    Service packages
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {sortedPackages.length} / {servicePackages.length} packages
+                    visible.
+                  </p>
+                </div>
+                <div className="px-0">
+                  {sortedPackages.length ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="px-6">Package</TableHead>
+                          <TableHead>Monthly price</TableHead>
+                          <TableHead>Slots</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-center">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {sortedPackages.map((servicePackage) => (
+                          <TableRow
+                            key={servicePackage.id}
+                            data-state={
+                              servicePackage.id === selectedPackageId
+                                ? "selected"
+                                : undefined
+                            }
+                            className="cursor-pointer"
+                            onClick={() =>
+                              setSelectedPackageId(servicePackage.id)
+                            }
+                          >
+                            <TableCell className="px-6">
+                              <div className="min-w-0">
+                                <p className="truncate font-medium text-foreground">
+                                  {servicePackage.name}
+                                </p>
+                                <p className="truncate text-xs text-muted-foreground">
+                                  {servicePackage.description ||
+                                    "No description provided."}
+                                </p>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {formatCurrency(
+                                servicePackage.pricePerMonth,
+                                servicePackage.currency,
+                              )}
+                            </TableCell>
+                            <TableCell className="text-muted-foreground">
+                              {servicePackage.currentSlots}/
+                              {servicePackage.maxSlots || "Unlimited"}
+                            </TableCell>
+                            <TableCell>
+                              <StatusPill
+                                label={
+                                  servicePackage.isActive
+                                    ? "Active"
+                                    : "Inactive"
+                                }
+                              />
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <div className="flex justify-center gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setSelectedPackageId(servicePackage.id);
+                                    setPackageForm(
+                                      toServicePackageFormState(servicePackage),
+                                    );
+                                    setIsEditDialogOpen(true);
+                                  }}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    setDeleteTarget({
+                                      id: servicePackage.id,
+                                      label: servicePackage.name,
+                                    });
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="px-6 pb-6">
+                      <EmptyState
+                        title="No service packages found"
+                        description="Create a package or adjust the current search keyword."
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="booking-muted-panel">
+                <div className="flex flex-col gap-4 p-6 md:flex-row md:items-end md:justify-between">
+                  <div className="space-y-1.5">
+                    <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                      Selected package
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      Detail data loaded from `GET /api/ServicePackages/{"{id}"}
+                      `.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (!selectedPackage) return;
+                      setPackageForm(
+                        toServicePackageFormState(selectedPackage),
+                      );
+                      setIsEditDialogOpen(true);
+                    }}
+                    disabled={!selectedPackage}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="px-6 pb-6">
+                  {selectedPackage ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      <DetailItem label="Name" value={selectedPackage.name} />
+                      <DetailItem
+                        label="Status"
+                        value={
+                          <StatusPill
+                            label={
+                              selectedPackage.isActive ? "Active" : "Inactive"
+                            }
+                          />
+                        }
+                      />
+                      <DetailItem
+                        label="Price"
+                        value={formatCurrency(
+                          selectedPackage.pricePerMonth,
+                          selectedPackage.currency,
+                        )}
+                      />
+                      <DetailItem
+                        label="Commission"
+                        value={`${selectedPackage.commissionRate}%`}
+                      />
+                      <DetailItem
+                        label="Slots"
+                        value={`${selectedPackage.currentSlots}/${selectedPackage.maxSlots || "Unlimited"}`}
+                      />
+                      <DetailItem
+                        label="Sort order"
+                        value={selectedPackage.sortOrder}
+                      />
+                      <DetailItem
+                        label="Access flags"
+                        value={
+                          [
+                            selectedPackage.hasChatAccess && "Chat access",
+                            selectedPackage.hasSearchPriority &&
+                              "Search priority",
+                            selectedPackage.hasPrioritySupport &&
+                              "Priority support",
+                            selectedPackage.hasProductFeedback &&
+                              "Product feedback",
+                          ]
+                            .filter(Boolean)
+                            .join(", ") || "No feature flags enabled."
+                        }
+                      />
+                      <DetailItem
+                        label="Features"
+                        value={
+                          selectedPackage.features.length ? (
+                            <div className="flex flex-wrap gap-1.5">
+                              {selectedPackage.features.map((feature) => (
+                                <Badge key={feature} variant="outline">
+                                  {feature}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            "No package features."
+                          )
+                        }
+                      />
+                      <DetailItem
+                        label="Description"
+                        value={
+                          selectedPackage.description ||
+                          "No description provided."
+                        }
+                      />
+                      <DetailItem
+                        label="Created"
+                        value={formatDateTime(selectedPackage.createdAt)}
+                      />
+                      <DetailItem
+                        label="Updated"
+                        value={formatDateTime(selectedPackage.updatedAt)}
+                      />
+                    </div>
+                  ) : (
+                    <EmptyState
+                      title="No package selected"
+                      description="Select a service package row to inspect full details."
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="subscribers">
+          <ServicePackageSubscribersPanel />
+        </TabsContent>
+      </Tabs>
 
       <Dialog
         open={isCreateDialogOpen}

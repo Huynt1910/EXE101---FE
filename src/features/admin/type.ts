@@ -133,6 +133,20 @@ export interface AdminBuddy {
   isActive?: boolean | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+  subscription?: AdminBuddySubscription | null;
+}
+
+export interface AdminBuddySubscription {
+  subscriptionId: string | null;
+  servicePackageId: string | null;
+  packageName: string | null;
+  commissionRate: number | null;
+  status: string | null;
+  startDate: string | null;
+  endDate: string | null;
+  amountPaid: number | null;
+  currency: string | null;
+  paidAt: string | null;
 }
 
 export interface AdminBuddyRegisterRequest {
@@ -459,6 +473,7 @@ export type AdminUserListResponse = ApiResponse<PaginatedResult<AdminUser>>;
 export type AdminUserResponse = ApiResponse<AdminUser>;
 export type AdminBuddyListResponse = ApiResponse<PaginatedResult<AdminBuddy>>;
 export type AdminBuddyResponse = ApiResponse<AdminBuddy>;
+export type AdminBuddiesWithSubscriptionResponse = ApiResponse<AdminBuddy[]>;
 export type AdminTripListResponse = ApiResponse<PaginatedResult<AdminTrip>>;
 export type AdminTripResponse = ApiResponse<AdminTrip>;
 export type AdminBookingListResponse = ApiResponse<PaginatedResult<AdminBooking>>;

@@ -10,10 +10,11 @@ export const userProfileQueryKey = [
   "profile",
 ] as const;
 
-export function useUserProfile() {
+export function useUserProfile(enabled = true) {
   return useQuery({
     queryKey: userProfileQueryKey,
     queryFn: () => userApi.getProfile(),
+    enabled,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
