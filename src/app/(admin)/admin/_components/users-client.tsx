@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useEffect, useState } from "react";
 import {
+  ImageIcon,
   Clock3,
   Pencil,
   ShieldAlert,
@@ -18,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -371,13 +373,24 @@ export function UsersClient() {
                         onClick={() => setSelectedUserId(user.id)}
                       >
                         <TableCell className="px-6">
-                          <div className="min-w-0">
-                            <p className="truncate font-medium text-foreground">
-                              {user.fullName || "Unnamed user"}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground">
-                              {user.phoneNumber || "No phone"}
-                            </p>
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage
+                                src={user.profilePicture ?? undefined}
+                                alt={user.fullName || user.email || "User avatar"}
+                              />
+                              <AvatarFallback>
+                                {getInitials(user.fullName || user.email)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <p className="truncate font-medium text-foreground">
+                                {user.fullName || "Unnamed user"}
+                              </p>
+                              <p className="truncate text-xs text-muted-foreground">
+                                {user.phoneNumber || "No phone"}
+                              </p>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell className="text-muted-foreground">
@@ -529,6 +542,24 @@ export function UsersClient() {
                                 : "Active"
                             }
                           />
+                        }
+                      />
+                      <DetailItem
+                        label="Profile picture"
+                        value={
+                          selectedUser.profilePicture ? (
+                            <a
+                              href={selectedUser.profilePicture}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-2 text-primary hover:underline"
+                            >
+                              <ImageIcon className="h-4 w-4" />
+                              Open image
+                            </a>
+                          ) : (
+                            "No profile picture"
+                          )
                         }
                       />
                       <DetailItem

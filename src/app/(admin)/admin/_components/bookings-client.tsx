@@ -28,6 +28,7 @@ import {
   PaginationControls,
   StatusPill,
   formatCurrency,
+  formatStatusLabel,
   getErrorMessage,
   selectClassName,
 } from "@/app/(admin)/admin/_components/admin-shared";
@@ -203,7 +204,7 @@ export function BookingsClient() {
               <option value="">All statuses</option>
               {BOOKING_STATUS_OPTIONS.map((status) => (
                 <option key={status} value={status}>
-                  {status}
+                  {formatStatusLabel(status)}
                 </option>
               ))}
             </select>
@@ -298,7 +299,7 @@ export function BookingsClient() {
               Bookings
             </h2>
             <p className="text-sm text-muted-foreground">
-              {totalBookings} bookings returned by the current API query.
+              {totalBookings} bookings returned.
             </p>
           </div>
           <div className="px-0">

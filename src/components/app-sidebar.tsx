@@ -29,6 +29,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import {
+  useAdminBookings,
   useAdminBuddies,
   useAdminIncidents,
   useAdminServicePackages,
@@ -41,6 +42,7 @@ import { authStore } from "@/lib/store/authStore";
 type AdminSidebarBadgeKey =
   | "users"
   | "buddies"
+  | "bookings"
   | "servicePackages"
   | "trips"
   | "incidents";
@@ -84,6 +86,7 @@ const ADMIN_MENU_ITEMS: Array<{
     title: "Bookings",
     href: "/admin/bookings",
     icon: CalendarDays,
+    badgeKey: "bookings",
   },
   {
     title: "Incidents",
@@ -110,6 +113,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [isHydrated, setIsHydrated] = useState(false);
   const usersQuery = useAdminUsers({ Page: 1, PageSize: 1 });
   const buddiesQuery = useAdminBuddies({ Page: 1, PageSize: 1 });
+  const bookingsQuery = useAdminBookings({ Page: 1, PageSize: 1 });
   const servicePackagesQuery = useAdminServicePackages();
   const tripsQuery = useAdminTrips({ Page: 1, PageSize: 1 });
   const incidentsQuery = useAdminIncidents({ Page: 1, PageSize: 1 });
@@ -117,6 +121,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const badgeMap = {
     users: usersQuery.data?.data.totalCount ?? 0,
     buddies: buddiesQuery.data?.data.totalCount ?? 0,
+    bookings: bookingsQuery.data?.data.totalCount ?? 0,
     servicePackages: servicePackagesQuery.data?.data.length ?? 0,
     trips: tripsQuery.data?.data.totalCount ?? 0,
     incidents: incidentsQuery.data?.data.totalCount ?? 0,

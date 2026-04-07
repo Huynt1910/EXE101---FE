@@ -48,5 +48,6 @@ export interface SubscribeServicePackageRequest {
 
 export type GetServicePackagesResponse = ApiResponse<ServicePackage[]>;
 export type SubscribeServicePackageResponse = ApiResponse<unknown>;
+export type UnsubscribeServicePackageResponse = ApiResponse<unknown>;
 export type GetMyServiceSubscriptionResponse =
   ApiResponse<ServicePackageSubscription | null>;

@@ -6,6 +6,7 @@ import type {
   ServicePackageSubscription,
   SubscribeServicePackageRequest,
   SubscribeServicePackageResponse,
+  UnsubscribeServicePackageResponse,
 } from "@/features/service-package/type";
 import { type ApiError, httpClient } from "@/lib/http/client";
 
@@ -160,5 +161,13 @@ export const servicePackageApi = {
 
       throw error;
     }
+  },
+
+  async unsubscribeMySubscription() {
+    const res = await httpClient.delete<UnsubscribeServicePackageResponse>(
+      `${SERVICE_PACKAGES_BASE_PATH}/my-subscription`,
+    );
+
+    return res.data;
   },
 };
