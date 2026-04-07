@@ -52,6 +52,13 @@ export function useAdminBuddyDetail(id?: string | null) {
   });
 }
 
+export function useAdminBuddiesWithSubscription() {
+  return useQuery({
+    queryKey: adminQueryKeys.buddiesWithSubscription(),
+    queryFn: () => adminApi.getBuddiesWithSubscription(),
+  });
+}
+
 export function useAdminTrips(params?: AdminTripsQuery) {
   return useQuery({
     queryKey: adminQueryKeys.trips(params),
@@ -273,6 +280,16 @@ export function useAdminMutations() {
     },
   });
 
+  const approveBuddyMutation = useMutation({
+    mutationFn: (id: string) => adminApi.approveBuddy(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: [...adminQueryKeys.all, "buddies"] });
+      queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.buddyDetail(id),
+      });
+    },
+  });
+
   const deleteBuddyMutation = useMutation({
     mutationFn: (id: string) => adminApi.deleteBuddy(id),
     onSuccess: () => {
@@ -354,6 +371,7 @@ export function useAdminMutations() {
     deleteUserMutation,
     registerBuddyMutation,
     updateBuddyMutation,
+    approveBuddyMutation,
     deleteBuddyMutation,
     updateBookingStatusMutation,
     resolveIncidentMutation,

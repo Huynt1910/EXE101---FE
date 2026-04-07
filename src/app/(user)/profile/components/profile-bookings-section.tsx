@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { CalendarClock, CreditCard, MessageCircle, Wallet } from "lucide-react";
+import {
+  CalendarClock,
+  CreditCard,
+  MessageCircle,
+  Star,
+  Wallet,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,12 +19,24 @@ import {
   BookingPanelHeader,
   BookingPanelTitle,
 } from "@/components/ui/booking-panel";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  useBookingReviewQuery,
   useConfirmAndCreatePaypalOrderMutation,
+  useCreateBookingReviewMutation,
   useMyTravelerBookingsQuery,
 } from "@/features/booking/hooks/useCreateBookingOffer";
 import type { BookingOffer } from "@/features/booking/type";
+import { cn } from "@/lib/utils";
 
 const bookingTabs = [
   "All",
@@ -80,14 +98,33 @@ function normalizeItems(items: BookingOffer[], activeTab: BookingTab) {
 
 export function ProfileBookingsSection() {
   const [activeTab, setActiveTab] = useState<BookingTab>("All");
+  const [reviewTarget, setReviewTarget] = useState<BookingOffer | null>(null);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewIsPublic, setReviewIsPublic] = useState(true);
+
   const bookingsQuery = useMyTravelerBookingsQuery();
   const confirmAndPayMutation = useConfirmAndCreatePaypalOrderMutation();
+  const createBookingReviewMutation = useCreateBookingReviewMutation();
+  const bookingReviewQuery = useBookingReviewQuery(
+    reviewTarget?.id,
+    Boolean(reviewTarget),
+  );
 
   const bookings = bookingsQuery.data?.data.items ?? [];
   const filteredBookings = useMemo(
     () => normalizeItems(bookings, activeTab),
     [activeTab, bookings],
   );
+  const existingReview = bookingReviewQuery.data?.data ?? null;
+
+  useEffect(() => {
+    if (!reviewTarget || !existingReview) return;
+
+    setReviewRating(existingReview.rating || 5);
+    setReviewComment(existingReview.comment || "");
+    setReviewIsPublic(existingReview.isPublic);
+  }, [existingReview, reviewTarget]);
 
   const handleConfirmAndPay = async (bookingId: string) => {
     try {
@@ -113,11 +150,54 @@ export function ProfileBookingsSection() {
     }
   };
 
+  const handleOpenReview = (booking: BookingOffer) => {
+    setReviewTarget(booking);
+    setReviewRating(5);
+    setReviewComment("");
+    setReviewIsPublic(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewTarget) return;
+
+    if (reviewRating < 1 || reviewRating > 5) {
+      toast.error("Please choose a rating from 1 to 5 stars.");
+      return;
+    }
+
+    try {
+      await createBookingReviewMutation.mutateAsync({
+        bookingId: reviewTarget.id,
+        payload: {
+          rating: reviewRating,
+          comment: reviewComment.trim(),
+          isPublic: reviewIsPublic,
+        },
+      });
+
+      toast.success("Review submitted successfully.");
+      setReviewTarget(null);
+      setReviewComment("");
+      setReviewRating(5);
+      setReviewIsPublic(true);
+    } catch (error) {
+      const message =
+        typeof error === "object" &&
+        error !== null &&
+        "message" in error &&
+        typeof error.message === "string"
+          ? error.message
+          : "Unable to submit your review right now.";
+
+      toast.error(message);
+    }
+  };
+
   if (bookingsQuery.isLoading) {
     return (
       <BookingPanel>
         <BookingPanelContent className="text-sm text-muted-foreground">
-          Loading your bookings…
+          Loading your bookings...
         </BookingPanelContent>
       </BookingPanel>
     );
@@ -138,7 +218,9 @@ export function ProfileBookingsSection() {
       <BookingPanelHeader className="border-b border-border/70">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <BookingPanelTitle className="text-2xl">My bookings</BookingPanelTitle>
+            <BookingPanelTitle className="text-2xl">
+              My bookings
+            </BookingPanelTitle>
             <BookingPanelDescription>
               Track confirmation, payment, and local buddy commitments in one
               place.
@@ -162,6 +244,7 @@ export function ProfileBookingsSection() {
           </Tabs>
         </div>
       </BookingPanelHeader>
+
       <BookingPanelContent className="space-y-4">
         {filteredBookings.length > 0 ? (
           filteredBookings.map((booking) => {
@@ -169,6 +252,7 @@ export function ProfileBookingsSection() {
             const canPay =
               booking.statusName === "PendingCustomerConfirm" ||
               booking.statusName === "PendingPayment";
+            const canReview = group === "Completed";
 
             return (
               <div
@@ -185,7 +269,7 @@ export function ProfileBookingsSection() {
                         {group}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        Booking ID: {booking.id.slice(0, 8)}
+                        Booking ID: {booking.id}
                       </span>
                     </div>
 
@@ -196,7 +280,10 @@ export function ProfileBookingsSection() {
                             {booking.buddyName || "Local buddy"}
                           </p>
                           <p className="mt-1 text-sm text-muted-foreground">
-                            {formatDate(booking.bookedDate, booking.bookedStartTime)}
+                            {formatDate(
+                              booking.bookedDate,
+                              booking.bookedStartTime,
+                            )}
                           </p>
                         </div>
 
@@ -207,7 +294,8 @@ export function ProfileBookingsSection() {
                               Booking details
                             </div>
                             <p className="mt-2">
-                              {booking.bookedAdults} adults, {booking.bookedChildren} children
+                              {booking.bookedAdults} adults,{" "}
+                              {booking.bookedChildren} children
                             </p>
                             <p>{booking.bookedDurationHours} hours</p>
                           </div>
@@ -271,8 +359,18 @@ export function ProfileBookingsSection() {
                       >
                         <Wallet className="h-4 w-4" />
                         {confirmAndPayMutation.isPending
-                          ? "Processing…"
+                          ? "Processing..."
                           : "Confirm & pay"}
+                      </Button>
+                    ) : null}
+                    {canReview ? (
+                      <Button
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => handleOpenReview(booking)}
+                      >
+                        <Star className="h-4 w-4" />
+                        Review
                       </Button>
                     ) : null}
                   </div>
@@ -292,6 +390,125 @@ export function ProfileBookingsSection() {
           </div>
         )}
       </BookingPanelContent>
+
+      <Dialog
+        open={Boolean(reviewTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setReviewTarget(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>
+              {existingReview ? "Your review" : "Review this booking"}
+            </DialogTitle>
+            <DialogDescription>
+              {existingReview
+                ? `Your saved review for ${reviewTarget?.buddyName || "your buddy"}.`
+                : `Share your experience with ${reviewTarget?.buddyName || "your buddy"}.`}
+            </DialogDescription>
+          </DialogHeader>
+
+          {bookingReviewQuery.isLoading ? (
+            <div className="py-6 text-sm text-muted-foreground">
+              Loading review...
+            </div>
+          ) : (
+            <div className="space-y-5">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-foreground">Rating</p>
+              <div className="flex items-center gap-2">
+                {Array.from({ length: 5 }, (_, index) => {
+                  const value = index + 1;
+                  const isActive = value <= reviewRating;
+
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => {
+                        if (!existingReview) setReviewRating(value);
+                      }}
+                      className={cn(
+                        "inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors",
+                        isActive
+                          ? "border-amber-300 bg-amber-50 text-amber-500"
+                          : "border-border/70 bg-background text-muted-foreground hover:bg-secondary/50",
+                      )}
+                      aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
+                      disabled={Boolean(existingReview)}
+                    >
+                      <Star
+                        className={cn("h-5 w-5", isActive && "fill-current")}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Comment
+              </label>
+              <Textarea
+                value={reviewComment}
+                onChange={(event) => setReviewComment(event.target.value)}
+                placeholder="Write a short review about your booking experience."
+                className="min-h-28"
+                disabled={Boolean(existingReview)}
+              />
+            </div>
+
+            <label className="flex items-center gap-3 rounded-xl border border-border/70 bg-secondary/25 px-4 py-3 text-sm text-foreground">
+              <input
+                type="checkbox"
+                checked={reviewIsPublic}
+                onChange={(event) => {
+                  if (!existingReview) setReviewIsPublic(event.target.checked);
+                }}
+                className="h-4 w-4 rounded border-border"
+                disabled={Boolean(existingReview)}
+              />
+              Make this review visible on the buddy profile
+            </label>
+              {existingReview?.createdAt ? (
+                <p className="text-xs text-muted-foreground">
+                  Submitted at {existingReview.createdAt}
+                </p>
+              ) : null}
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setReviewTarget(null)}
+            >
+              {existingReview ? "Close" : "Cancel"}
+            </Button>
+            {!existingReview ? (
+              <Button
+                type="button"
+                onClick={() => {
+                  void handleSubmitReview();
+                }}
+                disabled={
+                  createBookingReviewMutation.isPending ||
+                  bookingReviewQuery.isLoading
+                }
+              >
+                {createBookingReviewMutation.isPending
+                  ? "Submitting..."
+                  : "Submit review"}
+              </Button>
+            ) : null}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </BookingPanel>
   );
 }

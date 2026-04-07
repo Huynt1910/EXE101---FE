@@ -47,6 +47,23 @@ export interface BookingOffer {
 	updatedAt: string | null;
 }
 
+export interface CreateBookingReviewPayload {
+	rating: number;
+	comment: string;
+	isPublic: boolean;
+}
+
+export interface BookingReview {
+	id: string;
+	bookingId: string | null;
+	reviewerUserId: string | null;
+	reviewerName: string | null;
+	rating: number;
+	comment: string | null;
+	isPublic: boolean;
+	createdAt: string | null;
+}
+
 export interface TravelerBookingsList extends PaginatedResult<BookingOffer> {}
 
 export interface BookingOfferEnvelope {
@@ -78,3 +95,5 @@ export type ConfirmBookingAndPayResponse = ApiResponse<ConfirmBookingAndPayData>
 
 export type GetBookingDetailResponse = ApiResponse<BookingOffer>;
 export type GetTravelerBookingsResponse = ApiResponse<TravelerBookingsList>;
+export type CreateBookingReviewResponse = ApiResponse<BookingReview>;
+export type GetBookingReviewResponse = ApiResponse<BookingReview | null>;

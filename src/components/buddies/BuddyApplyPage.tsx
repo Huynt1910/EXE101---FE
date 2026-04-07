@@ -1,11 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  ArrowRight,
   BadgeCheck,
   Check,
   ChevronDown,
@@ -21,6 +19,14 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -31,7 +37,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRegisterAsBuddyMutation } from "@/features/buddy/hooks/useBuddy";
 import { handleApiError } from "@/lib/error-handler";
 import { buildAuthUrl } from "@/lib/callback-url";
-import { authStore, useAuthStore } from "@/lib/store/authStore";
+import { useAuthStore } from "@/lib/store/authStore";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
 import { cn } from "@/lib/utils";
 import { hasRole } from "@/lib/auth/route-access";
@@ -250,6 +256,7 @@ export default function BuddyApplyPage() {
   const [costPerHour, setCostPerHour] = useState("");
   const [bio, setBio] = useState("");
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const unifiedInputClass = "border-input bg-background text-foreground";
   const stepperButtonClass =
     "h-10 w-10 shrink-0 rounded-md border border-input bg-background text-foreground hover:bg-accent";
@@ -311,18 +318,12 @@ export default function BuddyApplyPage() {
         bio: bio.trim(),
       });
 
-      try {
-        await authStore.refreshSession();
-      } catch (refreshError) {
-        if (refreshError instanceof Error) {
-          toast.error(refreshError.message);
-        } else {
-          toast.error("Buddy role created, but the session could not be refreshed.");
-        }
-      }
+      const nextMessage =
+        typeof response.data === "string" && response.data.trim()
+          ? response.data
+          : response.message || "Your application has been submitted successfully.";
 
-      toast.success(response.message ?? "Buddy registered successfully.");
-      router.push(`/buddies/${response.data.id}`);
+      setSuccessMessage(nextMessage);
     } catch (error) {
       handleApiError(error, { showTitle: false });
     }
@@ -353,8 +354,9 @@ export default function BuddyApplyPage() {
                   </h1>
                   <p className="max-w-2xl text-base leading-7 text-primary-foreground/85">
                     Tell us what you know best, the languages you speak, and the
-                    kind of trips you enjoy helping with. Once registered, your
-                    buddy profile can start appearing to travelers.
+                    kind of trips you enjoy helping with. Once approved by the
+                    admin team, your buddy profile can start appearing to
+                    travelers.
                   </p>
                 </div>
               </div>
@@ -417,6 +419,10 @@ export default function BuddyApplyPage() {
                 <h2 className="text-3xl font-semibold tracking-tight text-foreground">
                   Buddy registration
                 </h2>
+                <p className="text-sm text-muted-foreground">
+                  Submit your profile for review. Admin approval is required
+                  before your buddy account becomes active.
+                </p>
               </div>
               <MultiSelectField
                 label="Activities"
@@ -563,6 +569,31 @@ export default function BuddyApplyPage() {
           </Card>
         )}
       </div>
+      <Dialog
+        open={Boolean(successMessage)}
+        onOpenChange={(open) => {
+          if (!open) setSuccessMessage(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Application submitted</DialogTitle>
+            <DialogDescription className="text-sm leading-6 text-muted-foreground">
+              {successMessage}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                setSuccessMessage(null);
+                router.push("/");
+              }}
+            >
+              Back to home
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

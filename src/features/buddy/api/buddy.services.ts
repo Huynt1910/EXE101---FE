@@ -6,6 +6,7 @@ import type {
   GetBuddyDetailResponse,
   GetBuddyReviewsResponse,
   GetBuddiesResponse,
+  GetPendingApplicantsResponse,
   RegisterAsBuddyRequest,
   RegisterAsBuddyResponse,
   GetBuddyMeResponse,
@@ -171,6 +172,19 @@ export const buddyApi = {
     };
   },
 
+  async getPendingApplicants() {
+    const res = await httpClient.get<GetPendingApplicantsResponse>(
+      `${BUDDY_BASE_PATH}/pending-applicants`,
+    );
+
+    return {
+      ...res.data,
+      data: Array.isArray(res.data.data)
+        ? res.data.data.map(normalizeBuddy)
+        : [],
+    };
+  },
+
   async getBuddyById(id: string) {
     const res = await httpClient.get<GetBuddyDetailResponse>(`${BUDDY_BASE_PATH}/${id}`);
 
@@ -200,7 +214,10 @@ export const buddyApi = {
 
     return {
       ...res.data,
-      data: normalizeBuddy(res.data.data),
+      data:
+        typeof res.data.data === "string"
+          ? res.data.data
+          : normalizeBuddy(res.data.data),
     };
   },
 

@@ -5,7 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useUserProfile } from "@/features/user/hooks/useUserProfile";
 import { useHydratedStore } from "@/hooks/useHydratedStore";
 import { authStore, useAuthStore } from "@/lib/store/authStore";
 import { buildAuthUrl, normalizeCallbackUrl } from "@/lib/callback-url";
@@ -22,6 +24,7 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const canUseAuthenticatedView = isHydrated && isAuthenticated;
+  const profileQuery = useUserProfile(canUseAuthenticatedView);
 
   const callbackUrl = useMemo(() => {
     const query = searchParams.toString();
@@ -38,8 +41,17 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
   );
 
   const fullName = useMemo(
-    () => user?.fullName ?? user?.email?.split("@")[0] ?? "Account",
-    [user?.email, user?.fullName],
+    () =>
+      profileQuery.data?.data.fullName ??
+      user?.fullName ??
+      user?.email?.split("@")[0] ??
+      "Account",
+    [profileQuery.data?.data.fullName, user?.email, user?.fullName],
+  );
+
+  const profilePicture = useMemo(
+    () => profileQuery.data?.data.profilePicture ?? null,
+    [profileQuery.data?.data.profilePicture],
   );
 
   const hasBuddyRole = useMemo(
@@ -126,9 +138,16 @@ export function Header({ variant = "default" }: Readonly<HeaderProps>) {
                         className="inline-flex max-w-[min(18rem,calc(100vw-7rem))] items-center gap-2 overflow-hidden rounded-full px-2 py-1.5 transition-colors hover:bg-transparent"
                         aria-label="Open account menu"
                       >
-                        <span className="inline-flex h-8 w-8 items-center justify-center bg-foreground text-xs font-semibold text-white rounded-sm">
-                          {initials}
-                        </span>
+                        <Avatar className="h-8 w-8 rounded-sm">
+                          <AvatarImage
+                            src={profilePicture ?? undefined}
+                            alt={fullName}
+                            className="object-cover"
+                          />
+                          <AvatarFallback className="rounded-sm bg-foreground text-xs font-semibold text-white">
+                            {initials}
+                          </AvatarFallback>
+                        </Avatar>
                         <span className="max-w-28 truncate text-sm font-medium text-muted-foreground hover:text-foreground">
                           {fullName}
                         </span>

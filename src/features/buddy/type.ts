@@ -144,9 +144,11 @@ export interface MyTripRequest {
 }
 
 export type GetBuddiesResponse = ApiResponse<BuddyProfile[]>;
+export type GetPendingApplicantsResponse = ApiResponse<BuddyProfile[]>;
 export type GetBuddyDetailResponse = ApiResponse<BuddyProfile>;
 export type GetBuddyReviewsResponse = ApiResponse<BuddyReviewsList | BuddyReview[]>;
-export type RegisterAsBuddyResponse = ApiResponse<BuddyProfile>;
+export type RegisterAsBuddyResult = BuddyProfile | string;
+export type RegisterAsBuddyResponse = ApiResponse<RegisterAsBuddyResult>;
 export type GetBuddyMeResponse = ApiResponse<BuddyProfile>;
 export type GetMyBuddyBookingsResponse = ApiResponse<BuddyBooking[]>;
 export type GetMyTripRequestsResponse = ApiResponse<MyTripRequest[]>;

@@ -4,14 +4,38 @@ import type {
   CreateBookingPayload,
   CreateBookingOfferPayload,
   CreateBookingOfferResponse,
+  CreateBookingReviewPayload,
+  CreateBookingReviewResponse,
   GetBookingDetailResponse,
+  GetBookingReviewResponse,
   GetTravelerBookingsResponse,
   TravelerBookingsList,
   BookingOffer,
+  BookingReview,
 } from "@/features/booking/type";
 
 const TRIP_REQUEST_BOOKING_BASE_PATH = "/api/TripRequests";
 const BOOKING_BASE_PATH = "/api/Bookings";
+
+function normalizeBookingReview(payload: unknown): BookingReview {
+  const value = (payload ?? {}) as Partial<BookingReview>;
+
+  return {
+    id: typeof value.id === "string" ? value.id : "",
+    bookingId: typeof value.bookingId === "string" ? value.bookingId : null,
+    reviewerUserId:
+      typeof value.reviewerUserId === "string" ? value.reviewerUserId : null,
+    reviewerName:
+      typeof value.reviewerName === "string" ? value.reviewerName : null,
+    rating:
+      typeof value.rating === "number" && Number.isFinite(value.rating)
+        ? value.rating
+        : 0,
+    comment: typeof value.comment === "string" ? value.comment : null,
+    isPublic: value.isPublic !== false,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : null,
+  };
+}
 
 function normalizeTravelerBookingsPayload(payload: unknown): TravelerBookingsList {
   if (payload && typeof payload === "object" && "items" in payload) {
@@ -93,5 +117,31 @@ export const bookingApi = {
     );
 
     return res.data;
+  },
+
+  async getBookingReview(bookingId: string) {
+    const res = await httpClient.get<GetBookingReviewResponse>(
+      `${BOOKING_BASE_PATH}/${bookingId}/review`,
+    );
+
+    return {
+      ...res.data,
+      data: res.data.data ? normalizeBookingReview(res.data.data) : null,
+    };
+  },
+
+  async createBookingReview(
+    bookingId: string,
+    payload: CreateBookingReviewPayload,
+  ) {
+    const res = await httpClient.post<
+      CreateBookingReviewResponse,
+      CreateBookingReviewPayload
+    >(`${BOOKING_BASE_PATH}/${bookingId}/review`, payload);
+
+    return {
+      ...res.data,
+      data: normalizeBookingReview(res.data.data),
+    };
   },
 };
