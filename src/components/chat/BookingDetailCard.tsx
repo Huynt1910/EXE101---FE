@@ -250,11 +250,11 @@ export default function BookingDetailCard({ bookingId, currentUserId, isMine = f
           >
             Book Now
           </button>
-        ) : (
+        ) : booking.statusName !== 'Confirmed' ? (
           <p className={`text-[11px] text-center ${isMine ? 'text-amber-700/50' : 'text-gray-400'}`}>
             Waiting for traveler payment action.
           </p>
-        )}
+        ) : null}
       </div>
     </div>
   );

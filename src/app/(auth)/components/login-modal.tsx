@@ -11,7 +11,7 @@ import {
   resolveAuthenticatedRedirectPath,
 } from "@/lib/auth/route-access";
 import { normalizeCallbackUrl, buildAuthUrl } from "@/lib/callback-url";
-import { signInWithGoogleAndGetIdToken } from "@/lib/config/firebase-google";
+import { signInWithGoogleAndGetIdToken, isGooglePopupCancelError, checkGoogleRedirectResult } from "@/lib/config/firebase-google";
 import { handleApiError } from "@/lib/error-handler";
 
 export interface LoginModalProps {
@@ -69,9 +69,20 @@ export default function LoginModal({
       const idToken = await signInWithGoogleAndGetIdToken();
       googleLoginMutation.mutate({ idToken });
     } catch (error) {
-      handleApiError(error);
+      if (!isGooglePopupCancelError(error)) {
+        handleApiError(error);
+      }
     }
   };
+
+  // Pick up Google redirect result on mobile
+  useEffect(() => {
+    checkGoogleRedirectResult().then((idToken) => {
+      if (idToken) {
+        googleLoginMutation.mutate({ idToken });
+      }
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (sessionQuery.data?.accessToken) {

@@ -11,6 +11,7 @@ export interface ChatRoom {
 	buddyUserId: string | null;
 	otherUserId: string | null;
 	otherUserName: string | null;
+	otherUserProfilePicture?: string | null;
 	lastMessage: string | null;
 	lastMessageAt: string | null;
 }

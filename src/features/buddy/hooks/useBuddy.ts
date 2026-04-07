@@ -51,10 +51,11 @@ export function useRegisterAsBuddyMutation() {
   });
 }
 
-export function useBuddyMeQuery() {
+export function useBuddyMeQuery(enabled = true) {
   return useQuery({
     queryKey: buddyQueryKeys.me(),
     queryFn: () => buddyApi.getBuddyMe(),
+    enabled,
     staleTime: 60 * 1000,
   });
 }

@@ -5,6 +5,8 @@ import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const SKELETON_KEYS = ['1', '2', '3', '4', '5', '6'];
+
 export type Conversation = {
   id: string;
   tripRequestId?: string | null;
@@ -72,8 +74,8 @@ export default function ConversationList({
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain scrollbar-hide">
         {isLoading ? (
           <ul className="divide-y divide-border/60">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <li key={i} className="flex items-start gap-3 px-4 py-3">
+            {SKELETON_KEYS.map((key) => (
+              <li key={key} className="flex items-start gap-3 px-4 py-3">
                 <Skeleton className="h-10 w-10 shrink-0 rounded-full" />
                 <div className="flex flex-1 flex-col gap-2 pt-1">
                   <Skeleton className="h-3.5 w-32" />
@@ -82,11 +84,15 @@ export default function ConversationList({
               </li>
             ))}
           </ul>
-        ) : filtered.length === 0 ? (
+        ) : null}
+
+        {!isLoading && filtered.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center">
             <p className="text-xs text-muted-foreground">No conversations found</p>
           </div>
-        ) : (
+        ) : null}
+
+        {!isLoading && filtered.length > 0 ? (
           <ul className="divide-y divide-border/60">
             {filtered.map((conversation) => (
               <li key={conversation.id}>
@@ -162,7 +168,7 @@ export default function ConversationList({
               </li>
             ))}
           </ul>
-        )}
+        ) : null}
       </div>
     </div>
   );
